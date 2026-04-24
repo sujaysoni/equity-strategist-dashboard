@@ -1,9 +1,9 @@
 import { useState } from 'react'
 
 const RATING_STYLES = {
-  BUY:  { bg: 'rgba(46,134,95,.18)',  border: '#2E865F', color: '#2E865F', glow: 'rgba(46,134,95,.35)'   },
-  HOLD: { bg: 'rgba(156,163,175,.12)', border: '#9CA3AF', color: '#9CA3AF', glow: 'rgba(156,163,175,.2)' },
-  SELL: { bg: 'rgba(255,0,0,.12)',    border: '#FF0000', color: '#FF0000', glow: 'rgba(255,0,0,.3)'      },
+  BUY:  { bg: 'rgba(46,134,95,.18)',   border: '#2E865F', color: '#2E865F', glow: 'rgba(46,134,95,.35)'   },
+  HOLD: { bg: 'rgba(156,163,175,.12)', border: '#9CA3AF', color: '#9CA3AF', glow: 'rgba(156,163,175,.2)'  },
+  SELL: { bg: 'rgba(255,0,0,.12)',     border: '#FF0000', color: '#FF0000', glow: 'rgba(255,0,0,.3)'      },
 }
 
 const HORIZON_CONTEXT = {
@@ -61,6 +61,13 @@ function RiskBadge({ text }) {
   )
 }
 
+/* ── Yahoo Finance URL builder ── */
+function yahooUrl(ticker) {
+  // If stock.yahoo_url exists (from backend), use it directly.
+  // Otherwise build it: TSX tickers end in .TO → ca.finance.yahoo.com
+  return `https://ca.finance.yahoo.com/quote/${encodeURIComponent(ticker)}`
+}
+
 export default function StockCard({ stock, horizon }) {
   const [expanded, setExpanded] = useState(false)
 
@@ -73,22 +80,24 @@ export default function StockCard({ stock, horizon }) {
   const isUp   = stock.change_pct >= 0
   const above200 = stock.price > stock.ma200
 
-  // Parse sector from thesis string e.g. "[CAD · Technology]"
   const sectorMatch = thesis.match(/\[.*?·\s*(.*?)\]/)
   const sector = sectorMatch ? sectorMatch[1] : stock.market
+
+  // Use backend-provided URL if available, else build it
+  const yUrl = stock.yahoo_url || yahooUrl(stock.ticker)
 
   return (
     <div
       className="rounded-2xl transition-all duration-300 cursor-pointer select-none"
       style={{
-        background:    'rgba(255,255,255,0.04)',
-        backdropFilter: 'blur(16px)',
+        background:           'rgba(255,255,255,0.04)',
+        backdropFilter:       'blur(16px)',
         WebkitBackdropFilter: 'blur(16px)',
-        border:        `1px solid ${expanded ? rs.border : 'rgba(255,255,255,0.08)'}`,
-        boxShadow:     expanded
+        border:               `1px solid ${expanded ? rs.border : 'rgba(255,255,255,0.08)'}`,
+        boxShadow:            expanded
           ? `0 0 24px ${rs.glow}, 0 4px 32px rgba(0,0,0,0.4)`
           : '0 2px 12px rgba(0,0,0,0.3)',
-        transform:     'translateZ(0)',
+        transform: 'translateZ(0)',
       }}
       onClick={() => setExpanded(e => !e)}
     >
@@ -101,21 +110,38 @@ export default function StockCard({ stock, horizon }) {
         </div>
       )}
 
-      {/* ── COLLAPSED VIEW (always visible) ── */}
+      {/* ── COLLAPSED VIEW ── */}
       <div className="p-4">
         <div className="flex items-center justify-between gap-3">
 
-          {/* Left: ticker + name + sector */}
+          {/* Left: ticker + name + sector + Yahoo link */}
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 font-bold text-xs"
                  style={{ background: rs.bg, color: rs.color, border: `1px solid ${rs.border}44` }}>
               {stock.ticker.replace('.TO','').slice(0,3)}
             </div>
             <div className="min-w-0">
-              <div className="font-bold text-sm tracking-tight leading-tight"
-                   style={{ fontFamily: 'Cabinet Grotesk, Inter, sans-serif' }}>
+
+              {/* Ticker — clickable Yahoo Finance link */}
+              <a
+                href={yUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-bold text-sm tracking-tight leading-tight flex items-center gap-1 hover:underline"
+                style={{ fontFamily: 'Cabinet Grotesk, Inter, sans-serif', color: 'inherit' }}
+                onClick={e => e.stopPropagation()}
+              >
                 {stock.ticker}
-              </div>
+                {/* External link icon */}
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                     style={{ opacity: 0.45, flexShrink: 0 }}>
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                  <polyline points="15 3 21 3 21 9"/>
+                  <line x1="10" y1="14" x2="21" y2="3"/>
+                </svg>
+              </a>
+
               <div className="text-xs truncate" style={{ color: '#6b7280', maxWidth: '140px' }}>
                 {stock.name}
               </div>
@@ -135,7 +161,7 @@ export default function StockCard({ stock, horizon }) {
             </div>
           </div>
 
-          {/* Right: rating + caret */}
+          {/* Right: rating badge + score + caret */}
           <div className="flex items-center gap-2 flex-shrink-0">
             <div className="flex flex-col items-center">
               <span className="text-xs font-bold px-3 py-1.5 rounded-full"
@@ -147,8 +173,7 @@ export default function StockCard({ stock, horizon }) {
               <span className="text-xs mt-1" style={{ color: '#4b5563' }}>{score}/100</span>
             </div>
             <div className="transition-transform duration-300 ml-1"
-                 style={{ transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
-                          color: '#6b7280' }}>
+                 style={{ transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)', color: '#6b7280' }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
                    stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="6 9 12 15 18 9"/>
@@ -158,7 +183,7 @@ export default function StockCard({ stock, horizon }) {
 
         </div>
 
-        {/* Score bar — always visible */}
+        {/* Score bar */}
         <div className="mt-3 h-1 rounded-full overflow-hidden"
              style={{ background: 'rgba(255,255,255,.06)' }}>
           <div className="h-full rounded-full transition-all duration-700"
@@ -191,10 +216,7 @@ export default function StockCard({ stock, horizon }) {
               § Multi-Layer Analysis
             </div>
 
-            {/* Fundamental metrics */}
-            <div className="text-xs font-semibold mb-2" style={{ color: '#6b7280' }}>
-              FUNDAMENTAL
-            </div>
+            <div className="text-xs font-semibold mb-2" style={{ color: '#6b7280' }}>FUNDAMENTAL</div>
             <div className="grid grid-cols-3 gap-2 mb-3">
               {stock.roe != null && stock.roe !== 0 && (
                 <MetricChip label="ROE" value={`${stock.roe?.toFixed(1)}%`}
@@ -218,13 +240,11 @@ export default function StockCard({ stock, horizon }) {
               )}
             </div>
 
-            {/* Technical */}
-            <div className="text-xs font-semibold mb-2" style={{ color: '#6b7280' }}>
-              TECHNICAL
-            </div>
+            <div className="text-xs font-semibold mb-2" style={{ color: '#6b7280' }}>TECHNICAL</div>
             <div className="grid grid-cols-2 gap-2 mb-3">
               <MetricChip label="RSI (14)" value={stock.rsi?.toFixed(0)}
-                          good={stock.rsi < 40} warn={stock.rsi > 70} neutral={stock.rsi >= 40 && stock.rsi <= 70} />
+                          good={stock.rsi < 40} warn={stock.rsi > 70}
+                          neutral={stock.rsi >= 40 && stock.rsi <= 70} />
               <MetricChip label="vs 200-MA" value={above200 ? 'Above ✓' : 'Below ✗'}
                           good={above200} warn={!above200} />
             </div>
@@ -235,10 +255,7 @@ export default function StockCard({ stock, horizon }) {
               {ctx.technical}
             </div>
 
-            {/* Macro/Micro */}
-            <div className="text-xs font-semibold mb-2" style={{ color: '#6b7280' }}>
-              MACRO / MICRO CATALYST
-            </div>
+            <div className="text-xs font-semibold mb-2" style={{ color: '#6b7280' }}>MACRO / MICRO CATALYST</div>
             <div className="text-xs rounded-lg px-3 py-2"
                  style={{ background: 'rgba(255,255,255,.03)', color: '#9ba8b4',
                           border: '1px solid rgba(255,255,255,.06)' }}>
@@ -255,6 +272,25 @@ export default function StockCard({ stock, horizon }) {
             <div className="flex flex-col gap-2">
               {ctx.risks.map((r, i) => <RiskBadge key={i} text={r} />)}
             </div>
+          </div>
+
+          {/* Footer: View on Yahoo Finance */}
+          <div className="mt-4 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+            <a
+              href={yUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-xs font-semibold px-4 py-2 rounded-full
+                         transition-all duration-200 hover:opacity-90"
+              style={{ background: 'rgba(100,160,255,0.10)', color: '#6fa8ff',
+                       border: '1px solid rgba(100,160,255,0.25)' }}
+              onClick={e => e.stopPropagation()}
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19.59 7L12 14.59 6.41 9H11V7H3v8h2v-4.59l7 7L21 9.41V14h2V6h-3.41z"/>
+              </svg>
+              View on Yahoo Finance →
+            </a>
           </div>
 
         </div>
