@@ -109,12 +109,8 @@ function yahooUrl(ticker) {
   return `https://ca.finance.yahoo.com/quote/${encodeURIComponent(ticker)}`
 }
 
-export default function StockCard({ stock, horizon, darkMode, livePrice }) {
+export default function StockCard({ stock, horizon, darkMode }) {
   const [expanded, setExpanded] = useState(false)
-
-  const displayPrice     = livePrice?.price      ?? stock.price
-  const displayChangePct = livePrice?.change_pct ?? stock.change_pct
-  const isLive           = !!livePrice?.price
 
   const h        = stock.horizons?.[horizon]
   const rating   = h?.rating || 'HOLD'
@@ -123,17 +119,15 @@ export default function StockCard({ stock, horizon, darkMode, livePrice }) {
   const RS       = darkMode ? RS_DARK : RS_LIGHT
   const rs       = RS[rating] || RS.HOLD
   const ctx      = HX[horizon] || HX.short
-  const isUp     = displayChangePct >= 0
-  const above200 = displayPrice > stock.ma200
+  const above200 = stock.price > stock.ma200
 
   const sectorMatch = thesis.match(/\[.*?·\s*(.*?)\]/)
   const sector      = sectorMatch ? sectorMatch[1] : stock.market
   const yUrl        = stock.yahoo_url || yahooUrl(stock.ticker)
-  const currency    = stock.currency === 'USD' ? '$' : 'C$'
   const isUltraLong = horizon === 'ultra_long'
   const capB        = stock.market_cap_usd ? (stock.market_cap_usd / 1e9).toFixed(0) : null
   const maDist      = stock.ma200 > 0
-    ? (((displayPrice - stock.ma200) / stock.ma200) * 100).toFixed(1)
+    ? (((stock.price - stock.ma200) / stock.ma200) * 100).toFixed(1)
     : null
 
   return (
@@ -175,7 +169,7 @@ export default function StockCard({ stock, horizon, darkMode, livePrice }) {
             {stock.ticker.replace('.TO', '').replace('-', '').slice(0, 3)}
           </div>
 
-          {/* Name block */}
+          {/* Name + exchange block */}
           <div style={{ minWidth: 0, flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               <a
@@ -202,24 +196,12 @@ export default function StockCard({ stock, horizon, darkMode, livePrice }) {
                 </svg>
               </a>
               <ExchangeBadge exchange={stock.exchange} market={stock.market} />
-              {isLive && (
-                <span style={{
-                  fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.07em',
-                  padding: '1px 6px', borderRadius: 'var(--radius-full)',
-                  background: 'color-mix(in oklch,var(--color-buy) 12%,transparent)',
-                  color: 'var(--color-buy)',
-                  border: '1px solid color-mix(in oklch,var(--color-buy) 22%,transparent)',
-                  fontFamily: 'var(--font-body)',
-                }}>
-                  LIVE
-                </span>
-              )}
             </div>
             <div style={{
               fontSize: '0.75rem', color: 'var(--color-text-muted)',
               fontFamily: 'var(--font-body)', marginTop: '2px',
               overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-              maxWidth: '170px',
+              maxWidth: '220px',
             }}>
               {stock.name}
             </div>
@@ -231,25 +213,7 @@ export default function StockCard({ stock, horizon, darkMode, livePrice }) {
             </div>
           </div>
 
-          {/* Price + change */}
-          <div style={{ textAlign: 'right', flexShrink: 0 }}>
-            <div style={{
-              fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.1rem',
-              letterSpacing: '-0.02em', color: 'var(--color-text)',
-              fontVariantNumeric: 'tabular-nums',
-            }}>
-              {currency}{displayPrice?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </div>
-            <div style={{
-              fontSize: '0.75rem', fontWeight: 700, marginTop: '2px',
-              fontFamily: 'var(--font-body)', fontVariantNumeric: 'tabular-nums',
-              color: isUp ? 'var(--color-buy)' : 'var(--color-sell)',
-            }}>
-              {isUp ? '▲' : '▼'} {Math.abs(displayChangePct).toFixed(2)}%
-            </div>
-          </div>
-
-          {/* Rating badge + caret */}
+          {/* Rating badge + caret — NO price block */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
               <span style={{
@@ -447,28 +411,4 @@ export default function StockCard({ stock, horizon, darkMode, livePrice }) {
               rel="noopener noreferrer"
               onClick={e => e.stopPropagation()}
               style={{
-                display: 'inline-flex', alignItems: 'center', gap: '6px',
-                fontSize: '0.75rem', fontWeight: 700, fontFamily: 'var(--font-body)',
-                padding: '7px 16px', borderRadius: 'var(--radius-full)',
-                background: 'color-mix(in oklch,var(--color-primary) 10%,transparent)',
-                color: 'var(--color-primary)',
-                border: '1px solid color-mix(in oklch,var(--color-primary) 28%,transparent)',
-                textDecoration: 'none', transition: 'opacity 0.2s ease',
-              }}
-              onMouseOver={e => e.currentTarget.style.opacity = '0.75'}
-              onMouseOut={e  => e.currentTarget.style.opacity = '1'}
-            >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
-                   stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-                <polyline points="15 3 21 3 21 9"/>
-                <line x1="10" y1="14" x2="21" y2="3"/>
-              </svg>
-              View on Yahoo Finance →
-            </a>
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
+                display: 'inline-flex', alignItems: 'center', gap: 
