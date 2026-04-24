@@ -100,7 +100,23 @@ function yahooUrl(ticker) {
 ══════════════════════════════════════════════════════════════════ */
 export default function StockCard({ stock, horizon, darkMode }) {
   const [expanded, setExpanded] = useState(false)
-
+  export default function StockCard({ stock, horizon, darkMode, livePrice }) {
+  // Use live price if available, fall back to snapshot price
+  const displayPrice     = livePrice?.price      ?? stock.price
+  const displayChangePct = livePrice?.change_pct ?? stock.change_pct
+  const isLive           = !!livePrice?.price
+{isLive && (
+  <span style={{
+    fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.06em',
+    padding: '1px 5px', borderRadius: 'var(--radius-full)',
+    background: 'color-mix(in oklch,var(--color-buy) 12%,transparent)',
+    color: 'var(--color-buy)',
+    border: '1px solid color-mix(in oklch,var(--color-buy) 22%,transparent)',
+    fontFamily: 'var(--font-body)',
+  }}>
+    LIVE
+  </span>
+)}
   const h      = stock.horizons?.[horizon]
   const rating = h?.rating || 'HOLD'
   const thesis = h?.thesis  || 'No thesis available.'
