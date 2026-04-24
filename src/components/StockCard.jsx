@@ -138,7 +138,6 @@ export default function StockCard({ stock, horizon, darkMode }) {
         boxShadow:   expanded ? `var(--shadow-md), 0 0 20px ${rs.glow}` : undefined,
       }}
     >
-      {/* Forensic banner */}
       {stock.shenanigan_flag && (
         <div style={{
           borderRadius: 'var(--radius-2xl) var(--radius-2xl) 0 0',
@@ -153,11 +152,8 @@ export default function StockCard({ stock, horizon, darkMode }) {
         </div>
       )}
 
-      {/* ══ COLLAPSED ROW ══ */}
       <div style={{ padding: '16px', cursor: 'pointer' }} onClick={() => setExpanded(e => !e)}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-
-          {/* Avatar */}
           <div style={{
             width: '44px', height: '44px', borderRadius: 'var(--radius-xl)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -169,13 +165,10 @@ export default function StockCard({ stock, horizon, darkMode }) {
             {stock.ticker.replace('.TO', '').replace('-', '').slice(0, 3)}
           </div>
 
-          {/* Name + exchange block */}
           <div style={{ minWidth: 0, flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               <a
-                href={yUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+                href={yUrl} target="_blank" rel="noopener noreferrer"
                 onClick={e => e.stopPropagation()}
                 style={{
                   fontFamily: 'var(--font-display)', fontWeight: 700,
@@ -200,20 +193,15 @@ export default function StockCard({ stock, horizon, darkMode }) {
             <div style={{
               fontSize: '0.75rem', color: 'var(--color-text-muted)',
               fontFamily: 'var(--font-body)', marginTop: '2px',
-              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-              maxWidth: '220px',
+              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '220px',
             }}>
               {stock.name}
             </div>
-            <div style={{
-              fontSize: '0.7rem', color: 'var(--color-text-faint)',
-              fontFamily: 'var(--font-body)', marginTop: '2px',
-            }}>
+            <div style={{ fontSize: '0.7rem', color: 'var(--color-text-faint)', fontFamily: 'var(--font-body)', marginTop: '2px' }}>
               {sector}
             </div>
           </div>
 
-          {/* Rating badge + caret */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
               <span style={{
@@ -246,7 +234,6 @@ export default function StockCard({ stock, horizon, darkMode }) {
           </div>
         </div>
 
-        {/* Score bar */}
         <div style={{
           marginTop: '12px', height: '3px', borderRadius: 'var(--radius-full)',
           background: 'var(--color-surface-offset)', overflow: 'hidden',
@@ -259,7 +246,6 @@ export default function StockCard({ stock, horizon, darkMode }) {
         </div>
       </div>
 
-      {/* ══ EXPANDED DEEP DIVE ══ */}
       {expanded && (
         <div
           style={{ padding: '0 16px 20px', borderTop: '1px solid var(--color-divider)' }}
@@ -277,41 +263,30 @@ export default function StockCard({ stock, horizon, darkMode }) {
             </div>
           )}
 
-          {/* § THE WHY */}
           <div style={{ marginTop: '16px', marginBottom: '16px' }}>
             <div style={{
               fontFamily: 'var(--font-display)', fontSize: '0.7rem', fontWeight: 700,
-              letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '8px',
-              color: rs.color,
+              letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '8px', color: rs.color,
             }}>
               § The Why
             </div>
-            <p style={{
-              fontFamily: 'var(--font-body)', fontSize: '0.875rem', lineHeight: 1.7,
-              color: 'var(--color-text-muted)',
-            }}>
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: '0.875rem', lineHeight: 1.7, color: 'var(--color-text-muted)' }}>
               {thesis.replace(/\[.*?\]\s*/, '').split(' | ')[0]}
             </p>
             {thesis.split(' | ')[1] && (
-              <p style={{
-                fontFamily: 'var(--font-body)', fontSize: '0.85rem', lineHeight: 1.65,
-                marginTop: '6px', color: 'var(--color-text-faint)',
-              }}>
+              <p style={{ fontFamily: 'var(--font-body)', fontSize: '0.85rem', lineHeight: 1.65, marginTop: '6px', color: 'var(--color-text-faint)' }}>
                 {thesis.split(' | ').slice(1).join(' | ')}
               </p>
             )}
           </div>
 
-          {/* § DATA MATRIX */}
           <div style={{ marginBottom: '16px' }}>
             <div style={{
               fontFamily: 'var(--font-display)', fontSize: '0.7rem', fontWeight: 700,
-              letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '12px',
-              color: rs.color,
+              letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '12px', color: rs.color,
             }}>
               § Data Matrix
             </div>
-
             <div style={{
               fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase',
               letterSpacing: '0.08em', color: 'var(--color-text-faint)',
@@ -321,12 +296,10 @@ export default function StockCard({ stock, horizon, darkMode }) {
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '8px', marginBottom: '12px' }}>
               {stock.roe != null && stock.roe !== 0 && (
-                <MetricChip label="ROE" value={`${stock.roe.toFixed(1)}%`}
-                            good={stock.roe > 12} warn={stock.roe < 8} />
+                <MetricChip label="ROE" value={`${stock.roe.toFixed(1)}%`} good={stock.roe > 12} warn={stock.roe < 8} />
               )}
               {stock.nd_ebitda != null && stock.nd_ebitda < 90 && (
-                <MetricChip label="ND/EBITDA" value={`${stock.nd_ebitda.toFixed(1)}x`}
-                            good={stock.nd_ebitda < 2} warn={stock.nd_ebitda > 4} />
+                <MetricChip label="ND/EBITDA" value={`${stock.nd_ebitda.toFixed(1)}x`} good={stock.nd_ebitda < 2} warn={stock.nd_ebitda > 4} />
               )}
               {stock.fcf_yield != null && (
                 <MetricChip label="FCF Yield" value={`${stock.fcf_yield.toFixed(1)}%`}
@@ -337,15 +310,12 @@ export default function StockCard({ stock, horizon, darkMode }) {
                 <MetricChip label="Div Yield" value={`${stock.div_yield.toFixed(1)}%`} />
               )}
               {stock.revenue_cagr != null && stock.revenue_cagr !== 0 && (
-                <MetricChip label="Rev CAGR" value={`${stock.revenue_cagr.toFixed(1)}%`}
-                            good={stock.revenue_cagr > 10} warn={stock.revenue_cagr < 0} />
+                <MetricChip label="Rev CAGR" value={`${stock.revenue_cagr.toFixed(1)}%`} good={stock.revenue_cagr > 10} warn={stock.revenue_cagr < 0} />
               )}
               {isUltraLong && capB && (
-                <MetricChip label="Mkt Cap" value={`$${capB}B`}
-                            good={stock.market_cap_usd > 100e9} />
+                <MetricChip label="Mkt Cap" value={`$${capB}B`} good={stock.market_cap_usd > 100e9} />
               )}
             </div>
-
             <div style={{
               fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase',
               letterSpacing: '0.08em', color: 'var(--color-text-faint)',
@@ -354,17 +324,14 @@ export default function StockCard({ stock, horizon, darkMode }) {
               Technicals
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '10px' }}>
-              <MetricChip label="RSI (14)" value={stock.rsi?.toFixed(0)}
-                          good={stock.rsi < 40} warn={stock.rsi > 70} />
-              <MetricChip label="vs 200-MA" value={above200 ? 'Above ✓' : 'Below ✗'}
-                          good={above200} warn={!above200} />
+              <MetricChip label="RSI (14)" value={stock.rsi?.toFixed(0)} good={stock.rsi < 40} warn={stock.rsi > 70} />
+              <MetricChip label="vs 200-MA" value={above200 ? 'Above ✓' : 'Below ✗'} good={above200} warn={!above200} />
             </div>
             {maDist && (
               <div style={{
                 fontSize: '0.75rem', padding: '8px 12px', borderRadius: 'var(--radius-lg)',
                 background: 'var(--color-surface-2)', border: '1px solid var(--color-border)',
-                color: 'var(--color-text-muted)', marginBottom: '10px',
-                fontFamily: 'var(--font-body)',
+                color: 'var(--color-text-muted)', marginBottom: '10px', fontFamily: 'var(--font-body)',
               }}>
                 <span style={{ fontWeight: 700, color: 'var(--color-text-faint)' }}>200-MA distance: </span>
                 {maDist}% &nbsp;·&nbsp;
@@ -372,7 +339,6 @@ export default function StockCard({ stock, horizon, darkMode }) {
                 {ctx.technical}
               </div>
             )}
-
             <div style={{
               fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase',
               letterSpacing: '0.08em', color: 'var(--color-text-faint)',
@@ -389,12 +355,10 @@ export default function StockCard({ stock, horizon, darkMode }) {
             </div>
           </div>
 
-          {/* § RISK FACTOR */}
           <div style={{ marginBottom: '16px' }}>
             <div style={{
               fontFamily: 'var(--font-display)', fontSize: '0.7rem', fontWeight: 700,
-              letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '8px',
-              color: 'var(--color-sell)',
+              letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '8px', color: 'var(--color-sell)',
             }}>
               § Primary Risk Factor
             </div>
@@ -403,12 +367,9 @@ export default function StockCard({ stock, horizon, darkMode }) {
             </div>
           </div>
 
-          {/* Yahoo Finance CTA */}
           <div style={{ paddingTop: '12px', borderTop: '1px solid var(--color-divider)' }}>
             <a
-              href={yUrl}
-              target="_blank"
-              rel="noopener noreferrer"
+              href={yUrl} target="_blank" rel="noopener noreferrer"
               onClick={e => e.stopPropagation()}
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: '6px',
