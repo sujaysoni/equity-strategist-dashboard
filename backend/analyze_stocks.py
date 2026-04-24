@@ -2,19 +2,6 @@
 analyze_stocks.py
 =================
 Dynamic North American equity analysis engine.
-
-Ticker discovery (no hardcoded lists):
-  CAD : TMX public API  → all TSX + TSXV listed securities
-  USD : NASDAQ FTP feed → all NASDAQ + NYSE listed securities
-
-Liquidity filter applied before analysis:
-  CAD : market cap > $100M CAD  OR  avg daily volume > 50,000
-  USD : market cap > $500M USD  OR  avg daily volume > 100,000
-
-Safety:
-  - Never overwrites recommendations.json if fewer than MIN_RESULTS succeed
-  - Each ticker retried 3x with backoff
-  - Rate-limited to avoid yfinance throttling
 """
 
 import os, io, csv, json, time, logging, datetime, warnings
@@ -26,16 +13,16 @@ warnings.filterwarnings("ignore")
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger(__name__)
 
-# ── CONFIG ───────────────────────────────────────────────────────────────────
-MIN_RESULTS         = 10
-CAD_MIN_MARKETCAP   = 100e6
-CAD_MIN_VOLUME      = 50_000
-USD_MIN_MARKETCAP   = 500e6
-USD_MIN_VOLUME      = 100_000
-MAX_CAD_TICKERS     = 150
-MAX_USD_TICKERS     = 150
-FETCH_DELAY         = 1.2
-REQUEST_TIMEOUT     = 20
+# ── CONFIG ────────────────────────────────────────────────────────────────────
+MIN_RESULTS       = 10
+CAD_MIN_MARKETCAP = 100e6
+CAD_MIN_VOLUME    = 50_000
+USD_MIN_MARKETCAP = 500e6
+USD_MIN_VOLUME    = 100_000
+MAX_CAD_TICKERS   = 150
+MAX_USD_TICKERS   = 150
+FETCH_DELAY       = 1.2
+REQUEST_TIMEOUT   = 20
 
 HORIZONS = ["ultra_short", "short", "medium", "long", "ultra_long"]
 HORIZON_LABELS = {
@@ -46,19 +33,18 @@ HORIZON_LABELS = {
     "ultra_long":  "0-360 Months",
 }
 
-# ── TICKER DISCOVERY ─────────────────────────────────────────────────────────
+# ── TICKER DISCOVERY ──────────────────────────────────────────────────────────
 
 def fetch_tmx_tickers():
     tickers = []
     headers = {
-        "User-Agent":  "Mozilla/5.0 (equity-research-bot/1.0)",
-        "Accept":      "application/json",
-        "Referer":     "https://money.tmx.com/",
+        "User-Agent": "Mozilla/5.0 (equity-research-bot/1.0)",
+        "Accept":     "application/json",
+        "Referer":    "https://money.tmx.com/",
     }
     page, size = 0, 100
     try:
         while True:
-            url = "https://app-money.tmx.com/graphql"
             payload = {
                 "operationName": "getSecurityList",
                 "variables": {
@@ -69,19 +55,16 @@ def fetch_tmx_tickers():
                 "query": """
                 query getSecurityList($page: Int, $pageLimit: Int, $filters: [FilterInput]) {
                   getSecurityList(page: $page, pageLimit: $pageLimit, filters: $filters) {
-                    items {
-                      symbol
-                      name
-                      exchangeCode
-                      volume
-                      marketCap
-                    }
+                    items { symbol name exchangeCode volume marketCap }
                     total
                   }
                 }
                 """
             }
-            resp = requests.post(url, json=payload, headers=headers, timeout=REQUEST_TIMEOUT)
+            resp = requests.post(
+                "https://app-money.tmx.com/graphql",
+                json=payload, headers=headers, timeout=REQUEST_TIMEOUT
+            )
             resp.raise_for_status()
             data  = resp.json()
             items = data["data"]["getSecurityList"]["items"]
@@ -93,9 +76,8 @@ def fetch_tmx_tickers():
                 if sym and (mc >= CAD_MIN_MARKETCAP or vol >= CAD_MIN_VOLUME):
                     tickers.append(sym + ".TO")
             page += 1
-            fetched = page * size
-            log.info(f"TMX page {page}: {len(tickers)} qualified so far (total listed={total})")
-            if fetched >= total:
+            log.info(f"TMX page {page}: {len(tickers)} qualified (total={total})")
+            if page * size >= total:
                 break
             time.sleep(0.5)
     except Exception as e:
@@ -103,23 +85,22 @@ def fetch_tmx_tickers():
         tickers = _cad_seed()
 
     tickers = list(dict.fromkeys(tickers))
-    log.info(f"TMX discovery: {len(tickers)} CAD tickers (capped at {MAX_CAD_TICKERS})")
+    log.info(f"TMX discovery: {len(tickers)} CAD tickers")
     return tickers[:MAX_CAD_TICKERS]
 
 
 def fetch_nasdaq_nyse_tickers():
     tickers = []
     feeds = [
-        ("https://ftp.nasdaqtrader.com/dynamic/SymDir/nasdaqlisted.txt",  0, 6),
-        ("https://ftp.nasdaqtrader.com/dynamic/SymDir/otherlisted.txt",   0, 6),
+        ("https://ftp.nasdaqtrader.com/dynamic/SymDir/nasdaqlisted.txt", 0, 6),
+        ("https://ftp.nasdaqtrader.com/dynamic/SymDir/otherlisted.txt",  0, 6),
     ]
     headers = {"User-Agent": "Mozilla/5.0 (equity-research-bot/1.0)"}
     try:
         for url, sym_col, test_col in feeds:
             resp = requests.get(url, headers=headers, timeout=REQUEST_TIMEOUT)
             resp.raise_for_status()
-            lines = resp.text.splitlines()
-            reader = csv.reader(lines, delimiter="|")
+            reader = csv.reader(resp.text.splitlines(), delimiter="|")
             for i, row in enumerate(reader):
                 if i == 0:
                     continue
@@ -138,9 +119,8 @@ def fetch_nasdaq_nyse_tickers():
 
     tickers = list(dict.fromkeys(tickers))
     log.info(f"NASDAQ/NYSE discovery: {len(tickers)} raw tickers")
-
     qualified = _liquidity_filter_usd(tickers)
-    log.info(f"After liquidity filter: {len(qualified)} USD tickers (capped at {MAX_USD_TICKERS})")
+    log.info(f"After liquidity filter: {len(qualified)} USD tickers")
     return qualified[:MAX_USD_TICKERS]
 
 
@@ -148,24 +128,23 @@ def _liquidity_filter_usd(tickers):
     qualified = []
     chunk_size = 50
     for i in range(0, min(len(tickers), 2000), chunk_size):
-        chunk = tickers[i:i + chunk_size]
-        for sym in chunk:
+        for sym in tickers[i:i + chunk_size]:
             try:
                 fi  = yf.Ticker(sym).fast_info
-                mc  = getattr(fi, "market_cap",               None) or 0
+                mc  = getattr(fi, "market_cap",                None) or 0
                 vol = getattr(fi, "three_month_average_volume", None) or 0
                 if mc >= USD_MIN_MARKETCAP or vol >= USD_MIN_VOLUME:
                     qualified.append(sym)
             except Exception:
                 pass
         time.sleep(0.3)
-        log.info(f"Liquidity filter progress: {min(i+chunk_size, len(tickers))}/{min(len(tickers),2000)} checked, {len(qualified)} qualified")
+        log.info(f"Liquidity filter: {min(i+chunk_size, len(tickers))}/{min(len(tickers),2000)} checked, {len(qualified)} qualified")
         if len(qualified) >= MAX_USD_TICKERS:
             break
     return qualified
 
 
-# ── SEED FALLBACKS ───────────────────────────────────────────────────────────
+# ── SEED FALLBACKS ────────────────────────────────────────────────────────────
 
 def _cad_seed():
     return [
@@ -190,7 +169,8 @@ def _usd_seed():
         "HD","MCD","SBUX","NKE","TGT","COST","WMT","PG","KO","PEP",
     ]
 
-# ── FUNDAMENTAL + TECHNICAL HELPERS ─────────────────────────────────────────
+
+# ── HELPERS ───────────────────────────────────────────────────────────────────
 
 def safe_get(info, key, default=None):
     val = info.get(key, default)
@@ -219,9 +199,9 @@ def get_roe(info):
     return round(v * 100, 2)
 
 def get_nd_ebitda(info):
-    ebitda = safe_get(info, "ebitda",     0) or 0
-    debt   = safe_get(info, "totalDebt",  0) or 0
-    cash   = safe_get(info, "totalCash",  0) or 0
+    ebitda = safe_get(info, "ebitda",    0) or 0
+    debt   = safe_get(info, "totalDebt", 0) or 0
+    cash   = safe_get(info, "totalCash", 0) or 0
     return round((debt - cash) / ebitda, 2) if ebitda else 99.0
 
 def get_fcf_yield(info):
@@ -244,7 +224,7 @@ def get_revenue_cagr(ticker_obj):
         rev = row.iloc[0].dropna().values
         if len(rev) < 2 or rev[-1] <= 0:
             return 0.0
-        return round(float(((rev[0] / rev[-1]) ** (1 / (len(rev)-1)) - 1) * 100), 2)
+        return round(float(((rev[0] / rev[-1]) ** (1 / (len(rev) - 1)) - 1) * 100), 2)
     except Exception:
         return 0.0
 
@@ -268,9 +248,11 @@ def shenanigan_flag(ticker_obj):
         pass
     return result
 
-# ── SCORING ──────────────────────────────────────────────────────────────────
 
-def clamp(v): return max(5, min(95, v))
+# ── SCORING ───────────────────────────────────────────────────────────────────
+
+def clamp(v):
+    return max(5, min(95, v))
 
 def score_ultra_short(info, hist, rsi, ma20, price):
     s = 50
@@ -280,7 +262,7 @@ def score_ultra_short(info, hist, rsi, ma20, price):
     else:            s -= 10
     vol_ratio = hist["Volume"].iloc[-5:].mean() / (hist["Volume"].mean() + 1)
     if vol_ratio > 1.3: s += 10
-    return clamp(s), f"RSI={rsi:.0f} | {'Above' if price>ma20 else 'Below'} 20MA | Vol {vol_ratio:.1f}x"
+    return clamp(s), f"RSI={rsi:.0f} | {'Above' if price > ma20 else 'Below'} 20MA | Vol {vol_ratio:.1f}x"
 
 def score_short(info, hist, rsi, ma50, price, cagr):
     s = 50
@@ -336,7 +318,8 @@ def build_thesis(ticker, market, detail, info, shena):
     flag   = f" | ⚠ {shena['detail']}" if shena["flag"] else ""
     return f"[{market} · {sector}] {detail}{flag}"[:280]
 
-# ── FETCH WITH RETRY ─────────────────────────────────────────────────────────
+
+# ── FETCH WITH RETRY ──────────────────────────────────────────────────────────
 
 def fetch_ticker(symbol, retries=3, delay=4):
     for attempt in range(retries):
@@ -354,13 +337,14 @@ def fetch_ticker(symbol, retries=3, delay=4):
             time.sleep(delay * (attempt + 1))
     return None, None, None
 
+
 # ── ANALYSIS LOOP ─────────────────────────────────────────────────────────────
 
 def analyze(tickers, market):
     results = []
-    seen = set()                          # dedupe guard
+    seen    = set()
     for ticker in tickers:
-        if ticker in seen:                # skip duplicates
+        if ticker in seen:
             log.info(f"[{market}] {ticker} — duplicate, skipping")
             continue
         seen.add(ticker)
@@ -387,11 +371,11 @@ def analyze(tickers, market):
 
             horizons = {}
             for h in HORIZONS:
-                if h == "ultra_short":  s, d = score_ultra_short(info, hist, rsi, ma20, price)
-                elif h == "short":      s, d = score_short(info, hist, rsi, ma50, price, cagr)
-                elif h == "medium":     s, d = score_medium(info, roe, nde, fcfy, divy)
-                elif h == "long":       s, d = score_long(info, roe, nde, cagr)
-                else:                   s, d = score_ultra_long(info, cagr, roe)
+                if h == "ultra_short": s, d = score_ultra_short(info, hist, rsi, ma20, price)
+                elif h == "short":     s, d = score_short(info, hist, rsi, ma50, price, cagr)
+                elif h == "medium":    s, d = score_medium(info, roe, nde, fcfy, divy)
+                elif h == "long":      s, d = score_long(info, roe, nde, cagr)
+                else:                  s, d = score_ultra_long(info, cagr, roe)
                 horizons[h] = {
                     "rating": score_to_rating(s),
                     "score":  round(s, 1),
@@ -403,8 +387,8 @@ def analyze(tickers, market):
                 "ticker":            ticker,
                 "name":              safe_get(info, "shortName", ticker),
                 "market":            market,
-                "exchange":          safe_get(info, "exchange", "TSX" if market=="CAD" else "NYSE"),
-                "currency":          safe_get(info, "currency", "CAD" if market=="CAD" else "USD"),
+                "exchange":          safe_get(info, "exchange", "TSX" if market == "CAD" else "NYSE"),
+                "currency":          safe_get(info, "currency", "CAD" if market == "CAD" else "USD"),
                 "price":             price,
                 "change_pct":        change,
                 "rsi":               rsi,
@@ -428,21 +412,14 @@ def analyze(tickers, market):
             continue
     return results
 
-# ── MAIN ─────────────────────────────────────────────────────────────────────
+
+# ── MAIN ──────────────────────────────────────────────────────────────────────
 
 def main():
     out_path = os.path.join(
         os.path.dirname(__file__), "..", "public", "recommendations.json"
     )
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
-
-    existing = {"cad": [], "usd": [], "generated_at": ""}
-    if os.path.exists(out_path):
-        try:
-            with open(out_path) as f:
-                existing = json.load(f)
-        except Exception:
-            pass
 
     log.info("=== Discovering CAD tickers from TMX ===")
     cad_tickers = fetch_tmx_tickers()
@@ -458,10 +435,7 @@ def main():
     log.info(f"=== Results: CAD={len(cad_results)}, USD={len(usd_results)}, Total={total} ===")
 
     if total < MIN_RESULTS:
-        log.error(
-            f"SAFETY GATE triggered: only {total} results. "
-            "Existing recommendations.json preserved."
-        )
+        log.error(f"SAFETY GATE: only {total} results — recommendations.json NOT updated.")
         return
 
     with open(out_path, "w") as f:
