@@ -1,2 +1,5 @@
-# equity-strategist-dashboard
-Dark-mode North American equity strategist dashboard with multi-timeframe BUY/HOLD/SELL analysis for TSX/TSXV and NYSE/NASDAQ, automated via GitHub Actions and deployed on GitHub Pages.
+# 📊 Equity Strategist Dashboard
+
+A full-stack, dark-mode financial dashboard delivering **BUY / HOLD / SELL** recommendations for **CAD (TSX/TSXV)** and **USD (NYSE/NASDAQ)** equities across 5 time horizons.
+
+## 🏗 Architecture
