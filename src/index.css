@@ -38,8 +38,8 @@
   --color-sell: #A33A2A;
   --color-warn: #A57C22;
 
-  --font-display: 'Boska', Georgia, serif;
-  --font-body:    'General Sans', 'Helvetica Neue', Arial, sans-serif;
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body:    'DM Sans', 'Helvetica Neue', Arial, sans-serif;
 
   --radius-sm:   0.375rem;
   --radius-md:   0.5rem;
