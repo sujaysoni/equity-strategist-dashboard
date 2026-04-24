@@ -2,14 +2,15 @@ name: Update Stock Recommendations
 
 on:
   schedule:
-    - cron: '0 11 * * 1-5'   # 11:00 UTC = 6 AM EST, weekdays
+    - cron: '0 11 * * 1-5'      # 11:00 UTC = 6 AM EST, weekdays
   repository_dispatch:
     types: [refresh-analysis]
   workflow_dispatch:
 
 jobs:
   analyze:
-    runs-on: ubuntu-latest
+    runs-on:         ubuntu-latest
+    timeout-minutes: 350          # ~6 hours — enough for 300 tickers at 1.2s each
     permissions:
       contents: write
 
@@ -17,16 +18,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          cache: 'pip'
 
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Run analysis
+      - name: Run full universe analysis
         env:
           POLYGON_API_KEY:   ${{ secrets.POLYGON_API_KEY }}
           ALPHA_VANTAGE_KEY: ${{ secrets.ALPHA_VANTAGE_KEY }}
