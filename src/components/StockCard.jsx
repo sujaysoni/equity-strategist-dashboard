@@ -213,7 +213,7 @@ export default function StockCard({ stock, horizon, darkMode }) {
             </div>
           </div>
 
-          {/* Rating badge + caret — NO price block */}
+          {/* Rating badge + caret */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
               <span style={{
@@ -411,4 +411,28 @@ export default function StockCard({ stock, horizon, darkMode }) {
               rel="noopener noreferrer"
               onClick={e => e.stopPropagation()}
               style={{
-                display: 'inline-flex', alignItems: 'center', gap: 
+                display: 'inline-flex', alignItems: 'center', gap: '6px',
+                fontSize: '0.75rem', fontWeight: 700, fontFamily: 'var(--font-body)',
+                padding: '7px 16px', borderRadius: 'var(--radius-full)',
+                background: 'color-mix(in oklch,var(--color-primary) 10%,transparent)',
+                color: 'var(--color-primary)',
+                border: '1px solid color-mix(in oklch,var(--color-primary) 28%,transparent)',
+                textDecoration: 'none', transition: 'opacity 0.2s ease',
+              }}
+              onMouseOver={e => e.currentTarget.style.opacity = '0.75'}
+              onMouseOut={e  => e.currentTarget.style.opacity = '1'}
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                <polyline points="15 3 21 3 21 9"/>
+                <line x1="10" y1="14" x2="21" y2="3"/>
+              </svg>
+              View on Yahoo Finance →
+            </a>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
