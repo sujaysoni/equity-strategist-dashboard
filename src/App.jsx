@@ -111,8 +111,8 @@ export default function App() {
 
   const cad = useMemo(() => sortStocks(data?.cad || [], horizon), [data, horizon])
   const usd = useMemo(() => sortStocks(data?.usd || [], horizon), [data, horizon])
-  const cadBuys = cad.filter(s => s.horizons?.[horizon]?.rating === 'BUY').length
-  const usdBuys = usd.filter(s => s.horizons?.[horizon]?.rating === 'BUY').length
+  const cadBuys    = cad.filter(s => s.horizons?.[horizon]?.rating === 'BUY').length
+  const usdBuys    = usd.filter(s => s.horizons?.[horizon]?.rating === 'BUY').length
   const isUltraLong = horizon === 'ultra_long'
 
   return (
@@ -164,5 +164,230 @@ export default function App() {
           {/* Right controls */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             {scanning && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '7px',
-                            fontSize: '0.75rem', fontWeight: 600, color: 
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: '7px',
+                fontSize: '0.75rem', fontWeight: 600,
+                color: 'var(--color-primary)', fontFamily: 'var(--font-body)',
+              }}>
+                <div style={{
+                  width: '7px', height: '7px', borderRadius: '50%',
+                  background: 'var(--color-primary)',
+                  animation: 'pulse 1.2s ease-in-out infinite',
+                }} />
+                Scanning markets…
+              </div>
+            )}
+
+            <RefreshButton onClick={handleRefresh} refreshing={refreshing} />
+
+            <button
+              onClick={() => setDarkMode(d => !d)}
+              style={{
+                width: '36px', height: '36px', borderRadius: 'var(--radius-full)',
+                border: '1px solid var(--color-border)',
+                background: 'var(--color-surface)',
+                color: 'var(--color-text-muted)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                cursor: 'pointer', transition: 'all 0.2s ease',
+              }}
+              title="Toggle theme"
+            >
+              {darkMode ? <SunIcon /> : <MoonIcon />}
+            </button>
+          </div>
+        </div>
+
+        {/* Horizon toggle */}
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px 12px' }}>
+          <HorizonToggle horizons={HORIZONS} active={horizon} onChange={handleHorizonChange} />
+        </div>
+      </header>
+
+      {/* ── MAIN CONTENT ── */}
+      <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '32px 24px' }}>
+
+        {/* Last updated + stats bar */}
+        {lastUpdated && !loading && (
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            flexWrap: 'wrap', gap: '12px', marginBottom: '28px',
+          }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-faint)', fontFamily: 'var(--font-body)' }}>
+              Last updated: {lastUpdated.toLocaleString()}
+            </div>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              {[
+                { label: 'CAD BUYs', value: cadBuys, color: 'var(--color-buy)' },
+                { label: 'USD BUYs', value: usdBuys, color: 'var(--color-navy)' },
+              ].map(({ label, value, color }) => (
+                <div key={label} style={{
+                  fontSize: '0.75rem', fontFamily: 'var(--font-body)',
+                  padding: '4px 12px', borderRadius: 'var(--radius-full)',
+                  background: `color-mix(in oklch,${color} 10%,transparent)`,
+                  border: `1px solid color-mix(in oklch,${color} 25%,transparent)`,
+                  color,
+                }}>
+                  <strong>{value}</strong> {label}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Loading state */}
+        {loading && (
+          <div style={{
+            display: 'flex', flexDirection: 'column', alignItems: 'center',
+            justifyContent: 'center', minHeight: '40vh', gap: '16px',
+          }}>
+            <div style={{
+              width: '40px', height: '40px', borderRadius: '50%',
+              border: '3px solid var(--color-surface-offset)',
+              borderTop: '3px solid var(--color-primary)',
+              animation: 'spin 0.8s linear infinite',
+            }} />
+            <div style={{ fontSize: '0.85rem', color: 'var(--color-text-faint)', fontFamily: 'var(--font-body)' }}>
+              Loading recommendations…
+            </div>
+          </div>
+        )}
+
+        {/* Error state */}
+        {error && !loading && (
+          <div style={{
+            padding: '20px 24px', borderRadius: 'var(--radius-xl)',
+            background: 'color-mix(in oklch,var(--color-sell) 8%,transparent)',
+            border: '1px solid color-mix(in oklch,var(--color-sell) 25%,transparent)',
+            color: 'var(--color-sell)', fontFamily: 'var(--font-body)', fontSize: '0.875rem',
+            marginBottom: '24px',
+          }}>
+            ⚠ Failed to load recommendations: {error}
+          </div>
+        )}
+
+        {/* Ultra Long notice */}
+        {isUltraLong && !loading && (
+          <div style={{
+            padding: '12px 20px', borderRadius: 'var(--radius-xl)', marginBottom: '24px',
+            background: 'color-mix(in oklch,var(--color-primary) 7%,transparent)',
+            border: '1px solid color-mix(in oklch,var(--color-primary) 20%,transparent)',
+            fontSize: '0.8rem', color: 'var(--color-primary)', fontFamily: 'var(--font-body)',
+          }}>
+            🏰 <strong>Ultra Long (0–360m):</strong> Ranked by Economic Moat × Market Cap. RSI signals de-weighted in favour of TAM, structural demand, and competitive durability.
+          </div>
+        )}
+
+        {/* ── TWO COLUMN GRID ── */}
+        {!loading && data && (
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 520px), 1fr))',
+            gap: '32px',
+            alignItems: 'start',
+          }}>
+
+            {/* CAD Column */}
+            <section>
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px',
+              }}>
+                <div style={{
+                  fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1rem',
+                  color: 'var(--color-text)', letterSpacing: '-0.01em',
+                }}>
+                  🍁 Canadian Markets
+                </div>
+                <span style={{
+                  fontSize: '0.68rem', fontWeight: 700, padding: '2px 8px',
+                  borderRadius: 'var(--radius-full)', letterSpacing: '0.06em',
+                  background: 'color-mix(in oklch,var(--color-primary) 12%,transparent)',
+                  color: 'var(--color-primary)',
+                  border: '1px solid color-mix(in oklch,var(--color-primary) 25%,transparent)',
+                }}>
+                  TSX · TSXV
+                </span>
+              </div>
+              <div
+                key={`cad-${fadeKey}`}
+                style={{ display: 'flex', flexDirection: 'column', gap: '10px', animation: 'fadeIn 0.35s ease' }}
+              >
+                {cad.length === 0
+                  ? <EmptyState />
+                  : cad.map(s => (
+                      <StockCard key={s.ticker} stock={s} horizon={horizon} darkMode={darkMode} />
+                    ))
+                }
+              </div>
+            </section>
+
+            {/* USD Column */}
+            <section>
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px',
+              }}>
+                <div style={{
+                  fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1rem',
+                  color: 'var(--color-text)', letterSpacing: '-0.01em',
+                }}>
+                  🦅 U.S. Markets
+                </div>
+                <span style={{
+                  fontSize: '0.68rem', fontWeight: 700, padding: '2px 8px',
+                  borderRadius: 'var(--radius-full)', letterSpacing: '0.06em',
+                  background: 'color-mix(in oklch,var(--color-navy) 12%,transparent)',
+                  color: 'var(--color-navy)',
+                  border: '1px solid color-mix(in oklch,var(--color-navy) 25%,transparent)',
+                }}>
+                  NYSE · NASDAQ
+                </span>
+              </div>
+              <div
+                key={`usd-${fadeKey}`}
+                style={{ display: 'flex', flexDirection: 'column', gap: '10px', animation: 'fadeIn 0.35s ease' }}
+              >
+                {usd.length === 0
+                  ? <EmptyState />
+                  : usd.map(s => (
+                      <StockCard key={s.ticker} stock={s} horizon={horizon} darkMode={darkMode} />
+                    ))
+                }
+              </div>
+            </section>
+
+          </div>
+        )}
+      </main>
+
+      {/* ── FOOTER ── */}
+      <footer style={{
+        borderTop: '1px solid var(--color-divider)',
+        padding: '20px 24px',
+        marginTop: '48px',
+      }}>
+        <div style={{
+          maxWidth: '1200px', margin: '0 auto',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          flexWrap: 'wrap', gap: '8px',
+          fontSize: '0.72rem', color: 'var(--color-text-faint)', fontFamily: 'var(--font-body)',
+        }}>
+          <span>Equity Strategist Dashboard — for informational purposes only. Not financial advice.</span>
+          <span>Data via yFinance · Refreshed 06:00 ET weekdays</span>
+        </div>
+      </footer>
+
+    </div>
+  )
+}
+
+function EmptyState() {
+  return (
+    <div style={{
+      padding: '40px 24px', textAlign: 'center',
+      borderRadius: 'var(--radius-xl)',
+      border: '1px dashed var(--color-border)',
+      color: 'var(--color-text-faint)', fontFamily: 'var(--font-body)', fontSize: '0.85rem',
+    }}>
+      No data available — trigger a refresh to run the analysis.
+    </div>
+  )
+}
