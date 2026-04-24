@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import HorizonToggle from './components/HorizonToggle'
 import StockCard from './components/StockCard'
 import RefreshButton from './components/RefreshButton'
+import useLivePrices from './hooks/useLivePrices'
 
 const HORIZONS = [
   { key: 'ultra_short', label: 'Ultra Short', sub: '0–3m'   },
@@ -77,6 +78,8 @@ export default function App() {
     try {
       setLoading(true); setError(null)
       const base = import.meta.env.BASE_URL
+        const base = import.meta.env.BASE_URL
+  const { prices, marketOpen, priceTime } = useLivePrices(base)
       const res  = await fetch(`${base}recommendations.json?t=${Date.now()}`)
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const json = await res.json()
@@ -175,6 +178,23 @@ export default function App() {
               <div style={{ fontSize: '0.72rem', color: 'var(--color-text-faint)',
                             fontFamily: 'var(--font-body)' }}
                    className="hidden sm:block">
+                {priceTime && (
+  <div style={{
+    display: 'flex', alignItems: 'center', gap: '6px',
+    fontSize: '0.7rem', fontFamily: 'var(--font-body)',
+    padding: '3px 10px', borderRadius: 'var(--radius-full)',
+    background: marketOpen
+      ? 'color-mix(in oklch,var(--color-buy) 10%,transparent)'
+      : 'color-mix(in oklch,var(--color-text-faint) 10%,transparent)',
+    color:  marketOpen ? 'var(--color-buy)' : 'var(--color-text-faint)',
+    border: `1px solid color-mix(in oklch,${marketOpen ? 'var(--color-buy)' : 'var(--color-text-faint)'} 22%,transparent)`,
+  }}>
+    <span style={{ width: '6px', height: '6px', borderRadius: '50%',
+                   background: 'currentColor', display: 'inline-block',
+                   animation: marketOpen ? 'pulseDot 1.2s ease-in-out infinite' : 'none' }} />
+    {marketOpen ? 'Market Open' : 'Market Closed'}
+  </div>
+)}
                 Last updated:&nbsp;
                 <span style={{ color: 'var(--color-text-muted)' }}>
                   {lastUpdated.toLocaleDateString()} {lastUpdated.toLocaleTimeString()}
@@ -341,7 +361,21 @@ export default function App() {
                       {usdBuys === 0 && horizon === 'ultra_short' && <NoHighConviction timeframe="0–3m" />}
                       {usd.map((s, i) => (
                         <div key={s.ticker} className="fade-in-up" style={{ animationDelay: `${i * 55}ms` }}>
-                          <StockCard stock={s} horizon={horizon} darkMode={darkMode} />
+                          {/* inside CAD map */}
+<StockCard
+  stock={s}
+  horizon={horizon}
+  darkMode={darkMode}
+  livePrice={prices[s.ticker] || null}
+/>
+
+{/* inside USD map — same change */}
+<StockCard
+  stock={s}
+  horizon={horizon}
+  darkMode={darkMode}
+  livePrice={prices[s.ticker] || null}
+/>
                         </div>
                       ))}
                     </>
