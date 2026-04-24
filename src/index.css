@@ -1,0 +1,35 @@
+@import url('https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&f[]=cabinet-grotesk@700,800&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-bg:      #0d0f11;
+  --color-surface: #131619;
+  --color-border:  #2a3038;
+  --color-primary: #00d4aa;
+  --color-buy:     #22c55e;
+  --color-hold:    #94a3b8;
+  --color-sell:    #ef4444;
+  --color-warn:    #f59e0b;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-font-smoothing: antialiased; }
+body {
+  font-family: 'Satoshi', 'Inter', sans-serif;
+  background: var(--color-bg);
+  color: #e2e8ef;
+  min-height: 100dvh;
+}
+
+.glassmorphism {
+  background: rgba(19, 22, 25, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(42, 48, 56, 0.8);
+}
+
+.glow-primary { box-shadow: 0 0 20px rgba(0, 212, 170, 0.15); }
+.glow-buy     { box-shadow: 0 0 16px rgba(34, 197, 94, 0.2);  }
+.glow-sell    { box-shadow: 0 0 16px rgba(239, 68, 68, 0.2);  }
