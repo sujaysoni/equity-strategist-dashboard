@@ -354,14 +354,53 @@ export default function App() {
       </main>
 
       {/* ── FOOTER ── */}
-      <footer style={{ borderTop: '1px solid var(--color-divider)', marginTop: '64px', padding: '24px 0' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px',
-                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                      flexWrap: 'wrap', gap: '12px' }}>
-          <span style={{ fontSize: '0.72rem', color: 'var(--color-text-faint)', fontFamily: 'var(--font-body)' }}>
-            For informational purposes only. Not financial advice.
-          </span>
-          <span style={{ fontSize: '0.72rem', color: 'var(--color-border)', fontFamily: 'var(--font-body)' }}>
+      <footer style={{ borderTop: '1px solid var(--color-divider)', marginTop: '64px', padding: '28px 0' }}>
+        <div style={{
+          maxWidth: '1200px', margin: '0 auto', padding: '0 24px',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          flexWrap: 'wrap', gap: '12px',
+        }}>
+          {/* Left — disclaimer + attribution */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+            <span style={{
+              fontSize: '0.75rem', color: 'var(--color-text-faint)', fontFamily: 'var(--font-body)',
+            }}>
+              For informational purposes only. Not financial advice.
+            </span>
+            <span style={{
+              fontSize: '0.72rem', color: 'var(--color-text-faint)', fontFamily: 'var(--font-body)',
+            }}>
+              Designed by Claude &nbsp;·&nbsp; Owned by&nbsp;
+              <a
+                href="https://sujaysoni.github.io/Career-Journey-/"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  color: 'var(--color-primary)',
+                  textDecoration: 'none',
+                  fontWeight: 600,
+                  borderBottom: '1px solid color-mix(in oklch,var(--color-primary) 35%,transparent)',
+                  paddingBottom: '1px',
+                  transition: 'color 180ms ease, border-color 180ms ease',
+                }}
+                onMouseOver={e => {
+                  e.currentTarget.style.color = 'var(--color-primary-hover)'
+                  e.currentTarget.style.borderBottomColor = 'var(--color-primary)'
+                }}
+                onMouseOut={e => {
+                  e.currentTarget.style.color = 'var(--color-primary)'
+                  e.currentTarget.style.borderBottomColor = 'color-mix(in oklch,var(--color-primary) 35%,transparent)'
+                }}
+              >
+                Sujay Soni
+              </a>
+            </span>
+          </div>
+
+          {/* Right — repo tag */}
+          <span style={{
+            fontSize: '0.7rem', color: 'var(--color-border)', fontFamily: 'var(--font-body)',
+          }}>
             sujaysoni/equity-strategist-dashboard
           </span>
         </div>
