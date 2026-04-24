@@ -78,8 +78,6 @@ export default function App() {
     try {
       setLoading(true); setError(null)
       const base = import.meta.env.BASE_URL
-        const base = import.meta.env.BASE_URL
-  const { prices, marketOpen, priceTime } = useLivePrices(base)
       const res  = await fetch(`${base}recommendations.json?t=${Date.now()}`)
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const json = await res.json()
@@ -90,6 +88,10 @@ export default function App() {
   }, [])
 
   useEffect(() => { fetchData() }, [fetchData])
+
+  /* Live prices hook — must be called at top level of component, not inside fetchData */
+  const base = import.meta.env.BASE_URL
+  const { prices, marketOpen, priceTime } = useLivePrices(base)
 
   const handleHorizonChange = (h) => { setFadeKey(k => k + 1); setHorizon(h) }
 
@@ -174,27 +176,32 @@ export default function App() {
                 AI Analyzing…
               </div>
             )}
+
+            {/* Market open/closed pill */}
+            {priceTime && (
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: '6px',
+                fontSize: '0.7rem', fontFamily: 'var(--font-body)',
+                padding: '3px 10px', borderRadius: 'var(--radius-full)',
+                background: marketOpen
+                  ? 'color-mix(in oklch,var(--color-buy) 10%,transparent)'
+                  : 'color-mix(in oklch,var(--color-text-faint) 10%,transparent)',
+                color: marketOpen ? 'var(--color-buy)' : 'var(--color-text-faint)',
+                border: `1px solid color-mix(in oklch,${marketOpen ? 'var(--color-buy)' : 'var(--color-text-faint)'} 22%,transparent)`,
+              }}>
+                <span style={{
+                  width: '6px', height: '6px', borderRadius: '50%',
+                  background: 'currentColor', display: 'inline-block',
+                  animation: marketOpen ? 'pulseDot 1.2s ease-in-out infinite' : 'none',
+                }} />
+                {marketOpen ? 'Market Open' : 'Market Closed'}
+              </div>
+            )}
+
             {lastUpdated && !scanning && (
               <div style={{ fontSize: '0.72rem', color: 'var(--color-text-faint)',
                             fontFamily: 'var(--font-body)' }}
                    className="hidden sm:block">
-                {priceTime && (
-  <div style={{
-    display: 'flex', alignItems: 'center', gap: '6px',
-    fontSize: '0.7rem', fontFamily: 'var(--font-body)',
-    padding: '3px 10px', borderRadius: 'var(--radius-full)',
-    background: marketOpen
-      ? 'color-mix(in oklch,var(--color-buy) 10%,transparent)'
-      : 'color-mix(in oklch,var(--color-text-faint) 10%,transparent)',
-    color:  marketOpen ? 'var(--color-buy)' : 'var(--color-text-faint)',
-    border: `1px solid color-mix(in oklch,${marketOpen ? 'var(--color-buy)' : 'var(--color-text-faint)'} 22%,transparent)`,
-  }}>
-    <span style={{ width: '6px', height: '6px', borderRadius: '50%',
-                   background: 'currentColor', display: 'inline-block',
-                   animation: marketOpen ? 'pulseDot 1.2s ease-in-out infinite' : 'none' }} />
-    {marketOpen ? 'Market Open' : 'Market Closed'}
-  </div>
-)}
                 Last updated:&nbsp;
                 <span style={{ color: 'var(--color-text-muted)' }}>
                   {lastUpdated.toLocaleDateString()} {lastUpdated.toLocaleTimeString()}
@@ -323,7 +330,12 @@ export default function App() {
                       {cadBuys === 0 && horizon === 'ultra_short' && <NoHighConviction timeframe="0–3m" />}
                       {cad.map((s, i) => (
                         <div key={s.ticker} className="fade-in-up" style={{ animationDelay: `${i * 55}ms` }}>
-                          <StockCard stock={s} horizon={horizon} darkMode={darkMode} />
+                          <StockCard
+                            stock={s}
+                            horizon={horizon}
+                            darkMode={darkMode}
+                            livePrice={prices[s.ticker] || null}
+                          />
                         </div>
                       ))}
                     </>
@@ -361,21 +373,12 @@ export default function App() {
                       {usdBuys === 0 && horizon === 'ultra_short' && <NoHighConviction timeframe="0–3m" />}
                       {usd.map((s, i) => (
                         <div key={s.ticker} className="fade-in-up" style={{ animationDelay: `${i * 55}ms` }}>
-                          {/* inside CAD map */}
-<StockCard
-  stock={s}
-  horizon={horizon}
-  darkMode={darkMode}
-  livePrice={prices[s.ticker] || null}
-/>
-
-{/* inside USD map — same change */}
-<StockCard
-  stock={s}
-  horizon={horizon}
-  darkMode={darkMode}
-  livePrice={prices[s.ticker] || null}
-/>
+                          <StockCard
+                            stock={s}
+                            horizon={horizon}
+                            darkMode={darkMode}
+                            livePrice={prices[s.ticker] || null}
+                          />
                         </div>
                       ))}
                     </>
@@ -394,28 +397,20 @@ export default function App() {
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           flexWrap: 'wrap', gap: '12px',
         }}>
-          {/* Left — disclaimer + attribution */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-            <span style={{
-              fontSize: '0.75rem', color: 'var(--color-text-faint)', fontFamily: 'var(--font-body)',
-            }}>
+            <span style={{ fontSize: '0.75rem', color: 'var(--color-text-faint)', fontFamily: 'var(--font-body)' }}>
               For informational purposes only. Not financial advice.
             </span>
-            <span style={{
-              fontSize: '0.72rem', color: 'var(--color-text-faint)', fontFamily: 'var(--font-body)',
-            }}>
+            <span style={{ fontSize: '0.72rem', color: 'var(--color-text-faint)', fontFamily: 'var(--font-body)' }}>
               Designed by Claude &nbsp;·&nbsp; Owned by&nbsp;
               <a
                 href="https://sujaysoni.github.io/Career-Journey-/"
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{
-                  color: 'var(--color-primary)',
-                  textDecoration: 'none',
-                  fontWeight: 600,
+                  color: 'var(--color-primary)', textDecoration: 'none', fontWeight: 600,
                   borderBottom: '1px solid color-mix(in oklch,var(--color-primary) 35%,transparent)',
-                  paddingBottom: '1px',
-                  transition: 'color 180ms ease, border-color 180ms ease',
+                  paddingBottom: '1px', transition: 'color 180ms ease, border-color 180ms ease',
                 }}
                 onMouseOver={e => {
                   e.currentTarget.style.color = 'var(--color-primary-hover)'
@@ -430,11 +425,7 @@ export default function App() {
               </a>
             </span>
           </div>
-
-          {/* Right — repo tag */}
-          <span style={{
-            fontSize: '0.7rem', color: 'var(--color-border)', fontFamily: 'var(--font-body)',
-          }}>
+          <span style={{ fontSize: '0.7rem', color: 'var(--color-border)', fontFamily: 'var(--font-body)' }}>
             sujaysoni/equity-strategist-dashboard
           </span>
         </div>
