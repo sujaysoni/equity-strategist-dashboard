@@ -1,118 +1,264 @@
+import { useState } from 'react'
+
 const RATING_STYLES = {
-  BUY:  { bg: 'rgba(34,197,94,.12)',   border: 'rgba(34,197,94,.3)',   color: '#22c55e' },
-  HOLD: { bg: 'rgba(148,163,184,.1)',  border: 'rgba(148,163,184,.25)', color: '#94a3b8' },
-  SELL: { bg: 'rgba(239,68,68,.12)',   border: 'rgba(239,68,68,.3)',   color: '#ef4444' },
+  BUY:  { bg: 'rgba(46,134,95,.18)',  border: '#2E865F', color: '#2E865F', glow: 'rgba(46,134,95,.35)'   },
+  HOLD: { bg: 'rgba(156,163,175,.12)', border: '#9CA3AF', color: '#9CA3AF', glow: 'rgba(156,163,175,.2)' },
+  SELL: { bg: 'rgba(255,0,0,.12)',    border: '#FF0000', color: '#FF0000', glow: 'rgba(255,0,0,.3)'      },
+}
+
+const HORIZON_CONTEXT = {
+  ultra_short: {
+    fundamental: ['ROE', 'FCF Yield'],
+    technical:   'RSI momentum + volume surge',
+    macro:       'Earnings date / PDUFA catalyst / MOC imbalance',
+    risks:       ['Earnings miss vs consensus', 'Sector rotation out of momentum names'],
+  },
+  short: {
+    fundamental: ['ROE', 'ND/EBITDA', 'Revenue CAGR'],
+    technical:   'Price vs 50-day MA + RSI trend',
+    macro:       'Bank of Canada / Fed rate trajectory impact on sector',
+    risks:       ['Rate hike surprise', 'Revenue growth deceleration'],
+  },
+  medium: {
+    fundamental: ['ROE vs 12% threshold', 'ND/EBITDA vs 4x cap', 'FCF Yield vs Div Yield'],
+    technical:   'Price vs 200-day MA trend integrity',
+    macro:       'WCS/WTI spread (energy) or AISC cost curve (mining)',
+    risks:       ['EBITDA compression from input cost inflation', 'Dividend cut signal'],
+  },
+  long: {
+    fundamental: ['ROE compounding', 'ND/EBITDA deleveraging path', 'FCF reinvestment rate'],
+    technical:   '200-day MA slope + multi-year base formation',
+    macro:       'AI infrastructure moat / AISC reserve quality / Lassonde Curve positioning',
+    risks:       ['Competitive moat erosion', 'Jurisdiction/regulatory risk for resource names'],
+  },
+  ultra_long: {
+    fundamental: ['TAM expansion rate', 'FCF margin trajectory', 'ROE sustainability'],
+    technical:   'Decade-scale price channel and accumulation patterns',
+    macro:       'Demographics, CO2/capita trends, energy transition, resource lifecycle',
+    risks:       ['Structural demand shift (e.g. EV vs oil)', 'Population decline in core markets'],
+  },
+}
+
+function MetricChip({ label, value, good, warn, neutral }) {
+  const color = good ? '#2E865F' : warn ? '#FF0000' : neutral ? '#9CA3AF' : '#7a8796'
+  const bg    = good ? 'rgba(46,134,95,.1)' : warn ? 'rgba(255,0,0,.08)' : 'rgba(255,255,255,.05)'
+  return (
+    <div className="flex flex-col items-center px-3 py-2 rounded-lg"
+         style={{ background: bg, border: `1px solid ${color}22` }}>
+      <span className="text-xs font-medium mb-0.5" style={{ color: '#6b7280' }}>{label}</span>
+      <span className="text-sm font-bold" style={{ color }}>{value ?? '—'}</span>
+    </div>
+  )
+}
+
+function RiskBadge({ text }) {
+  return (
+    <div className="flex items-start gap-2 text-xs py-1.5 px-3 rounded-lg"
+         style={{ background: 'rgba(255,0,0,.06)', border: '1px solid rgba(255,0,0,.15)', color: '#f87171' }}>
+      <span className="mt-0.5 flex-shrink-0">⚠</span>
+      <span>{text}</span>
+    </div>
+  )
 }
 
 export default function StockCard({ stock, horizon }) {
+  const [expanded, setExpanded] = useState(false)
+
   const h      = stock.horizons?.[horizon]
   const rating = h?.rating || 'HOLD'
   const thesis = h?.thesis  || 'No thesis available.'
   const score  = h?.score   || 50
   const rs     = RATING_STYLES[rating] || RATING_STYLES.HOLD
+  const ctx    = HORIZON_CONTEXT[horizon] || HORIZON_CONTEXT.short
   const isUp   = stock.change_pct >= 0
+  const above200 = stock.price > stock.ma200
+
+  // Parse sector from thesis string e.g. "[CAD · Technology]"
+  const sectorMatch = thesis.match(/\[.*?·\s*(.*?)\]/)
+  const sector = sectorMatch ? sectorMatch[1] : stock.market
 
   return (
-    <div className="rounded-xl border transition-all duration-200 hover:scale-[1.01]"
-         style={{ background: 'var(--color-surface)', borderColor: rs.border }}>
-
-      {/* Shenanigan banner */}
+    <div
+      className="rounded-2xl transition-all duration-300 cursor-pointer select-none"
+      style={{
+        background:    'rgba(255,255,255,0.04)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        border:        `1px solid ${expanded ? rs.border : 'rgba(255,255,255,0.08)'}`,
+        boxShadow:     expanded
+          ? `0 0 24px ${rs.glow}, 0 4px 32px rgba(0,0,0,0.4)`
+          : '0 2px 12px rgba(0,0,0,0.3)',
+        transform:     'translateZ(0)',
+      }}
+      onClick={() => setExpanded(e => !e)}
+    >
+      {/* ── FORENSIC BANNER ── */}
       {stock.shenanigan_flag && (
-        <div className="rounded-t-xl px-4 py-2 text-xs font-semibold flex items-center gap-2"
-             style={{ background: 'rgba(245,158,11,.15)', color: '#f59e0b',
-                      borderBottom: '1px solid rgba(245,158,11,.3)' }}>
+        <div className="rounded-t-2xl px-4 py-2 text-xs font-semibold flex items-center gap-2"
+             style={{ background: 'rgba(245,158,11,.12)', color: '#f59e0b',
+                      borderBottom: '1px solid rgba(245,158,11,.2)' }}>
           🚩 Forensic Flag · {stock.shenanigan_detail}
         </div>
       )}
 
+      {/* ── COLLAPSED VIEW (always visible) ── */}
       <div className="p-4">
+        <div className="flex items-center justify-between gap-3">
 
-        {/* Row 1: ticker + rating badge */}
-        <div className="flex items-start justify-between gap-3 mb-3">
-          <div>
-            <div className="font-bold text-base tracking-tight"
-                 style={{ fontFamily: 'Cabinet Grotesk' }}>
-              {stock.ticker}
+          {/* Left: ticker + name + sector */}
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 font-bold text-xs"
+                 style={{ background: rs.bg, color: rs.color, border: `1px solid ${rs.border}44` }}>
+              {stock.ticker.replace('.TO','').slice(0,3)}
             </div>
-            <div className="text-xs mt-0.5 truncate max-w-[180px]"
-                 style={{ color: 'var(--color-hold)' }}>
-              {stock.name}
+            <div className="min-w-0">
+              <div className="font-bold text-sm tracking-tight leading-tight"
+                   style={{ fontFamily: 'Cabinet Grotesk, Inter, sans-serif' }}>
+                {stock.ticker}
+              </div>
+              <div className="text-xs truncate" style={{ color: '#6b7280', maxWidth: '140px' }}>
+                {stock.name}
+              </div>
+              <div className="text-xs mt-0.5" style={{ color: '#4b5563' }}>{sector}</div>
             </div>
           </div>
-          <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
-            <span className="text-xs font-bold px-3 py-1 rounded-full border"
-                  style={{ background: rs.bg, borderColor: rs.border, color: rs.color }}>
-              {rating}
-            </span>
-            <span className="text-xs font-medium" style={{ color: 'var(--color-hold)' }}>
-              Score {score}/100
-            </span>
+
+          {/* Center: price */}
+          <div className="text-center flex-shrink-0">
+            <div className="font-bold text-lg tabular-nums leading-tight"
+                 style={{ fontFamily: 'Cabinet Grotesk, Inter, sans-serif' }}>
+              {stock.currency === 'USD' ? '$' : 'C$'}{stock.price?.toLocaleString()}
+            </div>
+            <div className="text-xs font-semibold mt-0.5"
+                 style={{ color: isUp ? '#2E865F' : '#FF0000' }}>
+              {isUp ? '▲' : '▼'} {Math.abs(stock.change_pct)}%
+            </div>
           </div>
+
+          {/* Right: rating + caret */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="flex flex-col items-center">
+              <span className="text-xs font-bold px-3 py-1.5 rounded-full"
+                    style={{ background: rs.bg, color: rs.color,
+                             border: `1px solid ${rs.border}`,
+                             boxShadow: `0 0 8px ${rs.glow}` }}>
+                {rating}
+              </span>
+              <span className="text-xs mt-1" style={{ color: '#4b5563' }}>{score}/100</span>
+            </div>
+            <div className="transition-transform duration-300 ml-1"
+                 style={{ transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                          color: '#6b7280' }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </div>
+          </div>
+
         </div>
 
-        {/* Row 2: price + change */}
-        <div className="flex items-center gap-3 mb-3">
-          <span className="text-xl font-bold tabular-nums"
-                style={{ fontFamily: 'Cabinet Grotesk' }}>
-            {stock.currency === 'USD' ? '$' : 'C$'}{stock.price?.toLocaleString()}
-          </span>
-          <span className="text-sm font-semibold px-2 py-0.5 rounded-md"
-                style={{
-                  background: isUp ? 'rgba(34,197,94,.1)' : 'rgba(239,68,68,.1)',
-                  color:      isUp ? '#22c55e' : '#ef4444',
-                }}>
-            {isUp ? '▲' : '▼'} {Math.abs(stock.change_pct)}%
-          </span>
-        </div>
-
-        {/* Row 3: metric chips */}
-        <div className="flex flex-wrap gap-1.5 mb-3">
-          {stock.rsi != null && (
-            <Chip label="RSI" value={stock.rsi?.toFixed(0)}
-                  warn={stock.rsi > 70 || stock.rsi < 30} />
-          )}
-          {stock.roe != null && stock.roe !== 0 && (
-            <Chip label="ROE" value={`${stock.roe?.toFixed(1)}%`}
-                  good={stock.roe > 12} />
-          )}
-          {stock.nd_ebitda != null && stock.nd_ebitda < 90 && (
-            <Chip label="ND/EBITDA" value={`${stock.nd_ebitda?.toFixed(1)}x`}
-                  warn={stock.nd_ebitda > 4} />
-          )}
-          {stock.div_yield != null && stock.div_yield > 0 && (
-            <Chip label="Div" value={`${stock.div_yield?.toFixed(1)}%`} />
-          )}
-          {stock.revenue_cagr != null && stock.revenue_cagr !== 0 && (
-            <Chip label="CAGR" value={`${stock.revenue_cagr?.toFixed(1)}%`}
-                  good={stock.revenue_cagr > 10} />
-          )}
-        </div>
-
-        {/* Row 4: thesis */}
-        <div className="rounded-lg p-3 text-xs leading-relaxed"
-             style={{ background: 'rgba(255,255,255,.03)', color: '#9ba8b4' }}>
-          {thesis}
-        </div>
-
-        {/* Score bar */}
-        <div className="mt-3 h-1.5 rounded-full overflow-hidden"
+        {/* Score bar — always visible */}
+        <div className="mt-3 h-1 rounded-full overflow-hidden"
              style={{ background: 'rgba(255,255,255,.06)' }}>
           <div className="h-full rounded-full transition-all duration-700"
-               style={{ width: `${score}%`, background: rs.color }} />
+               style={{ width: `${score}%`,
+                        background: `linear-gradient(90deg, ${rs.border}88, ${rs.border})` }} />
         </div>
-
       </div>
-    </div>
-  )
-}
 
-function Chip({ label, value, good, warn }) {
-  const color = good ? '#22c55e' : warn ? '#f59e0b' : '#7a8796'
-  const bg    = good ? 'rgba(34,197,94,.08)' : warn ? 'rgba(245,158,11,.08)' : 'rgba(255,255,255,.04)'
-  return (
-    <span className="text-xs px-2 py-0.5 rounded-md font-medium"
-          style={{ background: bg, color }}>
-      {label} {value}
-    </span>
+      {/* ── EXPANDED VIEW ── */}
+      {expanded && (
+        <div className="px-4 pb-4 pt-1"
+             style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
+             onClick={e => e.stopPropagation()}>
+
+          {/* Section A: The Why */}
+          <div className="mb-4">
+            <div className="text-xs font-bold uppercase tracking-widest mb-2"
+                 style={{ color: rs.color }}>
+              § The Why
+            </div>
+            <p className="text-sm leading-relaxed" style={{ color: '#cbd5e1' }}>
+              {thesis.replace(/\[.*?\]\s*/, '').replace(/\s*\|.*$/, '')}
+            </p>
+          </div>
+
+          {/* Section B: Multi-Layer Analysis */}
+          <div className="mb-4">
+            <div className="text-xs font-bold uppercase tracking-widest mb-3"
+                 style={{ color: rs.color }}>
+              § Multi-Layer Analysis
+            </div>
+
+            {/* Fundamental metrics */}
+            <div className="text-xs font-semibold mb-2" style={{ color: '#6b7280' }}>
+              FUNDAMENTAL
+            </div>
+            <div className="grid grid-cols-3 gap-2 mb-3">
+              {stock.roe != null && stock.roe !== 0 && (
+                <MetricChip label="ROE" value={`${stock.roe?.toFixed(1)}%`}
+                            good={stock.roe > 12} warn={stock.roe < 8} />
+              )}
+              {stock.nd_ebitda != null && stock.nd_ebitda < 90 && (
+                <MetricChip label="ND/EBITDA" value={`${stock.nd_ebitda?.toFixed(1)}x`}
+                            good={stock.nd_ebitda < 2} warn={stock.nd_ebitda > 4} />
+              )}
+              {stock.fcf_yield != null && (
+                <MetricChip label="FCF Yield" value={`${stock.fcf_yield?.toFixed(1)}%`}
+                            good={stock.fcf_yield > stock.div_yield && stock.fcf_yield > 0}
+                            warn={stock.fcf_yield < stock.div_yield} />
+              )}
+              {stock.div_yield != null && stock.div_yield > 0 && (
+                <MetricChip label="Div Yield" value={`${stock.div_yield?.toFixed(1)}%`} neutral />
+              )}
+              {stock.revenue_cagr != null && stock.revenue_cagr !== 0 && (
+                <MetricChip label="Rev CAGR" value={`${stock.revenue_cagr?.toFixed(1)}%`}
+                            good={stock.revenue_cagr > 10} warn={stock.revenue_cagr < 0} />
+              )}
+            </div>
+
+            {/* Technical */}
+            <div className="text-xs font-semibold mb-2" style={{ color: '#6b7280' }}>
+              TECHNICAL
+            </div>
+            <div className="grid grid-cols-2 gap-2 mb-3">
+              <MetricChip label="RSI (14)" value={stock.rsi?.toFixed(0)}
+                          good={stock.rsi < 40} warn={stock.rsi > 70} neutral={stock.rsi >= 40 && stock.rsi <= 70} />
+              <MetricChip label="vs 200-MA" value={above200 ? 'Above ✓' : 'Below ✗'}
+                          good={above200} warn={!above200} />
+            </div>
+            <div className="text-xs rounded-lg px-3 py-2 mb-3"
+                 style={{ background: 'rgba(255,255,255,.03)', color: '#9ba8b4',
+                          border: '1px solid rgba(255,255,255,.06)' }}>
+              <span className="font-semibold" style={{ color: '#6b7280' }}>Signal: </span>
+              {ctx.technical}
+            </div>
+
+            {/* Macro/Micro */}
+            <div className="text-xs font-semibold mb-2" style={{ color: '#6b7280' }}>
+              MACRO / MICRO CATALYST
+            </div>
+            <div className="text-xs rounded-lg px-3 py-2"
+                 style={{ background: 'rgba(255,255,255,.03)', color: '#9ba8b4',
+                          border: '1px solid rgba(255,255,255,.06)' }}>
+              {ctx.macro}
+            </div>
+          </div>
+
+          {/* Section C: Risk Factors */}
+          <div>
+            <div className="text-xs font-bold uppercase tracking-widest mb-2"
+                 style={{ color: '#FF0000' }}>
+              § Risk Factors
+            </div>
+            <div className="flex flex-col gap-2">
+              {ctx.risks.map((r, i) => <RiskBadge key={i} text={r} />)}
+            </div>
+          </div>
+
+        </div>
+      )}
+    </div>
   )
 }
