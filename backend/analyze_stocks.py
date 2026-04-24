@@ -433,8 +433,9 @@ def analyze(tickers, market):
                 "div_yield":         divy,
                 "revenue_cagr":      cagr,
                 "market_cap_usd":    cap,
-                "shenanigan_flag":   shena["flag"],
+                                "shenanigan_flag":   shena["flag"],
                 "shenanigan_detail": shena["detail"],
+                "yahoo_url":         f"https://ca.finance.yahoo.com/quote/{ticker}",
                 "horizons":          horizons,
             })
             time.sleep(FETCH_DELAY)
