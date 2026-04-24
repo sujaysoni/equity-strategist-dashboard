@@ -1,59 +1,45 @@
-/* ── INTER FONT (ensure loaded for cards) ── */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-
-/* ── CARD GLASS BASELINE ── */
-.stock-glass {
-  background:              rgba(10, 12, 16, 0.75);
-  backdrop-filter:         blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border:                  1px solid rgba(255,255,255,0.08);
-}
 @import url('https://api.fontshare.com/v2/css?f[]=boska@400,500,700&f[]=general-sans@400,500,600,700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ── DESIGN TOKENS (Career Journey palette) ── */
+/* ══════════════════════════════════════════════════
+   DESIGN TOKENS — Career Journey palette
+   Light mode = warm parchment + gold
+   Dark mode  = rich espresso + gold
+══════════════════════════════════════════════════ */
 :root {
-  /* Backgrounds */
   --color-bg:              #F9F7F2;
   --color-surface:         #FDFCF9;
   --color-surface-2:       #F4F1EA;
   --color-surface-offset:  #EDE9DF;
   --color-surface-dynamic: #E4DFD3;
+  --color-divider:         #DDD9CF;
+  --color-border:          #D4CFBF;
 
-  /* Borders & dividers */
-  --color-divider:  #DDD9CF;
-  --color-border:   #D4CFBF;
+  --color-text:            #1C1712;
+  --color-text-muted:      #6B6455;
+  --color-text-faint:      #A8A090;
+  --color-text-inverse:    #F9F7F2;
 
-  /* Text */
-  --color-text:         #1C1712;
-  --color-text-muted:   #6B6455;
-  --color-text-faint:   #A8A090;
-  --color-text-inverse: #F9F7F2;
-
-  /* Primary (gold) */
   --color-primary:           #A57C22;
   --color-primary-hover:     #7D5E18;
   --color-primary-active:    #5E4510;
   --color-primary-highlight: #F0E5C0;
 
-  /* Navy accent (used for secondary labels) */
   --color-navy:       #162140;
   --color-navy-muted: #243458;
 
-  /* Semantic signal colours (keep functional) */
+  /* Signal colours — earthy tones for light bg */
   --color-buy:  #2E6B3E;
   --color-hold: #7A6B50;
   --color-sell: #A33A2A;
   --color-warn: #A57C22;
 
-  /* Typography */
   --font-display: 'Boska', Georgia, serif;
-  --font-body:    'General Sans', 'Helvetica Neue', sans-serif;
+  --font-body:    'General Sans', 'Helvetica Neue', Arial, sans-serif;
 
-  /* Radius */
   --radius-sm:   0.375rem;
   --radius-md:   0.5rem;
   --radius-lg:   0.75rem;
@@ -61,47 +47,48 @@
   --radius-2xl:  1.5rem;
   --radius-full: 9999px;
 
-  /* Shadows */
-  --shadow-sm: 0 1px 2px  rgba(28,23,18,0.06);
-  --shadow-md: 0 4px 16px rgba(28,23,18,0.09);
-  --shadow-lg: 0 12px 40px rgba(28,23,18,0.13);
+  --shadow-sm: 0 1px 3px  rgba(28,23,18,0.07);
+  --shadow-md: 0 4px 18px rgba(28,23,18,0.10);
+  --shadow-lg: 0 12px 44px rgba(28,23,18,0.14);
 
-  /* Transitions */
-  --transition-interactive: 180ms cubic-bezier(0.16,1,0.3,1);
+  --transition: 180ms cubic-bezier(0.16,1,0.3,1);
 }
 
-/* ── DARK MODE (mirrors Career Journey dark theme) ── */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-bg:              #130F0A;
-    --color-surface:         #1B1710;
-    --color-surface-2:       #221D15;
-    --color-surface-offset:  #1F1A12;
-    --color-surface-dynamic: #2A2418;
-    --color-divider:  #2E2820;
-    --color-border:   #3A3328;
-    --color-text:         #EDE7DA;
-    --color-text-muted:   #857C6C;
-    --color-text-faint:   #5A5348;
-    --color-text-inverse: #130F0A;
-    --color-primary:           #D4AA3A;
-    --color-primary-hover:     #E8C050;
-    --color-primary-active:    #F0CE60;
-    --color-primary-highlight: #3A2F10;
-    --color-navy:       #A0B4D4;
-    --color-navy-muted: #7898C0;
-    --shadow-sm: 0 1px 2px  rgba(0,0,0,0.2);
-    --shadow-md: 0 4px 16px rgba(0,0,0,0.35);
-    --shadow-lg: 0 12px 40px rgba(0,0,0,0.5);
-  }
+/* Dark mode — espresso palette */
+[data-theme="dark"] {
+  --color-bg:              #130F0A;
+  --color-surface:         #1B1710;
+  --color-surface-2:       #221D15;
+  --color-surface-offset:  #1F1A12;
+  --color-surface-dynamic: #2A2418;
+  --color-divider:         #2E2820;
+  --color-border:          #3A3328;
+
+  --color-text:            #EDE7DA;
+  --color-text-muted:      #857C6C;
+  --color-text-faint:      #5A5348;
+  --color-text-inverse:    #130F0A;
+
+  --color-primary:           #D4AA3A;
+  --color-primary-hover:     #E8C050;
+  --color-primary-active:    #F0CE60;
+  --color-primary-highlight: #3A2F10;
+
+  --color-navy:       #A0B4D4;
+  --color-navy-muted: #7898C0;
+
+  --color-buy:  #3A9E5F;
+  --color-hold: #9CA3AF;
+  --color-sell: #FF6B6B;
+  --color-warn: #D4AA3A;
+
+  --shadow-sm: 0 1px 3px  rgba(0,0,0,0.25);
+  --shadow-md: 0 4px 18px rgba(0,0,0,0.40);
+  --shadow-lg: 0 12px 44px rgba(0,0,0,0.55);
 }
 
 /* ── RESET ── */
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html {
   -webkit-font-smoothing:  antialiased;
@@ -111,86 +98,95 @@ html {
 }
 
 body {
-  font-family:      var(--font-body);
-  background-color: var(--color-bg);
+  font-family:       var(--font-body);
+  background-color:  var(--color-bg);
   background-image:
     radial-gradient(ellipse 60% 50% at 80% 0%,
-      color-mix(in oklch, var(--color-primary) 6%, transparent), transparent),
+      color-mix(in oklch, var(--color-primary) 5%, transparent), transparent),
     radial-gradient(ellipse 50% 40% at 10% 90%,
-      color-mix(in oklch, var(--color-primary) 4%, transparent), transparent);
+      color-mix(in oklch, var(--color-primary) 3%, transparent), transparent);
   background-attachment: fixed;
-  color:            var(--color-text);
-  min-height:       100dvh;
-  line-height:      1.6;
-  transition:       background-color 0.3s ease, color 0.3s ease;
+  color:             var(--color-text);
+  min-height:        100dvh;
+  line-height:       1.65;
+  transition:        background-color 0.3s ease, color 0.3s ease;
 }
 
-/* ── GLASSMORPHISM (adapted to light theme) ── */
+/* ── GLASSMORPHISM ── */
 .glassmorphism {
-  background:              color-mix(in oklch, var(--color-surface) 90%, transparent);
-  backdrop-filter:         blur(24px) saturate(160%);
-  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  background:              color-mix(in oklch, var(--color-surface) 88%, transparent);
+  backdrop-filter:         blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
   border:                  1px solid var(--color-border);
   box-shadow:              var(--shadow-sm);
 }
 
 /* ── SELECTION ── */
 ::selection {
-  background: color-mix(in oklch, var(--color-primary) 25%, transparent);
+  background: color-mix(in oklch, var(--color-primary) 22%, transparent);
   color:      var(--color-text);
 }
 
 /* ── SCROLLBAR ── */
 ::-webkit-scrollbar       { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: var(--color-surface-2); }
-::-webkit-scrollbar-thumb {
-  background:    var(--color-border);
-  border-radius: var(--radius-full);
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-primary);
-}
+::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: var(--radius-full); }
+::-webkit-scrollbar-thumb:hover { background: var(--color-primary); }
 
 /* ── ANIMATIONS ── */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+@keyframes fadeIn    { from { opacity: 0; }                         to { opacity: 1; } }
+@keyframes fadeInUp  { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pulseDot  { 0%,100% { transform:scale(1);   opacity:1;   } 50% { transform:scale(1.7); opacity:0.45; } }
+@keyframes pulseRing {
+  0%   { box-shadow: 0 0 0  0   color-mix(in oklch, var(--color-primary) 45%, transparent); }
+  70%  { box-shadow: 0 0 0 10px color-mix(in oklch, var(--color-primary) 0%,  transparent); }
+  100% { box-shadow: 0 0 0  0   color-mix(in oklch, var(--color-primary) 0%,  transparent); }
 }
-.fade-in { animation: fadeIn 0.35s ease both; }
+@keyframes spin { to { transform: rotate(360deg); } }
 
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.fade-in-up {
-  animation: fadeInUp 0.4s ease both;
-  animation-fill-mode: both;
-}
+.fade-in     { animation: fadeIn   0.35s ease both; }
+.fade-in-up  { animation: fadeInUp 0.4s  ease both; animation-fill-mode: both; }
+.animate-spin { animation: spin 0.9s linear infinite; }
+.pulse-ring  { animation: pulseRing 1.5s ease-out infinite; }
 
-@keyframes pulseDot {
-  0%, 100% { transform: scale(1);   opacity: 1;   }
-  50%       { transform: scale(1.6); opacity: 0.5; }
-}
 .pulse-dot {
   display:          inline-block;
-  width:            7px;
-  height:           7px;
+  width:            7px; height: 7px;
   border-radius:    50%;
   background-color: var(--color-primary);
   animation:        pulseDot 1.2s ease-in-out infinite;
 }
 
-@keyframes pulseRing {
-  0%   { transform: scale(1);    box-shadow: 0 0 0  0   color-mix(in oklch, var(--color-primary) 50%, transparent); }
-  70%  { transform: scale(1.04); box-shadow: 0 0 0 10px color-mix(in oklch, var(--color-primary) 0%,  transparent); }
-  100% { transform: scale(1);    box-shadow: 0 0 0  0   color-mix(in oklch, var(--color-primary) 0%,  transparent); }
-}
-.pulse-ring { animation: pulseRing 1.5s ease-out infinite; }
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-.animate-spin { animation: spin 0.9s linear infinite; }
-
 /* ── UTILITY ── */
 .tabular { font-variant-numeric: tabular-nums; }
+
+/* ── THEME TOGGLE BUTTON ── */
+.btn-theme {
+  width: 38px; height: 38px;
+  border-radius: var(--radius-full);
+  display: flex; align-items: center; justify-content: center;
+  background:   var(--color-surface-offset);
+  border:       1px solid var(--color-border);
+  color:        var(--color-text-muted);
+  cursor:       pointer;
+  transition:   background var(--transition), color var(--transition), border-color var(--transition);
+  flex-shrink:  0;
+}
+.btn-theme:hover {
+  background: var(--color-primary-highlight);
+  color:      var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+/* ── STOCK CARD BASE ── */
+.stock-card {
+  border-radius:   var(--radius-2xl);
+  background:      var(--color-surface);
+  border:          1px solid var(--color-border);
+  box-shadow:      var(--shadow-sm);
+  transition:      box-shadow var(--transition), border-color var(--transition), transform var(--transition);
+}
+.stock-card:hover {
+  box-shadow:    var(--shadow-md);
+  transform:     translateY(-1px);
+}
