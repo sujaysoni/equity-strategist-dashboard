@@ -1,22 +1,89 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-@import url('https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@700,800&display=swap');
+@import url('https://api.fontshare.com/v2/css?f[]=boska@400,500,700&f[]=general-sans@400,500,600,700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ── DESIGN TOKENS ── */
+/* ── DESIGN TOKENS (Career Journey palette) ── */
 :root {
-  --color-bg:       #040507;
-  --color-surface:  #0b0d10;
-  --color-border:   rgba(255,255,255,0.07);
-  --color-primary:  #00d4aa;
-  --color-buy:      #2E865F;
-  --color-hold:     #9CA3AF;
-  --color-sell:     #FF0000;
-  --color-warn:     #f59e0b;
-  --font-display:   'Cabinet Grotesk', 'Inter', sans-serif;
-  --font-body:      'Inter', sans-serif;
+  /* Backgrounds */
+  --color-bg:              #F9F7F2;
+  --color-surface:         #FDFCF9;
+  --color-surface-2:       #F4F1EA;
+  --color-surface-offset:  #EDE9DF;
+  --color-surface-dynamic: #E4DFD3;
+
+  /* Borders & dividers */
+  --color-divider:  #DDD9CF;
+  --color-border:   #D4CFBF;
+
+  /* Text */
+  --color-text:         #1C1712;
+  --color-text-muted:   #6B6455;
+  --color-text-faint:   #A8A090;
+  --color-text-inverse: #F9F7F2;
+
+  /* Primary (gold) */
+  --color-primary:           #A57C22;
+  --color-primary-hover:     #7D5E18;
+  --color-primary-active:    #5E4510;
+  --color-primary-highlight: #F0E5C0;
+
+  /* Navy accent (used for secondary labels) */
+  --color-navy:       #162140;
+  --color-navy-muted: #243458;
+
+  /* Semantic signal colours (keep functional) */
+  --color-buy:  #2E6B3E;
+  --color-hold: #7A6B50;
+  --color-sell: #A33A2A;
+  --color-warn: #A57C22;
+
+  /* Typography */
+  --font-display: 'Boska', Georgia, serif;
+  --font-body:    'General Sans', 'Helvetica Neue', sans-serif;
+
+  /* Radius */
+  --radius-sm:   0.375rem;
+  --radius-md:   0.5rem;
+  --radius-lg:   0.75rem;
+  --radius-xl:   1rem;
+  --radius-2xl:  1.5rem;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px  rgba(28,23,18,0.06);
+  --shadow-md: 0 4px 16px rgba(28,23,18,0.09);
+  --shadow-lg: 0 12px 40px rgba(28,23,18,0.13);
+
+  /* Transitions */
+  --transition-interactive: 180ms cubic-bezier(0.16,1,0.3,1);
+}
+
+/* ── DARK MODE (mirrors Career Journey dark theme) ── */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg:              #130F0A;
+    --color-surface:         #1B1710;
+    --color-surface-2:       #221D15;
+    --color-surface-offset:  #1F1A12;
+    --color-surface-dynamic: #2A2418;
+    --color-divider:  #2E2820;
+    --color-border:   #3A3328;
+    --color-text:         #EDE7DA;
+    --color-text-muted:   #857C6C;
+    --color-text-faint:   #5A5348;
+    --color-text-inverse: #130F0A;
+    --color-primary:           #D4AA3A;
+    --color-primary-hover:     #E8C050;
+    --color-primary-active:    #F0CE60;
+    --color-primary-highlight: #3A2F10;
+    --color-navy:       #A0B4D4;
+    --color-navy-muted: #7898C0;
+    --shadow-sm: 0 1px 2px  rgba(0,0,0,0.2);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.35);
+    --shadow-lg: 0 12px 40px rgba(0,0,0,0.5);
+  }
 }
 
 /* ── RESET ── */
@@ -30,57 +97,69 @@ html {
   -webkit-font-smoothing:  antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering:          optimizeLegibility;
+  scroll-behavior:         smooth;
 }
 
 body {
   font-family:      var(--font-body);
   background-color: var(--color-bg);
   background-image:
-    radial-gradient(ellipse 120% 60% at 50% -5%,  rgba(0,212,170,0.06) 0%, transparent 65%),
-    radial-gradient(ellipse 60%  40% at 85% 80%,  rgba(96,165,250,0.04) 0%, transparent 60%),
-    radial-gradient(ellipse 50%  30% at 10% 90%,  rgba(46,134,95,0.03)  0%, transparent 60%);
+    radial-gradient(ellipse 60% 50% at 80% 0%,
+      color-mix(in oklch, var(--color-primary) 6%, transparent), transparent),
+    radial-gradient(ellipse 50% 40% at 10% 90%,
+      color-mix(in oklch, var(--color-primary) 4%, transparent), transparent);
   background-attachment: fixed;
-  color:            #e2e8ef;
+  color:            var(--color-text);
   min-height:       100dvh;
+  line-height:      1.6;
+  transition:       background-color 0.3s ease, color 0.3s ease;
 }
 
-/* ── GLASSMORPHISM ── */
+/* ── GLASSMORPHISM (adapted to light theme) ── */
 .glassmorphism {
-  background:              rgba(10, 12, 16, 0.75);
-  backdrop-filter:         blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border:                  1px solid rgba(255,255,255,0.07);
+  background:              color-mix(in oklch, var(--color-surface) 90%, transparent);
+  backdrop-filter:         blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border:                  1px solid var(--color-border);
+  box-shadow:              var(--shadow-sm);
 }
 
-/* ── FADE-IN (horizon toggle swap) ── */
+/* ── SELECTION ── */
+::selection {
+  background: color-mix(in oklch, var(--color-primary) 25%, transparent);
+  color:      var(--color-text);
+}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar       { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--color-surface-2); }
+::-webkit-scrollbar-thumb {
+  background:    var(--color-border);
+  border-radius: var(--radius-full);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary);
+}
+
+/* ── ANIMATIONS ── */
 @keyframes fadeIn {
   from { opacity: 0; }
   to   { opacity: 1; }
 }
-.fade-in {
-  animation: fadeIn 0.35s ease both;
-}
+.fade-in { animation: fadeIn 0.35s ease both; }
 
-/* ── FADE-IN-UP (staggered cards) ── */
 @keyframes fadeInUp {
-  from {
-    opacity:   0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity:   1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 .fade-in-up {
-  animation:      fadeInUp 0.4s ease both;
+  animation: fadeInUp 0.4s ease both;
   animation-fill-mode: both;
 }
 
-/* ── PULSE DOT (scanning state) ── */
 @keyframes pulseDot {
-  0%, 100% { transform: scale(1);   opacity: 1;    }
-  50%       { transform: scale(1.6); opacity: 0.5;  }
+  0%, 100% { transform: scale(1);   opacity: 1;   }
+  50%       { transform: scale(1.6); opacity: 0.5; }
 }
 .pulse-dot {
   display:          inline-block;
@@ -91,40 +170,17 @@ body {
   animation:        pulseDot 1.2s ease-in-out infinite;
 }
 
-/* ── PULSE RING (refresh button scanning) ── */
 @keyframes pulseRing {
-  0%   { transform: scale(1);   box-shadow: 0 0 0  0   rgba(0,212,170,0.5); }
-  70%  { transform: scale(1.04); box-shadow: 0 0 0 10px rgba(0,212,170,0);  }
-  100% { transform: scale(1);   box-shadow: 0 0 0  0   rgba(0,212,170,0);  }
+  0%   { transform: scale(1);    box-shadow: 0 0 0  0   color-mix(in oklch, var(--color-primary) 50%, transparent); }
+  70%  { transform: scale(1.04); box-shadow: 0 0 0 10px color-mix(in oklch, var(--color-primary) 0%,  transparent); }
+  100% { transform: scale(1);    box-shadow: 0 0 0  0   color-mix(in oklch, var(--color-primary) 0%,  transparent); }
 }
-.pulse-ring {
-  animation: pulseRing 1.5s ease-out infinite;
-}
+.pulse-ring { animation: pulseRing 1.5s ease-out infinite; }
 
-/* ── SPIN ── */
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
-.animate-spin {
-  animation: spin 0.9s linear infinite;
-}
+.animate-spin { animation: spin 0.9s linear infinite; }
 
-/* ── SCROLLBAR ── */
-::-webkit-scrollbar       { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb {
-  background:    rgba(255,255,255,0.1);
-  border-radius: 99px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(255,255,255,0.18);
-}
-
-/* ── SELECTION ── */
-::selection {
-  background: rgba(0,212,170,0.25);
-  color:      #fff;
-}
-
-/* ── UTILITY: tabular numbers ── */
+/* ── UTILITY ── */
 .tabular { font-variant-numeric: tabular-nums; }
