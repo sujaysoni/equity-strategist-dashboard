@@ -1,0 +1,41 @@
+name: Update Stock Recommendations
+
+on:
+  schedule:
+    - cron: '0 11 * * 1-5'   # 11:00 UTC = 6 AM EST, weekdays
+  repository_dispatch:
+    types: [refresh-analysis]
+  workflow_dispatch:
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run analysis
+        env:
+          POLYGON_API_KEY:   ${{ secrets.POLYGON_API_KEY }}
+          ALPHA_VANTAGE_KEY: ${{ secrets.ALPHA_VANTAGE_KEY }}
+        run: python backend/analyze_stocks.py
+
+      - name: Commit updated recommendations
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name  "github-actions[bot]"
+          git add public/recommendations.json
+          git diff --staged --quiet || git commit -m "chore: update recommendations $(date -u +'%Y-%m-%d %H:%M UTC')"
+          git push
