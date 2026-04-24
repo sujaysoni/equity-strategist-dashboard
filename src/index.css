@@ -1,3 +1,13 @@
+/* ── INTER FONT (ensure loaded for cards) ── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+/* ── CARD GLASS BASELINE ── */
+.stock-glass {
+  background:              rgba(10, 12, 16, 0.75);
+  backdrop-filter:         blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border:                  1px solid rgba(255,255,255,0.08);
+}
 @import url('https://api.fontshare.com/v2/css?f[]=boska@400,500,700&f[]=general-sans@400,500,600,700&display=swap');
 
 @tailwind base;
@@ -184,13 +194,3 @@ body {
 
 /* ── UTILITY ── */
 .tabular { font-variant-numeric: tabular-nums; }
-/* ── INTER FONT (ensure loaded for cards) ── */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-
-/* ── CARD GLASS BASELINE ── */
-.stock-glass {
-  background:              rgba(10, 12, 16, 0.75);
-  backdrop-filter:         blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border:                  1px solid rgba(255,255,255,0.08);
-}
