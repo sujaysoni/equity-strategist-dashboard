@@ -725,11 +725,42 @@ def _usd_seed():
 
 def _cad_seed():
     return [
-        "RY.TO", "TD.TO", "BNS.TO", "BMO.TO", "CM.TO",
-        "CNR.TO", "CP.TO", "ENB.TO", "TRP.TO", "SU.TO",
-        "ABX.TO", "WPM.TO", "AEM.TO", "K.TO", "FM.TO",
-        "SLF.TO", "MFC.TO", "GWO.TO", "IAG.TO", "POW.TO",
-        "ATD.TO", "MRU.TO", "L.TO", "EMP-A.TO", "DOL.TO",
+        # Big 6 Banks
+        "RY.TO", "TD.TO", "BNS.TO", "BMO.TO", "CM.TO", "NA.TO",
+        # Insurance
+        "SLF.TO", "MFC.TO", "GWO.TO", "IAG.TO", "IFC.TO", "FFH.TO",
+        # Energy — Integrateds & Pipelines
+        "ENB.TO", "TRP.TO", "SU.TO", "CNQ.TO", "CVE.TO", "IMO.TO",
+        "ARX.TO", "BTE.TO", "PEY.TO", "ERF.TO", "WCP.TO", "VET.TO",
+        "PPL.TO", "KEY.TO", "GEI.TO", "SPB.TO", "PKI.TO",
+        # Gold & Precious Metals
+        "ABX.TO", "WPM.TO", "AEM.TO", "K.TO", "AGI.TO", "DPM.TO",
+        "OR.TO", "FNV.TO", "ELD.TO", "IMG.TO", "SSL.TO", "MUX.TO",
+        # Base Metals & Diversified Mining
+        "FM.TO", "CS.TO", "LUN.TO", "HBM.TO", "ERO.TO", "TDG.TO",
+        "CCO.TO", "DML.TO", "NXE.TO",
+        # Railways & Industrials
+        "CNR.TO", "CP.TO", "CAE.TO", "TIH.TO", "WSP.TO", "STN.TO",
+        "BDI.TO", "ATS.TO", "MDA.TO",
+        # Telecom
+        "BCE.TO", "T.TO", "RCI-B.TO", "QBR-B.TO",
+        # REITs
+        "RioCan.TO", "HR.UN.TO", "AP.UN.TO", "CHP.UN.TO", "CAR.UN.TO",
+        "BEI.UN.TO", "GRT.UN.TO", "CSH.UN.TO", "D.UN.TO", "FCR.UN.TO",
+        # Retail & Consumer
+        "ATD.TO", "MRU.TO", "L.TO", "EMP-A.TO", "DOL.TO", "CTC-A.TO",
+        "GIL.TO", "GOOS.TO", "ATZ.TO",
+        # Utilities
+        "FTS.TO", "EMA.TO", "AQN.TO", "ACO-X.TO", "CU.TO", "BEP-UN.TO",
+        "NPI.TO", "INE.TO", "H.TO",
+        # Financials / Asset Managers
+        "POW.TO", "IGM.TO", "BAM.TO", "BN.TO", "GS.TO", "FSZ.TO",
+        "EQB.TO", "CWB.TO",
+        # Technology & Software
+        "CSU.TO", "DSG.TO", "SHOP.TO", "DCBO.TO", "ENGH.TO", "KXS.TO",
+        "LSPD.TO", "NVEI.TO", "TRMK.TO",
+        # Agriculture / Other
+        "AFN.TO", "NTR.TO", "CF.TO",
     ]
 
 
