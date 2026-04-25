@@ -11,6 +11,9 @@ const HORIZONS = [
   { key: 'ultra_long',  label: 'Ultra Long',  sub: '0–360m' },
 ]
 
+// Number of stocks shown per market column
+const TOP_N = 30
+
 function sortStocks(stocks, horizon) {
   return [...stocks].sort((a, b) => {
     const ratingOrder = { BUY: 0, HOLD: 1, SELL: 2 }
@@ -109,10 +112,14 @@ export default function App() {
     setTimeout(() => { fetchData(); setRefreshing(false); setScanning(false) }, 4000)
   }
 
-  const cad = useMemo(() => sortStocks(data?.cad || [], horizon), [data, horizon])
-  const usd = useMemo(() => sortStocks(data?.usd || [], horizon), [data, horizon])
+  // Sort then slice to TOP_N — ranked highest score → lowest
+  const cad = useMemo(() => sortStocks(data?.cad || [], horizon).slice(0, TOP_N), [data, horizon])
+  const usd = useMemo(() => sortStocks(data?.usd || [], horizon).slice(0, TOP_N), [data, horizon])
+
   const cadBuys    = cad.filter(s => s.horizons?.[horizon]?.rating === 'BUY').length
   const usdBuys    = usd.filter(s => s.horizons?.[horizon]?.rating === 'BUY').length
+  const cadTotal   = data?.cad?.length || 0
+  const usdTotal   = data?.usd?.length || 0
   const isUltraLong = horizon === 'ultra_long'
 
   return (
@@ -217,8 +224,8 @@ export default function App() {
             </div>
             <div style={{ display: 'flex', gap: '12px' }}>
               {[
-                { label: 'CAD BUYs', value: cadBuys, color: 'var(--color-buy)' },
-                { label: 'USD BUYs', value: usdBuys, color: 'var(--color-navy)' },
+                { label: `CAD BUYs  (top ${TOP_N} of ${cadTotal})`, value: cadBuys, color: 'var(--color-buy)' },
+                { label: `USD BUYs  (top ${TOP_N} of ${usdTotal})`, value: usdBuys, color: 'var(--color-navy)' },
               ].map(({ label, value, color }) => (
                 <div key={label} style={{
                   fontSize: '0.75rem', fontFamily: 'var(--font-body)',
@@ -306,6 +313,17 @@ export default function App() {
                 }}>
                   TSX · TSXV
                 </span>
+                {/* Rank badge */}
+                <span style={{
+                  fontSize: '0.68rem', fontWeight: 600, padding: '2px 8px',
+                  borderRadius: 'var(--radius-full)',
+                  background: 'var(--color-surface-offset)',
+                  color: 'var(--color-text-muted)',
+                  border: '1px solid var(--color-border)',
+                  marginLeft: 'auto',
+                }}>
+                  Top {Math.min(TOP_N, cad.length)} of {cadTotal}
+                </span>
               </div>
               <div
                 key={`cad-${fadeKey}`}
@@ -313,8 +331,8 @@ export default function App() {
               >
                 {cad.length === 0
                   ? <EmptyState />
-                  : cad.map(s => (
-                      <StockCard key={s.ticker} stock={s} horizon={horizon} darkMode={darkMode} />
+                  : cad.map((s, i) => (
+                      <StockCard key={s.ticker} stock={s} horizon={horizon} darkMode={darkMode} rank={i + 1} />
                     ))
                 }
               </div>
@@ -340,6 +358,17 @@ export default function App() {
                 }}>
                   NYSE · NASDAQ
                 </span>
+                {/* Rank badge */}
+                <span style={{
+                  fontSize: '0.68rem', fontWeight: 600, padding: '2px 8px',
+                  borderRadius: 'var(--radius-full)',
+                  background: 'var(--color-surface-offset)',
+                  color: 'var(--color-text-muted)',
+                  border: '1px solid var(--color-border)',
+                  marginLeft: 'auto',
+                }}>
+                  Top {Math.min(TOP_N, usd.length)} of {usdTotal}
+                </span>
               </div>
               <div
                 key={`usd-${fadeKey}`}
@@ -347,8 +376,8 @@ export default function App() {
               >
                 {usd.length === 0
                   ? <EmptyState />
-                  : usd.map(s => (
-                      <StockCard key={s.ticker} stock={s} horizon={horizon} darkMode={darkMode} />
+                  : usd.map((s, i) => (
+                      <StockCard key={s.ticker} stock={s} horizon={horizon} darkMode={darkMode} rank={i + 1} />
                     ))
                 }
               </div>
