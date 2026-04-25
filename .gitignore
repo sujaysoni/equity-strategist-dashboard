@@ -6,7 +6,6 @@ __pycache__/
 .venv
 venv/
 *.egg-info/
-dist/
 build/
 .pytest_cache/
 
@@ -22,6 +21,10 @@ dist/
 .env.production
 secrets.json
 api_keys.json
+
+# TSX ticker cache (auto-generated — committed by CI only)
+# Comment out the line below if you want the cache tracked in git
+# backend/tsx_tickers_cache.txt
 
 # Editor
 .vscode/

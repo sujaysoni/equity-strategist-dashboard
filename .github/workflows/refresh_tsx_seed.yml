@@ -1,0 +1,38 @@
+name: Refresh TSX Ticker Seed
+
+# Runs on the 1st of every month at 8:00 AM UTC
+# Also triggerable manually from the Actions tab
+on:
+  schedule:
+    - cron: '0 8 1 * *'
+  workflow_dispatch:
+
+jobs:
+  refresh-seed:
+    runs-on:         ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Fetch full TSX listing from TMX API
+        run: python backend/fetch_tsx_tickers.py
+
+      - name: Commit refreshed _cad_seed() and ticker cache
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name  "github-actions[bot]"
+          git add backend/analyze_stocks.py backend/tsx_tickers_cache.txt
+          git diff --staged --quiet || git commit -m "chore: refresh TSX ticker seed $(date -u +'%Y-%m-%d')"
+          git push

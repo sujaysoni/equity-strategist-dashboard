@@ -10,7 +10,7 @@ on:
 jobs:
   analyze:
     runs-on:         ubuntu-latest
-    timeout-minutes: 350          # ~6 hours — enough for 300 tickers at 1.2s each
+    timeout-minutes: 360          # 6 hours — covers 1700 CAD + USD tickers
     permissions:
       contents: write
 
@@ -26,16 +26,19 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Refresh TSX ticker seed from TMX API
+        run: python backend/fetch_tsx_tickers.py
+
       - name: Run full universe analysis
         env:
           POLYGON_API_KEY:   ${{ secrets.POLYGON_API_KEY }}
           ALPHA_VANTAGE_KEY: ${{ secrets.ALPHA_VANTAGE_KEY }}
         run: python backend/analyze_stocks.py
 
-      - name: Commit updated recommendations
+      - name: Commit updated recommendations & seed
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name  "github-actions[bot]"
-          git add public/recommendations.json
+          git add public/recommendations.json backend/analyze_stocks.py
           git diff --staged --quiet || git commit -m "chore: update recommendations $(date -u +'%Y-%m-%d %H:%M UTC')"
           git push
