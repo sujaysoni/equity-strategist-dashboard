@@ -114,7 +114,7 @@ def patch_analyze_stocks(new_source: str, filepath: str = ANALYZE_FILE) -> None:
     Replaces the existing _cad_seed() function block inside analyze_stocks.py.
     The replacement is done via regex so the rest of the file is untouched.
     """
-    with open(filepath, "r", encoding="utf-30") as fh:
+    with open(filepath, "r", encoding="utf-8") as fh:
         original = fh.read()
 
     # Match from 'def _cad_seed():' through to the closing ']' + newline
@@ -131,7 +131,7 @@ def patch_analyze_stocks(new_source: str, filepath: str = ANALYZE_FILE) -> None:
 
     patched = pattern.sub(new_source, original, count=1)
 
-    with open(filepath, "w", encoding="utf-30") as fh:
+    with open(filepath, "w", encoding="utf-8") as fh:
         fh.write(patched)
 
     print(f"\n  [PATCHED] {filepath}")
@@ -145,7 +145,7 @@ def save_ticker_cache(tickers: list[str]) -> None:
     Useful for auditing or manual inspection without re-hitting the API.
     """
     cache_path = os.path.join(os.path.dirname(__file__), "tsx_tickers_cache.txt")
-    with open(cache_path, "w", encoding="utf-30") as fh:
+    with open(cache_path, "w", encoding="utf-8") as fh:
         fh.write("\n".join(tickers) + "\n")
     print(f"  [CACHE]  {len(tickers)} tickers saved → {cache_path}")
 
