@@ -1,959 +1,419 @@
-# backend/analyze_stocks.py
-# Writes public/recommendations.json consumed by the React dashboard
+#!/usr/bin/env python3
+"""
+Equity Strategist Dashboard — Analysis Engine v3
 
-import os
-import json
+For each ticker (CAD & USD) this script:
+  1. Fetches yfinance fundamentals + price history
+  2. Classifies cap tier: small / mid / large / mega
+  3. Scores across 5 time horizons with separate weights
+  4. Detects insider-buy signals via yfinance major_holders proxy
+  5. Adds a headline sentiment stub (upgradable with a live news API)
+  6. Writes public/recommendations.json
+
+Output schema per ticker:
+  {
+    ticker, name, exchange, sector, cap_tier,
+    market_cap_usd, roe, fcf_yield, div_yield, debt_ebitda,
+    rsi_14, above_50ma, above_200ma,
+    insider_buy_signal,          # bool
+    shenanigan_flag,             # bool
+    horizons: {
+      ultra_short: { rating, score, thesis, risk },
+      short:       { rating, score, thesis, risk },
+      medium:      { rating, score, thesis, risk },
+      long:        { rating, score, thesis, risk },
+      ultra_long:  { rating, score, thesis, risk },
+    }
+  }
+"""
+
+import os, json, math, time, traceback
 import yfinance as yf
 import pandas as pd
 from datetime import datetime, timezone
 
+# ── Constants ─────────────────────────────────────────────────────────────────
 
-# ── Seed Lists ────────────────────────────────────────────────────────────────
+OUT_PATH   = os.path.join(os.path.dirname(__file__), "..", "public", "recommendations.json")
+CAD_CACHE  = os.path.join(os.path.dirname(__file__), "tsx_tickers_cache.txt")
 
-def _usd_seed():
+# Cap-tier thresholds in USD
+MEGA_CAP   = 200e9
+LARGE_CAP  = 10e9
+MID_CAP    = 2e9
+# < MID_CAP → small
+
+HORIZONS = ["ultra_short", "short", "medium", "long", "ultra_long"]
+HORIZON_LABELS = {
+    "ultra_short": "0-3m",
+    "short":       "0-12m",
+    "medium":      "0-36m",
+    "long":        "0-60m",
+    "ultra_long":  "0-360m",
+}
+
+# How each factor is weighted per horizon (weights sum to ~1)
+# Keys: roe, fcf, debt, rsi, ma50, ma200, insider, shenanigan(neg), moat
+HORIZON_WEIGHTS = {
+    "ultra_short": dict(roe=0.05, fcf=0.05, debt=0.05, rsi=0.40, ma50=0.25, ma200=0.10, insider=0.10, shenanigan=-0.30, moat=0.00),
+    "short":       dict(roe=0.15, fcf=0.15, debt=0.10, rsi=0.20, ma50=0.15, ma200=0.10, insider=0.10, shenanigan=-0.20, moat=0.05),
+    "medium":      dict(roe=0.20, fcf=0.20, debt=0.15, rsi=0.10, ma50=0.10, ma200=0.10, insider=0.05, shenanigan=-0.15, moat=0.10),
+    "long":        dict(roe=0.25, fcf=0.25, debt=0.15, rsi=0.05, ma50=0.05, ma200=0.10, insider=0.05, shenanigan=-0.10, moat=0.10),
+    "ultra_long":  dict(roe=0.20, fcf=0.15, debt=0.10, rsi=0.00, ma50=0.00, ma200=0.05, insider=0.05, shenanigan=-0.05, moat=0.45),
+}
+
+BATCH_SIZE = 50      # tickers per yfinance batch
+SLEEP_S    = 2       # pause between batches (rate-limit courtesy)
+MAX_TICKERS_PER_SIDE = 500   # cap to keep GH Actions within 6 h
+
+
+# ── Seed lists ────────────────────────────────────────────────────────────────
+
+def _load_cad_tickers():
+    if os.path.exists(CAD_CACHE):
+        with open(CAD_CACHE) as f:
+            tickers = [ln.strip() for ln in f if ln.strip() and not ln.startswith("#")]
+        if tickers:
+            return tickers[:MAX_TICKERS_PER_SIDE]
+    # Hardcoded fallback — top 60 liquid TSX names
     return [
-        "A", "AA", "AACB", "AACBR", "AACBU", "AACG", "AACI", "AACIU", "AACIW", "AACO",
-        "AACOU", "AACOW", "AACPU", "AAL", "AAME", "AAMI", "AAOI", "AAON", "AAP", "AAPG",
-        "AAPL", "AARD", "AAT", "AAUC", "AB", "ABAT", "ABBV", "ABCB", "ABCL", "ABEO",
-        "ABEV", "ABG", "ABLV", "ABLVW", "ABM", "ABNB", "ABOS", "ABR", "ABR^D", "ABR^E",
-        "ABR^F", "ABSI", "ABT", "ABTC", "ABTS", "ABUS", "ABVC", "ABVE", "ABVEW", "ABVX",
-        "ABX", "ABXL", "ACA", "ACAA", "ACAAU", "ACAAW", "ACAD", "ACB", "ACCL", "ACCO",
-        "ACCS", "ACDC", "ACEL", "ACET", "ACFN", "ACGCU", "ACGL", "ACGLN", "ACGLO", "ACH",
-        "ACHC", "ACHR", "ACHV", "ACI", "ACIC", "ACIU", "ACIW", "ACLS", "ACLX", "ACM",
-        "ACMR", "ACN", "ACNB", "ACNT", "ACOG", "ACON", "ACONW", "ACP", "ACP^A", "ACR",
-        "ACR^C", "ACR^D", "ACRE", "ACRS", "ACRV", "ACT", "ACTG", "ACTU", "ACU", "ACV",
-        "ACVA", "ACXP", "AD", "ADAC", "ADACW", "ADAG", "ADAM", "ADAMG", "ADAMH", "ADAMI",
-        "ADAML", "ADAMM", "ADAMN", "ADAMO", "ADAMZ", "ADBE", "ADC", "ADC^A", "ADCT", "ADEA",
-        "ADGM", "ADI", "ADIL", "ADM", "ADMA", "ADNT", "ADP", "ADPT", "ADSE", "ADSEW",
-        "ADSK", "ADT", "ADTN", "ADTX", "ADUR", "ADUS", "ADV", "ADVB", "ADX", "ADXN",
-        "AEAQW", "AEBI", "AEC", "AEE", "AEF", "AEFC", "AEG", "AEHL", "AEHR", "AEI",
-        "AEIS", "AEM", "AEMD", "AENT", "AENTW", "AEO", "AEON", "AEP", "AER", "AERO",
-        "AERT", "AERTW", "AES", "AESI", "AEVA", "AEXA", "AEYE", "AFB", "AFBI", "AFCG",
-        "AFG", "AFGB", "AFGC", "AFGD", "AFGE", "AFJK", "AFJKR", "AFJKU", "AFL", "AFRI",
-        "AFRIW", "AFRM", "AFYA", "AG", "AGAE", "AGBK", "AGCC", "AGCO", "AGD", "AGEN",
-        "AGH", "AGI", "AGIG", "AGIO", "AGL", "AGM", "AGM^D", "AGM^E", "AGM^F", "AGM^G",
-        "AGM^H", "AGMB", "AGMH", "AGNC", "AGNCL", "AGNCM", "AGNCN", "AGNCO", "AGNCP", "AGNCZ",
-        "AGO", "AGPU", "AGRO", "AGRZ", "AGX", "AGYS", "AHCO", "AHG", "AHL^D", "AHL^E",
-        "AHL^F", "AHMA", "AHR", "AHRT", "AHRT^A", "AHT", "AHT^D", "AHT^F", "AHT^G", "AHT^H",
-        "AHT^I", "AI", "AIB", "AIDX", "AIFF", "AIFU", "AIG", "AIHS", "AII", "AIIA",
-        "AIIO", "AIIOW", "AIM", "AIMD", "AIMDW", "AIN", "AIO", "AIOS", "AIOT", "AIP",
-        "AIR", "AIRE", "AIRG", "AIRI", "AIRJ", "AIRJW", "AIRO", "AIRS", "AIRT", "AIRTP",
-        "AISP", "AISPW", "AIT", "AIV", "AIXC", "AIXI", "AIZ", "AIZN", "AJG", "AKA",
-        "AKAM", "AKAN", "AKBA", "AKO/A", "AKO/B", "AKR", "AKTS", "AKTX", "ALAB", "ALAR",
-        "ALB", "ALB^A", "ALBT", "ALC", "ALCO", "ALCY", "ALCYU", "ALCYW", "ALDF", "ALDFU",
-        "ALDFW", "ALDX", "ALEC", "ALF", "ALFUU", "ALG", "ALGM", "ALGN", "ALGS", "ALGT",
-        "ALH", "ALHC", "ALIS", "ALISR", "ALISU", "ALIT", "ALK", "ALKS", "ALKT", "ALL",
-        "ALL^B", "ALL^H", "ALL^I", "ALL^J", "ALLE", "ALLO", "ALLR", "ALLT", "ALLY", "ALM",
-        "ALMR", "ALMS", "ALMU", "ALNT", "ALNY", "ALOT", "ALOV", "ALOVU", "ALOVW", "ALOY",
-        "ALP", "ALPS", "ALRM", "ALRS", "ALSN", "ALT", "ALTG", "ALTG^A", "ALTI", "ALTO",
-        "ALTS", "ALV", "ALVO", "ALVOW", "ALX", "ALXO", "ALZN", "AM", "AMAL", "AMAT",
-        "AMBA", "AMBO", "AMBP", "AMBQ", "AMBR", "AMC", "AMCI", "AMCR", "AMCX", "AMD",
-        "AME", "AMG", "AMGN", "AMH", "AMH^G", "AMH^H", "AMIX", "AMKR", "AMLX", "AMN",
-        "AMOD", "AMODW", "AMP", "AMPG", "AMPGR", "AMPGZ", "AMPH", "AMPL", "AMPX", "AMPY",
-        "AMR", "AMRC", "AMRN", "AMRX", "AMRZ", "AMS", "AMSC", "AMSF", "AMST", "AMT",
-        "AMTB", "AMTD", "AMTM", "AMTX", "AMWD", "AMWL", "AMX", "AMZE", "AMZN", "AN",
-        "ANAB", "ANDE", "ANDG", "ANET", "ANF", "ANG^D", "ANGH", "ANGHW", "ANGI", "ANGO",
-        "ANGX", "ANIK", "ANIP", "ANIX", "ANL", "ANNA", "ANNAW", "ANNX", "ANPA", "ANRO",
-        "ANSC", "ANSCW", "ANTA", "ANTX", "ANVS", "ANY", "AOD", "AOMD", "AOMN", "AOMR",
-        "AON", "AORT", "AOS", "AOSL", "AOUT", "AP", "APA", "APAC", "APACR", "APACU",
-        "APAD", "APADR", "APADU", "APAM", "APC", "APD", "APEI", "APG", "APGE", "APH",
-        "API", "APLD", "APLE", "APLM", "APLMW", "APLS", "APM", "APO", "APO^A", "APOG",
-        "APOS", "APP", "APPF", "APPN", "APPS", "APRE", "APT", "APTV", "APVO", "APWC",
-        "APXT", "APXTU", "APXTW", "APYX", "AQB", "AQMS", "AQN", "AQNB", "AQST", "AR",
-        "ARAI", "ARAY", "ARBB", "ARBE", "ARBEW", "ARBK", "ARCB", "ARCC", "ARCI", "ARCIU",
-        "ARCIW", "ARCO", "ARCT", "ARDC", "ARDT", "ARDX", "ARE", "AREC", "AREN", "ARES",
-        "ARES^B", "ARGX", "ARHS", "ARI", "ARIS", "ARKO", "ARKR", "ARL", "ARLO", "ARLP",
-        "ARM", "ARMK", "ARMP", "AROC", "AROW", "ARQ", "ARQQ", "ARQQW", "ARQT", "ARR",
-        "ARR^C", "ARRY", "ARTC", "ARTCU", "ARTCW", "ARTL", "ARTNA", "ARTV", "ARTW", "ARVN",
-        "ARW", "ARWR", "ARX", "ARXS", "AS", "ASA", "ASAN", "ASB", "ASB^E", "ASB^F",
-        "ASBA", "ASBP", "ASBPW", "ASC", "ASG", "ASGI", "ASH", "ASIC", "ASIX", "ASLE",
-        "ASM", "ASMB", "ASML", "ASND", "ASO", "ASPC", "ASPCU", "ASPI", "ASPN", "ASPS",
-        "ASPSW", "ASPSZ", "ASR", "ASRT", "ASRV", "ASST", "ASTC", "ASTE", "ASTH", "ASTI",
-        "ASTL", "ASTLW", "ASTS", "ASUR", "ASX", "ASYS", "ATAI", "ATAT", "ATCH", "ATCX",
-        "ATEC", "ATEN", "ATER", "ATEX", "ATGL", "ATH^A", "ATH^B", "ATH^D", "ATH^E", "ATHE",
-        "ATHM", "ATHR", "ATHS", "ATI", "ATII", "ATIIU", "ATIIW", "ATKR", "ATLC", "ATLCL",
-        "ATLCP", "ATLCZ", "ATLN", "ATLO", "ATLX", "ATMU", "ATNI", "ATNM", "ATO", "ATOM",
-        "ATOS", "ATPC", "ATR", "ATRA", "ATRC", "ATRO", "ATS", "ATXG", "ATYR", "AU",
-        "AUB", "AUB^A", "AUBN", "AUDC", "AUGO", "AUID", "AUNA", "AUPH", "AUR", "AURA",
-        "AURE", "AUROW", "AUST", "AUTL", "AUUD", "AVA", "AVAH", "AVAL", "AVAV", "AVB",
-        "AVBC", "AVBH", "AVBP", "AVD", "AVEX", "AVGO", "AVIR", "AVK", "AVNS", "AVNT",
-        "AVNW", "AVO", "AVPT", "AVR", "AVT", "AVTR", "AVTX", "AVX", "AVXL", "AVY",
-        "AWF", "AWI", "AWK", "AWP", "AWR", "AWRE", "AWX", "AX", "AXG", "AXGN",
-        "AXIA", "AXIA^", "AXIA^C", "AXIL", "AXIN", "AXINR", "AXINU", "AXON", "AXP", "AXR",
-        "AXS", "AXS^E", "AXSM", "AXTA", "AXTI", "AYI", "AYTU", "AZ", "AZI", "AZN",
-        "AZO", "AZTA", "AZTR", "AZZ", "B", "BA", "BA^A", "BABA", "BAC", "BAC^B",
-        "BAC^E", "BAC^K", "BAC^L", "BAC^M", "BAC^N", "BAC^O", "BAC^P", "BAC^Q", "BAC^S", "BACC",
-        "BACCR", "BAER", "BAERW", "BAFN", "BAH", "BAK", "BALL", "BALY", "BAM", "BANC",
-        "BANC^F", "BAND", "BANF", "BANFP", "BANL", "BANR", "BANX", "BAOS", "BAP", "BARK",
-        "BATL", "BATRA", "BATRK", "BAX", "BAYA", "BAYAR", "BB", "BBAI", "BBAR", "BBBY",
-        "BBCP", "BBCQ", "BBCQU", "BBCQW", "BBD", "BBDC", "BBDO", "BBGI", "BBIO", "BBLG",
-        "BBLGW", "BBN", "BBNX", "BBOT", "BBSI", "BBT", "BBUC", "BBVA", "BBW", "BBWI",
-        "BBY", "BC", "BC^C", "BCAB", "BCAL", "BCAR", "BCARW", "BCAT", "BCAX", "BCBP",
-        "BCC", "BCDA", "BCE", "BCG", "BCGWW", "BCH", "BCHT", "BCIC", "BCML", "BCO",
-        "BCPC", "BCRX", "BCS", "BCSF", "BCSS", "BCTX", "BCTXL", "BCTXZ", "BCV", "BCV^A",
-        "BCX", "BCYC", "BDC", "BDCI", "BDCIU", "BDCIW", "BDJ", "BDL", "BDMD", "BDMDW",
-        "BDN", "BDRX", "BDSX", "BDTX", "BDX", "BE", "BEAG", "BEAGR", "BEAGU", "BEAM",
-        "BEAT", "BEATW", "BEBE", "BEEM", "BEEP", "BEKE", "BELFA", "BELFB", "BEN", "BENF",
-        "BENFW", "BEP", "BEP^A", "BEPC", "BEPH", "BEPI", "BEPJ", "BESS", "BETA", "BETR",
-        "BETRW", "BF/A", "BF/B", "BFAM", "BFC", "BFH", "BFH^A", "BFLY", "BFRG", "BFRGW",
-        "BFRI", "BFRIW", "BFS", "BFS^D", "BFS^E", "BFST", "BG", "BGB", "BGC", "BGH",
-        "BGI", "BGIN", "BGL", "BGLC", "BGLWW", "BGM", "BGMS", "BGR", "BGS", "BGSF",
-        "BGSI", "BGT", "BGX", "BGY", "BH", "BHAV", "BHAVR", "BHAVU", "BHB", "BHC",
-        "BHE", "BHF", "BHFAL", "BHFAM", "BHFAN", "BHFAO", "BHFAP", "BHK", "BHM", "BHP",
-        "BHR", "BHR^B", "BHR^D", "BHRB", "BHST", "BHV", "BHVN", "BIAF", "BIAFW", "BIDU",
-        "BIIB", "BIII", "BILI", "BILL", "BIO", "BIO/B", "BIOA", "BIOX", "BIP", "BIP^A",
-        "BIP^B", "BIPC", "BIPH", "BIPI", "BIPJ", "BIRD", "BIRK", "BIT", "BIVI", "BIVIW",
-        "BIXI", "BIXIU", "BIXIW", "BIYA", "BJ", "BJDX", "BJRI", "BK", "BK^K", "BKD",
-        "BKE", "BKH", "BKKT", "BKNG", "BKR", "BKSY", "BKT", "BKTI", "BKU", "BKV",
-        "BKYI", "BL", "BLBD", "BLCO", "BLD", "BLDP", "BLDR", "BLFS", "BLIN", "BLIV",
-        "BLK", "BLKB", "BLLN", "BLMN", "BLND", "BLNE", "BLNK", "BLRK", "BLRKU", "BLRKW",
-        "BLRX", "BLSH", "BLTE", "BLUW", "BLUWW", "BLW", "BLX", "BLZE", "BLZR", "BLZRU",
-        "BLZRW", "BMA", "BMBL", "BME", "BMEA", "BMEZ", "BMGL", "BMHL", "BMI", "BML^G",
-        "BML^H", "BML^J", "BML^L", "BMM", "BMN", "BMNR", "BMO", "BMR", "BMRA", "BMRC",
-        "BMRN", "BMY", "BN", "BNAI", "BNAIW", "BNBX", "BNC", "BNCWW", "BNCWZ", "BNED",
-        "BNGO", "BNH", "BNJ", "BNKK", "BNL", "BNR", "BNRG", "BNS", "BNT", "BNTC",
-        "BNTX", "BNZI", "BNZIW", "BOBS", "BOC", "BODI", "BOE", "BOF", "BOH", "BOH^A",
-        "BOH^B", "BOKF", "BOLD", "BOLT", "BON", "BOOM", "BOOT", "BORR", "BOSC", "BOTJ",
-        "BOW", "BOX", "BOXL", "BP", "BPAC", "BPACR", "BPOP", "BPOPM", "BPRE", "BPRN",
-        "BPYPM", "BPYPN", "BPYPO", "BPYPP", "BQ", "BR", "BRAG", "BRAI", "BRBI", "BRBR",
-        "BRBS", "BRC", "BRCB", "BRCC", "BRFH", "BRIA", "BRID", "BRK/A", "BRK/B", "BRKR",
-        "BRKRP", "BRLS", "BRLSW", "BRLT", "BRN", "BRNS", "BRO", "BROS", "BRR", "BRRWW",
-        "BRSL", "BRSP", "BRT", "BRTX", "BRW", "BRX", "BRZE", "BSAA", "BSAAR", "BSAAU",
-        "BSAC", "BSBK", "BSBR", "BSET", "BSL", "BSM", "BSRR", "BST", "BSTZ", "BSVN",
-        "BSX", "BSY", "BTAI", "BTBD", "BTBDW", "BTBT", "BTCS", "BTCT", "BTDR", "BTE",
-        "BTG", "BTGO", "BTI", "BTM", "BTMD", "BTMWW", "BTO", "BTOC", "BTOG", "BTQ",
-        "BTSG", "BTSGU", "BTT", "BTTC", "BTU", "BTX", "BTZ", "BUD", "BUDA", "BUI",
-        "BULL", "BULLW", "BUR", "BURL", "BURU", "BUSE", "BUSEP", "BUUU", "BV", "BVC",
-        "BVFL", "BVN", "BVS", "BW", "BW^A", "BWA", "BWAY", "BWB", "BWBBP", "BWEN",
-        "BWFG", "BWG", "BWIN", "BWLP", "BWMN", "BWMX", "BWNB", "BWXT", "BX", "BXC",
-        "BXMT", "BXP", "BXSL", "BY", "BYAH", "BYD", "BYFC", "BYND", "BYRN", "BYSI",
-        "BZ", "BZAI", "BZAIW", "BZFD", "BZFDW", "BZH", "BZUN", "C", "C^N", "C^R",
-        "CAAP", "CAAS", "CABA", "CABO", "CABR", "CAC", "CACC", "CACI", "CADL", "CAE",
-        "CAEP", "CAF", "CAG", "CAH", "CAI", "CAKE", "CAL", "CALC", "CALM", "CALX",
-        "CALY", "CAMP", "CAMT", "CAN", "CANF", "CANG", "CAPL", "CAPN", "CAPR", "CAPS",
-        "CAQ", "CAQUU", "CAR", "CARE", "CARG", "CARL", "CARR", "CARS", "CART", "CASH",
-        "CASS", "CAST", "CASY", "CAT", "CATO", "CATX", "CATY", "CAVA", "CB", "CBAN",
-        "CBAT", "CBC", "CBFV", "CBIO", "CBK", "CBL", "CBLL", "CBNA", "CBNK", "CBOE",
-        "CBRE", "CBRL", "CBSH", "CBT", "CBU", "CBUS", "CBZ", "CC", "CCAP", "CCB",
-        "CCBG", "CCC", "CCCC", "CCD", "CCEC", "CCEL", "CCEP", "CCG", "CCGWW", "CCHH",
-        "CCI", "CCID", "CCIF", "CCII", "CCIIU", "CCIIW", "CCIX", "CCIXW", "CCJ", "CCK",
-        "CCL", "CCLD", "CCLDO", "CCM", "CCNE", "CCNEP", "CCO", "CCOI", "CCRN", "CCS",
-        "CCSI", "CCTG", "CCU", "CCXI", "CCXIU", "CCXIW", "CCZ", "CD", "CDE", "CDIO",
-        "CDIOW", "CDLR", "CDLX", "CDNA", "CDNL", "CDNS", "CDP", "CDR^B", "CDR^C", "CDRE",
-        "CDRO", "CDROW", "CDT", "CDTG", "CDTTW", "CDW", "CDXS", "CDZI", "CDZIP", "CE",
-        "CECO", "CEE", "CEG", "CELC", "CELH", "CELU", "CELZ", "CENN", "CENT", "CENTA",
-        "CENX", "CEPF", "CEPO", "CEPS", "CEPT", "CEPU", "CEPV", "CERS", "CERT", "CET",
-        "CETX", "CETY", "CEV", "CEVA", "CF", "CFBK", "CFFI", "CFFN", "CFG", "CFG^E",
-        "CFG^H", "CFG^I", "CFND", "CFR", "CFR^B", "CFTR^A", "CG", "CGABL", "CGAU", "CGBD",
-        "CGC", "CGCT", "CGCTU", "CGCTW", "CGEM", "CGEN", "CGNT", "CGNX", "CGO", "CGON",
-        "CGTL", "CGTX", "CHA", "CHAI", "CHAR", "CHARR", "CHCI", "CHCO", "CHCT", "CHD",
-        "CHDN", "CHE", "CHEC", "CHECU", "CHECW", "CHEF", "CHGG", "CHH", "CHI", "CHKP",
-        "CHMG", "CHMI", "CHMI^A", "CHMI^B", "CHNR", "CHOW", "CHPG", "CHPGR", "CHPT", "CHR",
-        "CHRD", "CHRS", "CHRW", "CHSCL", "CHSCM", "CHSCN", "CHSCO", "CHSCP", "CHSN", "CHT",
-        "CHTR", "CHW", "CHWY", "CHY", "CHYM", "CI", "CIA", "CIB", "CICB", "CICC",
-        "CIEN", "CIF", "CIFR", "CIG", "CIGI", "CII", "CIIT", "CIK", "CIM", "CIM^A",
-        "CIM^B", "CIM^C", "CIM^D", "CIMN", "CIMO", "CIMP", "CINF", "CING", "CINGW", "CINT",
-        "CION", "CISO", "CISS", "CITR", "CIVB", "CIX", "CJMB", "CKX", "CL", "CLAR",
-        "CLB", "CLBK", "CLBR", "CLBT", "CLDI", "CLDT", "CLDT^A", "CLDX", "CLF", "CLFD",
-        "CLGN", "CLH", "CLIK", "CLIR", "CLLS", "CLM", "CLMB", "CLMT", "CLNE", "CLNN",
-        "CLOV", "CLPR", "CLPS", "CLPT", "CLRB", "CLRO", "CLS", "CLSK", "CLSKW", "CLST",
-        "CLVT", "CLW", "CLWT", "CLX", "CLYM", "CM", "CMBT", "CMC", "CMCL", "CMCM",
-        "CMCO", "CMCSA", "CMCT", "CMDB", "CME", "CMG", "CMI", "CMII", "CMMB", "CMND",
-        "CMP", "CMPR", "CMPS", "CMPX", "CMRC", "CMRE", "CMRE^B", "CMRE^C", "CMRE^D", "CMS",
-        "CMS^B", "CMS^C", "CMSA", "CMSC", "CMSD", "CMT", "CMTG", "CMTL", "CMTV", "CMU",
-        "CNA", "CNC", "CNCK", "CNCKW", "CNDT", "CNET", "CNEY", "CNF", "CNH", "CNI",
-        "CNK", "CNL", "CNM", "CNMD", "CNNE", "CNO", "CNO^A", "CNOB", "CNOBP", "CNP",
-        "CNQ", "CNR", "CNS", "CNSP", "CNTA", "CNTB", "CNTN", "CNTX", "CNTY", "CNVS",
-        "CNX", "CNXC", "CNXN", "COCH", "COCHW", "COCO", "COCP", "CODA", "CODI", "CODI^A",
-        "CODI^B", "CODI^C", "CODX", "COE", "COEP", "COEPW", "COF", "COF^I", "COF^J", "COF^K",
-        "COF^L", "COF^N", "COFS", "COGT", "COHN", "COHR", "COHU", "COIN", "COKE", "COLA",
-        "COLAU", "COLB", "COLD", "COLL", "COLM", "COMP", "CON", "COO", "COOK", "COOT",
-        "COOTW", "COP", "COPL", "COR", "CORT", "CORZ", "CORZW", "CORZZ", "COSM", "COSO",
-        "COST", "COTY", "COUR", "COYA", "CP", "CPA", "CPAC", "CPAY", "CPB", "CPBI",
-        "CPF", "CPHC", "CPHI", "CPIX", "CPK", "CPNG", "CPOP", "CPRI", "CPRT", "CPRX",
-        "CPS", "CPSH", "CPSS", "CPT", "CPZ", "CQP", "CR", "CRAC", "CRACR", "CRACU",
-        "CRACW", "CRAI", "CRAN", "CRANR", "CRANU", "CRAQ", "CRAQR", "CRAQU", "CRBD", "CRBG",
-        "CRBP", "CRBU", "CRC", "CRCL", "CRCT", "CRD/A", "CRD/B", "CRDF", "CRDL", "CRDO",
-        "CRE", "CREG", "CRESY", "CREX", "CRF", "CRGO", "CRGOW", "CRGY", "CRH", "CRI",
-        "CRIS", "CRK", "CRL", "CRM", "CRMD", "CRML", "CRMLW", "CRMT", "CRNC", "CRNT",
-        "CRNX", "CRON", "CROX", "CRS", "CRSP", "CRSR", "CRT", "CRTO", "CRUS", "CRVL",
-        "CRVO", "CRVS", "CRWD", "CRWS", "CRWV", "CSAI", "CSAN", "CSBR", "CSCO", "CSGP",
-        "CSGS", "CSHR", "CSHRW", "CSIQ", "CSL", "CSPI", "CSQ", "CSR", "CSTE", "CSTL",
-        "CSTM", "CSV", "CSW", "CSWC", "CSX", "CTA^A", "CTA^B", "CTAA", "CTAAR", "CTAAU",
-        "CTAS", "CTBB", "CTBI", "CTDD", "CTEV", "CTGO", "CTKB", "CTLP", "CTM", "CTMX",
-        "CTNM", "CTNT", "CTO", "CTO^A", "CTOR", "CTOS", "CTRA", "CTRE", "CTRI", "CTRM",
-        "CTRN", "CTS", "CTSH", "CTSO", "CTVA", "CTW", "CTXR", "CUB", "CUBB", "CUBE",
-        "CUBI", "CUBWU", "CUBWW", "CUE", "CUK", "CULP", "CUPR", "CURB", "CURI", "CURR",
-        "CURV", "CURX", "CUZ", "CV", "CVBF", "CVCO", "CVE", "CVEO", "CVGI", "CVGW",
-        "CVI", "CVKD", "CVLG", "CVLT", "CVM", "CVNA", "CVR", "CVRX", "CVS", "CVSA",
-        "CVU", "CVV", "CVX", "CW", "CWAN", "CWBC", "CWCO", "CWD", "CWEN", "CWH",
-        "CWK", "CWST", "CWT", "CX", "CXAI", "CXAIW", "CXDO", "CXE", "CXH", "CXM",
-        "CXT", "CXW", "CYAB", "CYCN", "CYCU", "CYCUW", "CYD", "CYH", "CYN", "CYPH",
-        "CYRX", "CYTK", "CZFS", "CZNC", "CZR", "CZWI", "D", "DAAQ", "DAAQU", "DAAQW",
-        "DAC", "DAIC", "DAICW", "DAIO", "DAKT", "DAL", "DAN", "DAO", "DAR", "DARE",
-        "DASH", "DAVA", "DAVE", "DAVEW", "DB", "DBCA", "DBCAW", "DBD", "DBGI", "DBI",
-        "DBL", "DBRG", "DBRG^H", "DBRG^I", "DBRG^J", "DBVT", "DBX", "DC", "DCBG", "DCBO",
-        "DCGO", "DCH", "DCI", "DCO", "DCOM", "DCOM^", "DCOY", "DCTH", "DCX", "DD",
-        "DDC", "DDD", "DDI", "DDL", "DDOG", "DDS", "DDT", "DE", "DEA", "DEC",
-        "DECK", "DEFT", "DEI", "DELL", "DEO", "DERM", "DETX", "DEVS", "DFDV", "DFDVW",
-        "DFH", "DFIN", "DFLI", "DFLIW", "DFNS", "DFNSW", "DFP", "DFSC", "DFSCW", "DFTX",
-        "DG", "DGICA", "DGICB", "DGII", "DGNX", "DGX", "DGXX", "DH", "DHC", "DHCNI",
-        "DHCNL", "DHF", "DHI", "DHR", "DHT", "DHX", "DHY", "DIBS", "DIN", "DINO",
-        "DIOD", "DIS", "DIT", "DJCO", "DJT", "DJTWW", "DK", "DKI", "DKL", "DKNG",
-        "DKS", "DLB", "DLHC", "DLNG", "DLNG^A", "DLO", "DLPN", "DLR", "DLR^J", "DLR^K",
-        "DLR^L", "DLTH", "DLTR", "DLX", "DLXY", "DLY", "DMA", "DMAA", "DMAAR", "DMAC",
-        "DMB", "DMII", "DMIIR", "DMIIU", "DMLP", "DMO", "DMRA", "DMRC", "DNA", "DNLI",
-        "DNMX", "DNMXU", "DNMXW", "DNN", "DNOW", "DNP", "DNTH", "DNUT", "DOC", "DOCN",
-        "DOCS", "DOCU", "DOGZ", "DOLE", "DOMH", "DOMO", "DOO", "DORM", "DOUG", "DOV",
-        "DOW", "DOX", "DOYU", "DPG", "DPRO", "DPZ", "DQ", "DRCT", "DRD", "DRDB",
-        "DRDBW", "DRH", "DRI", "DRIO", "DRMA", "DRMAW", "DRS", "DRTS", "DRTSW", "DRUG",
-        "DRVN", "DSACU", "DSGN", "DSGR", "DSGX", "DSL", "DSM", "DSP", "DSS", "DSU",
-        "DSWL", "DSX", "DSX^B", "DSY", "DSYWW", "DT", "DTB", "DTCX", "DTE", "DTF",
-        "DTG", "DTI", "DTIL", "DTK", "DTM", "DTSQ", "DTSQR", "DTSQU", "DTSS", "DTST",
-        "DTSTW", "DTW", "DUK", "DUK^A", "DUKB", "DUO", "DUOL", "DUOT", "DV", "DVA",
-        "DVLT", "DVN", "DWSN", "DWTX", "DX", "DX^C", "DXC", "DXCM", "DXF", "DXLG",
-        "DXPE", "DXR", "DXST", "DXYZ", "DY", "DYAI", "DYN", "DYOR", "DYORU", "E",
-        "EA", "EAD", "EAF", "EAI", "EARN", "EAT", "EBAY", "EBC", "EBF", "EBMT",
-        "EBON", "EBS", "EC", "ECAT", "ECBK", "ECC", "ECC^D", "ECCC", "ECCU", "ECCV",
-        "ECCW", "ECCX", "ECF", "ECF^A", "ECG", "ECL", "ECO", "ECOR", "ECPG", "ECVT",
-        "ECX", "ECXWW", "ED", "EDAP", "EDBL", "EDBLW", "EDD", "EDF", "EDHL", "EDIT",
-        "EDN", "EDRY", "EDSA", "EDTK", "EDU", "EDUC", "EE", "EEA", "EEFT", "EEIQ",
-        "EEX", "EFC", "EFC^B", "EFC^C", "EFC^D", "EFOI", "EFOR", "EFR", "EFSC", "EFSCP",
-        "EFSI", "EFT", "EFX", "EFXT", "EG", "EGAN", "EGBN", "EGP", "EGY", "EH",
-        "EHAB", "EHC", "EHGO", "EHI", "EHLD", "EHTH", "EIC", "EICA", "EIG", "EIIA",
-        "EIKN", "EIM", "EIX", "EJH", "EKSO", "EL", "ELA", "ELAB", "ELAN", "ELBM",
-        "ELC", "ELDN", "ELE", "ELF", "ELLA", "ELLO", "ELMD", "ELME", "ELMT", "ELOG",
-        "ELPC", "ELPW", "ELS", "ELSE", "ELTK", "ELTX", "ELUT", "ELV", "ELVA", "ELVN",
-        "ELVR", "ELWT", "EM", "EMA", "EMAT", "EMBC", "EMBJ", "EMD", "EME", "EMF",
-        "EMIS", "EML", "EMN", "EMO", "EMP", "EMPD", "EMR", "ENB", "ENGN", "ENGNW",
-        "ENGS", "ENIC", "ENJ", "ENLT", "ENLV", "ENO", "ENOV", "ENPH", "ENR", "ENS",
-        "ENSC", "ENSG", "ENTA", "ENTG", "ENTX", "ENVA", "ENVB", "ENVX", "EOD", "EOG",
-        "EOI", "EOLS", "EONR", "EOS", "EOSE", "EOT", "EP", "EP^C", "EPAC", "EPAM",
-        "EPC", "EPD", "EPM", "EPOW", "EPR", "EPR^C", "EPR^E", "EPR^G", "EPRT", "EPRX",
-        "EPSM", "EPSN", "EQ", "EQBK", "EQH", "EQH^A", "EQH^C", "EQIX", "EQNR", "EQPT",
-        "EQR", "EQS", "EQT", "EQX", "ERAS", "ERC", "ERH", "ERIC", "ERIE", "ERII",
-        "ERNA", "ERNAW", "ERO", "ES", "ESAB", "ESCA", "ESE", "ESEA", "ESHA", "ESHAR",
-        "ESI", "ESLA", "ESLAW", "ESLT", "ESNT", "ESOA", "ESP", "ESPR", "ESQ", "ESRT",
-        "ESS", "ESTA", "ESTC", "ET", "ET^I", "ETB", "ETD", "ETG", "ETHB", "ETHM",
-        "ETHMU", "ETHMW", "ETI^", "ETJ", "ETN", "ETO", "ETON", "ETOR", "ETR", "ETS",
-        "ETSY", "ETV", "ETW", "ETX", "ETY", "EU", "EUDA", "EUDAW", "EVAC", "EVAX",
-        "EVC", "EVCM", "EVER", "EVEX", "EVF", "EVG", "EVGN", "EVGO", "EVGOW", "EVH",
-        "EVI", "EVLV", "EVLVW", "EVMN", "EVN", "EVO", "EVOX", "EVOXU", "EVOXW", "EVR",
-        "EVRG", "EVT", "EVTC", "EVTL", "EVTV", "EVV", "EW", "EWBC", "EWCZ", "EWTX",
-        "EXC", "EXE", "EXEL", "EXFY", "EXG", "EXK", "EXLS", "EXOD", "EXOZ", "EXP",
-        "EXPD", "EXPE", "EXPI", "EXPO", "EXR", "EXTR", "EYE", "EYPT", "EZGO", "EZPW",
-        "EZRA", "F", "F^B", "F^C", "F^D", "FA", "FACT", "FACTU", "FACTW", "FAF",
-        "FAMI", "FANG", "FARM", "FAST", "FATE", "FATN", "FAX", "FBGL", "FBIN", "FBIO",
-        "FBIOP", "FBIZ", "FBK", "FBLA", "FBLG", "FBNC", "FBP", "FBRT", "FBRT^E", "FBRX",
-        "FBYD", "FBYDW", "FC", "FCAP", "FCBC", "FCCO", "FCEL", "FCF", "FCFS", "FCHL",
-        "FCN", "FCNCA", "FCNCN", "FCNCO", "FCNCP", "FCO", "FCPT", "FCRS", "FCRX", "FCT",
-        "FCUV", "FCX", "FDBC", "FDMT", "FDP", "FDS", "FDSB", "FDUS", "FDX", "FE",
-        "FEAM", "FEBO", "FEDU", "FEED", "FEIM", "FELE", "FEMY", "FENC", "FENG", "FER",
-        "FERA", "FERAR", "FERG", "FET", "FF", "FFA", "FFAI", "FFAIW", "FFBC", "FFC",
-        "FFIC", "FFIN", "FFIV", "FG", "FGBI", "FGBIP", "FGI", "FGII", "FGIIU", "FGIIW",
-        "FGIWW", "FGL", "FGMC", "FGMCR", "FGN", "FGNX", "FGNXP", "FGSN", "FHB", "FHI",
-        "FHN", "FHN^C", "FHN^E", "FHN^F", "FHN^H", "FHTX", "FIBK", "FICO", "FIEE", "FIG",
-        "FIGR", "FIGS", "FIGX", "FIHL", "FINS", "FINV", "FINW", "FIP", "FIS", "FISI",
-        "FISV", "FITB", "FITBI", "FITBM", "FITBO", "FITBP", "FIVE", "FIVN", "FIX", "FIZZ",
-        "FJET", "FKWL", "FLC", "FLD", "FLDDW", "FLEX", "FLG", "FLG^A", "FLG^U", "FLGT",
-        "FLL", "FLNA", "FLNC", "FLNG", "FLNT", "FLO", "FLOC", "FLR", "FLS", "FLUT",
-        "FLUX", "FLWS", "FLX", "FLXS", "FLY", "FLYE", "FLYW", "FLYX", "FMACU", "FMAO",
-        "FMBH", "FMC", "FMFC", "FMN", "FMNB", "FMS", "FMST", "FMSTW", "FMX", "FMY",
-        "FN", "FNB", "FND", "FNF", "FNGR", "FNKO", "FNLC", "FNRN", "FNUC", "FNV",
-        "FNWB", "FNWD", "FOA", "FOF", "FOFO", "FOLD", "FONR", "FOR", "FORA", "FORM",
-        "FORR", "FORTY", "FOSL", "FOUR", "FOUR^A", "FOX", "FOXA", "FOXF", "FOXX", "FOXXW",
-        "FPF", "FPH", "FPI", "FPS", "FR", "FRA", "FRAF", "FRBA", "FRD", "FRGT",
-        "FRHC", "FRME", "FRMEP", "FRMI", "FRMM", "FRO", "FROG", "FRPH", "FRPT", "FRSH",
-        "FRST", "FRSX", "FRT", "FRT^C", "FSBC", "FSBW", "FSCO", "FSEA", "FSHP", "FSI",
-        "FSK", "FSLR", "FSLY", "FSM", "FSP", "FSS", "FSSL", "FSTR", "FSUN", "FSV",
-        "FT", "FTAI", "FTAIM", "FTAIN", "FTCI", "FTDR", "FTEK", "FTF", "FTFT", "FTHM",
-        "FTHY", "FTI", "FTK", "FTLF", "FTNT", "FTRE", "FTRK", "FTS", "FTV", "FTW",
-        "FUBO", "FUFU", "FUFUW", "FUL", "FULC", "FULT", "FULTP", "FUN", "FUNC", "FUND",
-        "FURY", "FUSB", "FUSE", "FUSEW", "FUTU", "FVAV", "FVCB", "FVN", "FVR", "FVRR",
-        "FWDI", "FWONA", "FWONK", "FWRD", "FWRG", "FXNC", "G", "GAB", "GAB^G", "GAB^H",
-        "GAB^K", "GABC", "GAIA", "GAIN", "GAING", "GAINI", "GAINN", "GAINZ", "GALT", "GAM",
-        "GAM^B", "GAMB", "GAME", "GANX", "GAP", "GASS", "GATX", "GAU", "GAUZ", "GAVA",
-        "GBAB", "GBCI", "GBDC", "GBFH", "GBLI", "GBR", "GBTG", "GBX", "GCBC", "GCDT",
-        "GCL", "GCMG", "GCO", "GCT", "GCTK", "GCTS", "GCV", "GD", "GDC", "GDDY",
-        "GDEN", "GDEV", "GDHG", "GDL", "GDO", "GDOT", "GDRX", "GDS", "GDTC", "GDV",
-        "GDV^H", "GDV^K", "GDYN", "GE", "GECC", "GECCG", "GECCH", "GECCI", "GECCO", "GEF",
-        "GEG", "GEGGL", "GEHC", "GEL", "GELS", "GEMI", "GEN", "GENB", "GENC", "GENI",
-        "GENK", "GENVR", "GEO", "GEOS", "GERN", "GETY", "GEV", "GEVO", "GF", "GFAI",
-        "GFAIW", "GFF", "GFI", "GFL", "GFR", "GFS", "GGAL", "GGB", "GGG", "GGN",
-        "GGN^B", "GGR", "GGROW", "GGRP", "GGT", "GGT^E", "GGT^G", "GGZ", "GH", "GHC",
-        "GHG", "GHI", "GHM", "GHRS", "GHY", "GIB", "GIBO", "GIC", "GIFT", "GIG",
-        "GIGGU", "GIGGW", "GIGM", "GIII", "GIL", "GILD", "GILT", "GIPR", "GIPRW", "GIS",
-        "GITS", "GIW", "GIWWR", "GIWWU", "GIX", "GIXXR", "GIXXU", "GJH", "GJO", "GJP",
-        "GJR", "GJS", "GJT", "GKOS", "GL", "GL^D", "GLAD", "GLBE", "GLBS", "GLDG",
-        "GLE", "GLED", "GLIBA", "GLIBK", "GLMD", "GLND", "GLNG", "GLO", "GLOB", "GLOO",
-        "GLOP^A", "GLOP^B", "GLOP^C", "GLP", "GLP^B", "GLPG", "GLPI", "GLQ", "GLRE", "GLSI",
-        "GLU", "GLU^B", "GLUE", "GLV", "GLW", "GLXG", "GLXY", "GM", "GMAB", "GME",
-        "GMED", "GMEX", "GMHS", "GMM", "GMTL", "GNE", "GNK", "GNL", "GNL^A", "GNL^B",
-        "GNL^D", "GNL^E", "GNLN", "GNLX", "GNPX", "GNRC", "GNS", "GNSS", "GNT", "GNT^A",
-        "GNTA", "GNTX", "GNW", "GO", "GOAI", "GOCO", "GOF", "GOGO", "GOLD", "GOLF",
-        "GOOD", "GOODN", "GOODO", "GOOG", "GOOGL", "GOOS", "GORO", "GOSS", "GOTU", "GOVX",
-        "GP", "GPAC", "GPACU", "GPAT", "GPATU", "GPATW", "GPC", "GPCR", "GPGI", "GPI",
-        "GPJA", "GPK", "GPMT", "GPMT^A", "GPN", "GPOR", "GPRE", "GPRK", "GPRO", "GPUS",
-        "GPUS^D", "GRAB", "GRABW", "GRAF", "GRAL", "GRAN", "GRBK", "GRBK^A", "GRC", "GRCE",
-        "GRDN", "GRDX", "GREE", "GREEL", "GRF", "GRFS", "GRI", "GRML", "GRMLW", "GRMN",
-        "GRND", "GRNQ", "GRNT", "GRO", "GROV", "GROW", "GROY", "GRPN", "GRRR", "GRRRW",
-        "GRVY", "GRWG", "GRX", "GS", "GS^A", "GS^C", "GS^D", "GSAT", "GSBC", "GSBD",
-        "GSHD", "GSHR", "GSHRW", "GSIT", "GSIW", "GSK", "GSL", "GSL^B", "GSM", "GSRF",
-        "GSRFR", "GSUN", "GT", "GTBP", "GTE", "GTEC", "GTEN", "GTENW", "GTERA", "GTERR",
-        "GTERU", "GTES", "GTIM", "GTLB", "GTLS", "GTM", "GTN", "GTX", "GTY", "GUG",
-        "GURE", "GUT", "GUT^C", "GUTS", "GV", "GVA", "GVH", "GWAV", "GWH", "GWRE",
-        "GWRS", "GWW", "GXAI", "GXO", "GYRE", "GYRO", "H", "HACQU", "HAE", "HAFC",
-        "HAFN", "HAIN", "HAL", "HALO", "HAO", "HAS", "HASI", "HAVA", "HAVAU", "HAYW",
-        "HBAN", "HBANL", "HBANM", "HBANP", "HBANZ", "HBB", "HBCP", "HBIO", "HBM", "HBNB",
-        "HBNC", "HBT", "HCA", "HCAC", "HCACR", "HCACU", "HCAI", "HCAT", "HCC", "HCHL",
-        "HCI", "HCIC", "HCICR", "HCICU", "HCKT", "HCM", "HCMA", "HCMAU", "HCMAW", "HCSG",
-        "HCTI", "HCWB", "HCWC", "HCXY", "HD", "HDB", "HDL", "HDSN", "HE", "HEI",
-        "HEI/A", "HELE", "HELP", "HEPS", "HEQ", "HERE", "HERZ", "HESM", "HFBL", "HFFG",
-        "HFRO", "HFRO^A", "HFRO^B", "HFWA", "HG", "HGBL", "HGLB", "HGTY", "HGV", "HHH",
-        "HHS", "HIFS", "HIG", "HIG^G", "HIHO", "HII", "HIMS", "HIMX", "HIND", "HIO",
-        "HIPO", "HIT", "HITI", "HIVE", "HIW", "HIX", "HKD", "HKIT", "HKPD", "HL",
-        "HL^B", "HLF", "HLI", "HLIO", "HLIT", "HLLY", "HLMN", "HLN", "HLNE", "HLP",
-        "HLT", "HLX", "HLXC", "HMC", "HMH", "HMN", "HMR", "HMY", "HNGE", "HNI",
-        "HNNA", "HNNAZ", "HNRG", "HNST", "HNVR", "HOFT", "HOG", "HOLO", "HOLOW", "HOMB",
-        "HON", "HOOD", "HOPE", "HOTH", "HOUR", "HOV", "HOVNP", "HOVR", "HOVRW", "HOWL",
-        "HP", "HPAI", "HPAIW", "HPE", "HPE^C", "HPF", "HPI", "HPK", "HPP", "HPP^C",
-        "HPQ", "HPS", "HQ", "HQH", "HQI", "HQL", "HQWWW", "HQY", "HR", "HRB",
-        "HRI", "HRL", "HRMY", "HROW", "HRTG", "HRTX", "HRZN", "HSAI", "HSBC", "HSCS",
-        "HSCSW", "HSDT", "HSHP", "HSIC", "HSLV", "HSPT", "HSPTR", "HST", "HSTM", "HSY",
-        "HTB", "HTCO", "HTCR", "HTD", "HTFC", "HTFL", "HTGC", "HTH", "HTHT", "HTLD",
-        "HTLM", "HTO", "HTOO", "HTT", "HTZ", "HTZWW", "HUBB", "HUBC", "HUBCW", "HUBCZ",
-        "HUBG", "HUBS", "HUDI", "HUHU", "HUIZ", "HUM", "HUMA", "HUMAW", "HUN", "HURA",
-        "HURC", "HURN", "HUT", "HUYA", "HVII", "HVIIR", "HVIIU", "HVMC", "HVMCU", "HVMCW",
-        "HVT", "HVT/A", "HWBK", "HWC", "HWCPZ", "HWH", "HWKN", "HWM", "HXHX", "HXL",
-        "HY", "HYFM", "HYFT", "HYI", "HYLN", "HYMC", "HYNE", "HYPD", "HYPR", "HYT",
-        "HZO", "IAC", "IACO", "IACOU", "IAE", "IAF", "IAG", "IART", "IAUX", "IBAC",
-        "IBACR", "IBCP", "IBEX", "IBG", "IBIO", "IBKR", "IBM", "IBN", "IBO", "IBOC",
-        "IBP", "IBRX", "IBTA", "ICCC", "ICCM", "ICE", "ICFI", "ICG", "ICHR", "ICL",
-        "ICLR", "ICMB", "ICON", "ICR^A", "ICU", "ICUCW", "ICUI", "IDA", "IDAI", "IDCC",
-        "IDE", "IDN", "IDR", "IDT", "IDXX", "IDYA", "IE", "IEAG", "IEAGU", "IEP",
-        "IESC", "IEX", "IFBD", "IFF", "IFN", "IFRX", "IFS", "IGA", "IGAC", "IGACR",
-        "IGACU", "IGC", "IGD", "IGI", "IGIC", "IGR", "IH", "IHD", "IHG", "IHRT",
-        "IHS", "IHT", "IIF", "III", "IIIN", "IIIV", "IIM", "IINN", "IINNW", "IIPR",
-        "IIPR^A", "IKT", "ILAG", "ILLR", "ILLRW", "ILLU", "ILLUW", "ILMN", "ILPT", "IMA",
-        "IMAX", "IMCC", "IMCR", "IMDX", "IMKTA", "IMMP", "IMMR", "IMMX", "IMNM", "IMNN",
-        "IMO", "IMOS", "IMPP", "IMPPP", "IMRN", "IMRX", "IMSR", "IMSRW", "IMTE", "IMTX",
-        "IMUX", "IMVT", "IMXI", "INAB", "INAC", "INACR", "INACU", "INBK", "INBKZ", "INBS",
-        "INBX", "INCR", "INCY", "INDB", "INDI", "INDO", "INDP", "INDV", "INEO", "INFQ",
-        "INFU", "INFY", "ING", "INGM", "INGN", "INGR", "INHD", "INKT", "INLF", "INLX",
-        "INM", "INMB", "INMD", "INN", "INN^E", "INN^F", "INNV", "INO", "INOD", "INR",
-        "INSE", "INSG", "INSM", "INSP", "INSW", "INTA", "INTC", "INTG", "INTJ", "INTR",
-        "INTS", "INTT", "INTU", "INTZ", "INUV", "INV", "INVA", "INVE", "INVH", "INVX",
-        "INVZ", "IONQ", "IONR", "IONS", "IOR", "IOSP", "IOT", "IOTR", "IOVA", "IP",
-        "IPAR", "IPCX", "IPCXR", "IPCXU", "IPDN", "IPEX", "IPEXR", "IPEXU", "IPFXU", "IPGP",
-        "IPHA", "IPI", "IPM", "IPOD", "IPODU", "IPODW", "IPSC", "IPST", "IPW", "IPWR",
-        "IPX", "IQ", "IQI", "IQST", "IQV", "IR", "IRD", "IRDM", "IREN", "IRHO",
-        "IRHOR", "IRHOU", "IRIX", "IRM", "IRMD", "IRON", "IRS", "IRT", "IRTC", "IRWD",
-        "ISBA", "ISD", "ISOU", "ISPC", "ISPR", "ISRG", "ISSC", "ISTR", "IT", "ITGR",
-        "ITHAU", "ITIC", "ITOC", "ITP", "ITRG", "ITRI", "ITRN", "ITT", "ITUB", "ITW",
-        "IVA", "IVDA", "IVDAW", "IVF", "IVR", "IVR^C", "IVT", "IVVD", "IVZ", "IX",
-        "IXHL", "IZEA", "IZM", "J", "JACK", "JACS", "JAGU", "JAGX", "JAKK", "JAN",
-        "JANX", "JATT", "JAZZ", "JBDI", "JBGS", "JBHT", "JBI", "JBIO", "JBL", "JBLU",
-        "JBS", "JBSS", "JBTM", "JCAP", "JCE", "JCI", "JCSE", "JCTC", "JD", "JDZG",
-        "JEF", "JELD", "JEM", "JENA", "JF", "JFB", "JFIN", "JFR", "JFU", "JG",
-        "JGH", "JHG", "JHI", "JHS", "JHX", "JILL", "JJSF", "JKHY", "JKS", "JL",
-        "JLHL", "JLL", "JLS", "JMIA", "JMM", "JMSB", "JNJ", "JOB", "JOBY", "JOE",
-        "JOF", "JOUT", "JOYY", "JPC", "JPM", "JPM^C", "JPM^D", "JPM^J", "JPM^K", "JPM^L",
-        "JPM^M", "JQC", "JRI", "JRS", "JRSH", "JRVR", "JSM", "JSPR", "JSPRW", "JTAI",
-        "JUNS", "JVA", "JWEL", "JXG", "JXN", "JXN^A", "JYD", "JYNT", "JZ", "JZXN",
-        "KAI", "KALA", "KALU", "KALV", "KAPA", "KARO", "KB", "KBDC", "KBH", "KBON",
-        "KBONU", "KBONW", "KBR", "KBSX", "KC", "KCHV", "KCHVR", "KD", "KDK", "KDKRW",
-        "KDP", "KE", "KEEL", "KELYA", "KELYB", "KEN", "KEP", "KEQU", "KEX", "KEY",
-        "KEY^I", "KEY^J", "KEY^K", "KEY^L", "KEYS", "KF", "KFFB", "KFII", "KFIIR", "KFRC",
-        "KFS", "KFY", "KG", "KGC", "KGEI", "KGS", "KHC", "KIDS", "KIDZ", "KIDZW",
-        "KIM", "KIM^L", "KIM^M", "KIM^N", "KINS", "KIO", "KITT", "KITTW", "KKR", "KKR^D",
-        "KKRS", "KKRT", "KLAC", "KLAR", "KLC", "KLIC", "KLRA", "KLRS", "KLTR", "KLXE",
-        "KMB", "KMDA", "KMI", "KMPB", "KMPR", "KMRK", "KMT", "KMTS", "KMX", "KN",
-        "KNDI", "KNF", "KNOP", "KNRX", "KNSA", "KNSL", "KNTK", "KNX", "KO", "KOD",
-        "KODK", "KOF", "KOP", "KOPN", "KORE", "KOS", "KOSS", "KOYN", "KOYNU", "KOYNW",
-        "KPLT", "KPLTW", "KPRX", "KPTI", "KR", "KRAQ", "KRAQU", "KRAQW", "KRC", "KREF",
-        "KREF^A", "KRG", "KRKR", "KRMD", "KRMN", "KRNT", "KRNY", "KRO", "KROS", "KRP",
-        "KRRO", "KRSP", "KRT", "KRUS", "KRYS", "KSCP", "KSPI", "KSS", "KT", "KTB",
-        "KTCC", "KTF", "KTH", "KTN", "KTOS", "KTTA", "KTTAW", "KTWO", "KTWOR", "KTWOU",
-        "KULR", "KURA", "KUST", "KVAC", "KVACW", "KVHI", "KVUE", "KVYO", "KW", "KWM",
-        "KWMWW", "KWR", "KXIN", "KYIV", "KYIVW", "KYMR", "KYN", "KYNB", "KYTX", "KZIA",
-        "KZR", "L", "LAB", "LABT", "LAC", "LAD", "LADR", "LAES", "LAFA", "LAKE",
-        "LAMR", "LAND", "LANDO", "LANDP", "LANV", "LAR", "LARK", "LASE", "LASR", "LATA",
-        "LATAU", "LAUR", "LAW", "LAZ", "LB", "LBGJ", "LBRDA", "LBRDK", "LBRDP", "LBRT",
-        "LBRX", "LBTYA", "LBTYB", "LBTYK", "LC", "LCCC", "LCCCU", "LCFY", "LCFYW", "LCID",
-        "LCII", "LCNB", "LCTX", "LCUT", "LDI", "LDOS", "LDP", "LE", "LEA", "LECO",
-        "LEDS", "LEE", "LEG", "LEGH", "LEGN", "LEGO", "LEGT", "LEN", "LENZ", "LEO",
-        "LESL", "LEU", "LEVI", "LEXX", "LFAC", "LFACU", "LFCR", "LFMD", "LFMDP", "LFS",
-        "LFST", "LFT", "LFT^A", "LFUS", "LFVN", "LFWD", "LGCB", "LGCL", "LGCY", "LGHL",
-        "LGI", "LGIH", "LGL", "LGN", "LGND", "LGO", "LGPS", "LGVN", "LH", "LHAI",
-        "LHSW", "LHX", "LI", "LICN", "LIDR", "LIDRW", "LIEN", "LIF", "LIFE", "LII",
-        "LILA", "LILAK", "LIMN", "LIMNW", "LIN", "LINC", "LIND", "LINE", "LINK", "LION",
-        "LIQT", "LITB", "LITE", "LITS", "LIVE", "LIVN", "LIXT", "LKFN", "LKQ", "LKSP",
-        "LKSPR", "LKSPU", "LLY", "LLYVA", "LLYVK", "LMAT", "LMB", "LMFA", "LMND", "LMNR",
-        "LMRI", "LMT", "LNAI", "LNC", "LNC^D", "LND", "LNG", "LNKB", "LNKS", "LNN",
-        "LNSR", "LNT", "LNTH", "LNZA", "LNZAW", "LOAN", "LOAR", "LOB", "LOB^A", "LOBO",
-        "LOCL", "LOCO", "LODE", "LOGI", "LOKV", "LOKVW", "LOMA", "LONA", "LOOP", "LOPE",
-        "LOT", "LOTWW", "LOVE", "LOW", "LPA", "LPAA", "LPAAW", "LPBB", "LPBBW", "LPCN",
-        "LPCV", "LPCVU", "LPG", "LPL", "LPLA", "LPRO", "LPSN", "LPTH", "LPX", "LQDA",
-        "LQDT", "LRCX", "LRE", "LRHC", "LRMR", "LRN", "LSAK", "LSBK", "LSCC", "LSE",
-        "LSF", "LSH", "LSPD", "LSTA", "LSTR", "LTBR", "LTC", "LTH", "LTM", "LTRN",
-        "LTRX", "LTRYW", "LU", "LUCD", "LUCK", "LUCY", "LUCYW", "LUD", "LULU", "LUMN",
-        "LUNG", "LUNR", "LUV", "LUXE", "LVLU", "LVO", "LVS", "LVWR", "LW", "LWAC",
-        "LWACW", "LWAY", "LWLG", "LX", "LXEH", "LXEO", "LXFR", "LXP", "LXP^C", "LXRX",
-        "LXU", "LYB", "LYEL", "LYFT", "LYG", "LYTS", "LYV", "LZ", "LZB", "LZM",
-        "LZMH", "M", "MA", "MAA", "MAA^I", "MAAS", "MAC", "MACI", "MAGN", "MAIA",
-        "MAIN", "MAIR", "MAKO", "MAMA", "MAMO", "MAN", "MANE", "MANH", "MANU", "MAPS",
-        "MAPSW", "MAR", "MARA", "MARPS", "MAS", "MASI", "MASK", "MASS", "MAT", "MATH",
-        "MATV", "MATW", "MATX", "MAX", "MAXN", "MAYS", "MAZE", "MB", "MBAI", "MBAV",
-        "MBAVW", "MBBC", "MBC", "MBI", "MBIN", "MBINL", "MBINM", "MBINN", "MBIO", "MBLY",
-        "MBNKO", "MBOT", "MBRX", "MBUU", "MBVI", "MBVIU", "MBVIW", "MBWM", "MBX", "MC",
-        "MCB", "MCBS", "MCD", "MCFT", "MCGA", "MCGAU", "MCGAW", "MCHB", "MCHP", "MCHPP",
-        "MCHX", "MCI", "MCK", "MCN", "MCO", "MCR", "MCRB", "MCRI", "MCRP", "MCS",
-        "MCW", "MCY", "MD", "MDA", "MDAI", "MDAIW", "MDB", "MDBH", "MDCX", "MDCXW",
-        "MDGL", "MDIA", "MDLN", "MDLZ", "MDRR", "MDT", "MDU", "MDV", "MDV^A", "MDWD",
-        "MDXG", "MDXH", "MEC", "MED", "MEDP", "MEG", "MEGI", "MEGL", "MEHA", "MEI",
-        "MELI", "MENS", "MEOH", "MER^K", "MERC", "MESH", "MESHU", "MESO", "MET", "MET^A",
-        "MET^E", "MET^F", "META", "METC", "METCB", "METCI", "METCZ", "MEVO", "MEVOU", "MEVOW",
-        "MFA", "MFA^B", "MFA^C", "MFAN", "MFAO", "MFC", "MFG", "MFI", "MFIC", "MFICL",
-        "MFIN", "MFM", "MG", "MGA", "MGEE", "MGF", "MGIH", "MGLD", "MGM", "MGN",
-        "MGNI", "MGNX", "MGPI", "MGR", "MGRB", "MGRC", "MGRD", "MGRE", "MGRT", "MGRX",
-        "MGTX", "MGX", "MGY", "MGYR", "MH", "MHD", "MHF", "MHH", "MHK", "MHLA",
-        "MHNC", "MHO", "MI", "MIAX", "MICC", "MIDD", "MIGI", "MIMI", "MIN", "MIND",
-        "MINE", "MIR", "MIRA", "MIRM", "MIST", "MITK", "MITN", "MITP", "MITQ", "MITT",
-        "MITT^A", "MITT^B", "MITT^C", "MIY", "MKC", "MKDW", "MKDWW", "MKL", "MKLY", "MKLYR",
-        "MKLYU", "MKSI", "MKTW", "MKTX", "MKZR", "MLAA", "MLAAU", "MLAAW", "MLAB", "MLAC",
-        "MLACU", "MLCI", "MLCIL", "MLCO", "MLEC", "MLECW", "MLGO", "MLI", "MLKN", "MLM",
-        "MLP", "MLR", "MLSS", "MLTX", "MLYS", "MMA", "MMD", "MMED", "MMI", "MMLP",
-        "MMM", "MMS", "MMSI", "MMT", "MMTX", "MMU", "MMYT", "MNDO", "MNDR", "MNDY",
-        "MNKD", "MNOV", "MNPR", "MNR", "MNRO", "MNSB", "MNSBP", "MNSO", "MNST", "MNTK",
-        "MNTN", "MNTS", "MNTSW", "MNY", "MNYWW", "MO", "MOB", "MOBBW", "MOBX", "MOBXW",
-        "MOD", "MODD", "MOGU", "MOH", "MOLN", "MOMO", "MORN", "MOS", "MOV", "MOVE",
-        "MP", "MPA", "MPAA", "MPB", "MPC", "MPLT", "MPLX", "MPT", "MPTI", "MPU",
-        "MPV", "MPWR", "MPX", "MQ", "MQY", "MRAM", "MRBK", "MRCY", "MRDN", "MREO",
-        "MRK", "MRKR", "MRLN", "MRM", "MRNA", "MRNO", "MRNOW", "MRP", "MRSH", "MRT",
-        "MRTN", "MRVI", "MRVL", "MRX", "MS", "MS^A", "MS^E", "MS^F", "MS^I", "MS^K",
-        "MS^L", "MS^O", "MS^P", "MS^Q", "MSA", "MSAI", "MSAIW", "MSB", "MSBI", "MSBIP",
-        "MSC", "MSCI", "MSD", "MSDL", "MSEX", "MSFT", "MSGE", "MSGM", "MSGS", "MSGY",
-        "MSI", "MSIF", "MSLE", "MSM", "MSN", "MSS", "MSTR", "MSW", "MT", "MTA",
-        "MTAL", "MTB", "MTB^H", "MTB^J", "MTB^K", "MTC", "MTCH", "MTD", "MTDR", "MTEK",
-        "MTEKW", "MTEN", "MTEX", "MTG", "MTH", "MTLS", "MTN", "MTNB", "MTR", "MTRN",
-        "MTRX", "MTSI", "MTUS", "MTVA", "MTW", "MTX", "MTZ", "MU", "MUA", "MUC",
-        "MUFG", "MUJ", "MUR", "MUSA", "MUX", "MUZE", "MUZEU", "MUZEW", "MVBF", "MVIS",
-        "MVO", "MVST", "MVSTW", "MWA", "MWG", "MWH", "MWYN", "MX", "MXC", "MXCT",
-        "MXE", "MXF", "MXL", "MYE", "MYFW", "MYGN", "MYI", "MYN", "MYND", "MYO",
-        "MYPS", "MYPSW", "MYRG", "MYSE", "MYSEW", "MYSZ", "MYXXU", "MZTI", "NAAS", "NABL",
-        "NAC", "NAD", "NAGE", "NAII", "NAK", "NAKA", "NAMI", "NAMM", "NAMMW", "NAMS",
-        "NAMSW", "NAN", "NAT", "NATH", "NATL", "NATR", "NAUT", "NAVI", "NAVN", "NAZ",
-        "NB", "NBB", "NBBK", "NBH", "NBHC", "NBIS", "NBIX", "NBN", "NBP", "NBR",
-        "NBRGR", "NBRGU", "NBTB", "NBTX", "NBXG", "NC", "NCA", "NCDL", "NCEL", "NCEW",
-        "NCI", "NCL", "NCLH", "NCMI", "NCNA", "NCNO", "NCPL", "NCPLW", "NCRA", "NCSM",
-        "NCT", "NCTY", "NCV", "NCV^A", "NCZ", "NCZ^A", "NDAQ", "NDLS", "NDMO", "NDRA",
-        "NDSN", "NE", "NEA", "NECB", "NEE", "NEE^N", "NEE^S", "NEE^T", "NEE^U", "NEE^V",
-        "NEE^W", "NEGG", "NEM", "NEN", "NEO", "NEOG", "NEON", "NEOV", "NEOVW", "NEPH",
-        "NERV", "NESR", "NET", "NEU", "NEUP", "NEWP", "NEWT", "NEWTG", "NEWTH", "NEWTI",
-        "NEWTO", "NEWTP", "NEXA", "NEXM", "NEXN", "NEXR", "NEXRW", "NEXT", "NFBK", "NFE",
-        "NFG", "NFGC", "NFJ", "NFLX", "NG", "NGEN", "NGG", "NGL", "NGL^B", "NGL^C",
-        "NGNE", "NGS", "NGVC", "NGVT", "NHC", "NHI", "NHIC", "NHICU", "NHICW", "NHIVU",
-        "NHP", "NHPAP", "NHPBP", "NHS", "NHTC", "NI", "NIC", "NICE", "NICM", "NIE",
-        "NIM", "NINE", "NIO", "NIOBW", "NIPG", "NIQ", "NIU", "NIVF", "NIVFW", "NIXX",
-        "NIXXW", "NJR", "NKE", "NKLR", "NKSH", "NKTR", "NKTX", "NKX", "NL", "NLOP",
-        "NLY", "NLY^F", "NLY^G", "NLY^I", "NLY^J", "NMAI", "NMAX", "NMCO", "NMFC", "NMFCZ",
-        "NMG", "NMI", "NMIH", "NML", "NMM", "NMP", "NMPAR", "NMPAU", "NMR", "NMRA",
-        "NMRK", "NMS", "NMT", "NMTC", "NMZ", "NN", "NNAVW", "NNBR", "NNDM", "NNE",
-        "NNI", "NNN", "NNNN", "NNOX", "NNVC", "NNY", "NOA", "NOAH", "NOC", "NODK",
-        "NOEM", "NOEMR", "NOEMU", "NOEMW", "NOG", "NOK", "NOM", "NOMA", "NOMD", "NOTV",
-        "NOV", "NOVT", "NOVTU", "NOW", "NP", "NPAC", "NPACU", "NPACW", "NPB", "NPCE",
-        "NPCT", "NPFD", "NPK", "NPKI", "NPO", "NPT", "NPV", "NPWR", "NQP", "NRC",
-        "NRDS", "NRDY", "NREF", "NREF^A", "NRG", "NRGV", "NRIM", "NRIX", "NRK", "NRO",
-        "NRP", "NRSN", "NRSNW", "NRT", "NRUC", "NRXP", "NRXPW", "NRXS", "NSA", "NSA^A",
-        "NSA^B", "NSC", "NSIT", "NSP", "NSPR", "NSRX", "NSSC", "NSTS", "NSYS", "NTAP",
-        "NTB", "NTCL", "NTCT", "NTES", "NTGR", "NTHI", "NTIC", "NTIP", "NTLA", "NTNX",
-        "NTR", "NTRA", "NTRB", "NTRBW", "NTRP", "NTRS", "NTRSO", "NTSK", "NTST", "NTWK",
-        "NTWO", "NTWOW", "NTZ", "NU", "NUAI", "NUAIW", "NUCL", "NUCLW", "NUE", "NUS",
-        "NUTX", "NUV", "NUVB", "NUVL", "NUW", "NUWE", "NVA", "NVAWW", "NVAX", "NVCR",
-        "NVCT", "NVDA", "NVEC", "NVG", "NVGS", "NVMI", "NVNI", "NVNIW", "NVNO", "NVO",
-        "NVR", "NVRI", "NVS", "NVST", "NVT", "NVTS", "NVVE", "NVX", "NWAX", "NWBI",
-        "NWE", "NWFL", "NWG", "NWGL", "NWL", "NWN", "NWPX", "NWS", "NWSA", "NWTG",
-        "NX", "NXDR", "NXDT", "NXDT^A", "NXE", "NXG", "NXGL", "NXGLW", "NXJ", "NXL",
-        "NXP", "NXPI", "NXPL", "NXPLW", "NXRT", "NXST", "NXT", "NXTC", "NXTS", "NXTT",
-        "NXXT", "NYAX", "NYC", "NYT", "NYXH", "NZF", "O", "OABI", "OABIW", "OACC",
-        "OACCU", "OACCW", "OAK^A", "OAK^B", "OBA", "OBAI", "OBAWU", "OBDC", "OBE", "OBIO",
-        "OBK", "OBT", "OBTC", "OC", "OCC", "OCCI", "OCCIM", "OCCIN", "OCCIO", "OCFC",
-        "OCG", "OCGN", "OCS", "OCSAW", "OCSL", "OCUL", "ODC", "ODD", "ODFL", "ODV",
-        "ODVWZ", "ODYS", "OEC", "OESX", "OFAL", "OFG", "OFIX", "OFLX", "OFRM", "OFS",
-        "OFSSH", "OFSSO", "OGC", "OGE", "OGEN", "OGI", "OGN", "OGS", "OHI", "OI",
-        "OIA", "OII", "OIM", "OIMAU", "OIMAW", "OIO", "OIOWW", "OIS", "OKE", "OKLO",
-        "OKTA", "OKUR", "OKYO", "OLB", "OLED", "OLLI", "OLMA", "OLN", "OLOX", "OLP",
-        "OLPX", "OM", "OMAB", "OMC", "OMCL", "OMDA", "OMER", "OMEX", "OMF", "OMH",
-        "OMSE", "ON", "ONB", "ONBPO", "ONBPP", "ONC", "ONCH", "ONCHU", "ONCO", "ONCY",
-        "ONDS", "ONEG", "ONEW", "ONFO", "ONFOW", "ONIT", "ONL", "ONMD", "ONMDW", "ONON",
-        "ONTO", "OOMA", "OPAD", "OPAL", "OPBK", "OPCH", "OPEN", "OPENL", "OPENW", "OPENZ",
-        "OPFI", "OPHC", "OPK", "OPLN", "OPP", "OPP^A", "OPP^B", "OPP^C", "OPRA", "OPRT",
-        "OPRX", "OPTT", "OPTU", "OPTX", "OPTXW", "OPXS", "OPY", "OR", "ORA", "ORBS",
-        "ORC", "ORCL", "ORCL^D", "ORGN", "ORGNW", "ORGO", "ORI", "ORIC", "ORIO", "ORIQ",
-        "ORIQW", "ORIS", "ORKA", "ORKT", "ORLA", "ORLY", "ORMP", "ORN", "ORRF", "OSBC",
-        "OSCR", "OSG", "OSIS", "OSK", "OSPN", "OSRH", "OSRHW", "OSS", "OSTX", "OSUR",
-        "OSW", "OTEX", "OTF", "OTGA", "OTGAU", "OTGAW", "OTH", "OTIS", "OTLK", "OTLY",
-        "OTTR", "OUST", "OUT", "OVBC", "OVID", "OVLY", "OVV", "OWL", "OWLS", "OWLT",
-        "OXBR", "OXLC", "OXLCG", "OXLCI", "OXLCL", "OXLCM", "OXLCN", "OXLCO", "OXLCP", "OXLCZ",
-        "OXM", "OXSQ", "OXSQG", "OXSQH", "OXY", "OYSE", "OYSER", "OZ", "OZK", "OZKAP",
-        "P", "PAA", "PAAC", "PAACU", "PAACW", "PAAS", "PAC", "PACB", "PACH", "PACHW",
-        "PACK", "PACS", "PAG", "PAGP", "PAGS", "PAHC", "PAI", "PAII", "PAL", "PALI",
-        "PALO", "PALOU", "PALOW", "PAM", "PAMT", "PANL", "PANW", "PAPL", "PAR", "PARK",
-        "PARR", "PASG", "PASW", "PATH", "PATK", "PAVM", "PAVS", "PAX", "PAXS", "PAY",
-        "PAYC", "PAYO", "PAYP", "PAYS", "PAYX", "PB", "PBA", "PBF", "PBFS", "PBH",
-        "PBHC", "PBI", "PBI^B", "PBM", "PBMWW", "PBR", "PBT", "PBYI", "PCAP", "PCAPU",
-        "PCAPW", "PCAR", "PCB", "PCF", "PCG", "PCG^A", "PCG^B", "PCG^C", "PCG^D", "PCG^E",
-        "PCG^G", "PCG^H", "PCG^I", "PCG^X", "PCLA", "PCM", "PCN", "PCOR", "PCQ", "PCRX",
-        "PCSA", "PCSC", "PCT", "PCTTU", "PCTTW", "PCTY", "PCVX", "PCYO", "PD", "PDC",
-        "PDCC", "PDD", "PDEX", "PDFS", "PDI", "PDLB", "PDM", "PDO", "PDPA", "PDS",
-        "PDSB", "PDT", "PDX", "PDYN", "PDYNW", "PEB", "PEB^E", "PEB^F", "PEB^G", "PEB^H",
-        "PEBK", "PEBO", "PECO", "PED", "PEG", "PEGA", "PEN", "PENG", "PENN", "PEO",
-        "PEP", "PEPG", "PERF", "PERI", "PESI", "PETS", "PETZ", "PEW", "PFAI", "PFBC",
-        "PFD", "PFE", "PFG", "PFGC", "PFH", "PFIS", "PFL", "PFLT", "PFN", "PFO",
-        "PFS", "PFSA", "PFSI", "PFX", "PFXNZ", "PG", "PGAC", "PGC", "PGEN", "PGNY",
-        "PGP", "PGR", "PGY", "PGYWW", "PGZ", "PH", "PHAR", "PHAT", "PHG", "PHGE",
-        "PHI", "PHIN", "PHIO", "PHK", "PHM", "PHOE", "PHR", "PHUN", "PHVS", "PHXE^",
-        "PI", "PICS", "PII", "PIII", "PIIIW", "PIM", "PINE", "PINE^A", "PINS", "PIPR",
-        "PJT", "PK", "PKBK", "PKE", "PKG", "PKOH", "PKST", "PKX", "PL", "PLAB",
-        "PLAG", "PLAY", "PLBC", "PLBL", "PLBY", "PLCE", "PLD", "PLG", "PLMK", "PLMKW",
-        "PLMR", "PLNT", "PLOW", "PLPC", "PLRX", "PLRZ", "PLSE", "PLSM", "PLTK", "PLTR",
-        "PLUG", "PLUR", "PLUS", "PLUT", "PLX", "PLXS", "PLYX", "PM", "PMAX", "PMCB",
-        "PMEC", "PMI", "PML", "PMM", "PMN", "PMNT", "PMO", "PMT", "PMT^A", "PMT^B",
-        "PMT^C", "PMTR", "PMTRW", "PMTS", "PMTU", "PMTV", "PMTW", "PMVP", "PN", "PNBK",
-        "PNC", "PNFP", "PNFP^A", "PNFP^B", "PNFP^C", "PNI", "PNNT", "PNR", "PNRG", "PNTG",
-        "PNW", "POAS", "POCI", "PODC", "PODD", "POET", "POLA", "POLE", "POLEW", "POM",
-        "PONOU", "PONY", "POOL", "POR", "POST", "POWI", "POWL", "POWW", "POWWP", "PPBT",
-        "PPC", "PPCB", "PPG", "PPHC", "PPIH", "PPL", "PPLC", "PPSI", "PPT", "PPTA",
-        "PR", "PRA", "PRAA", "PRAX", "PRCH", "PRCT", "PRDO", "PRE", "PRFX", "PRG",
-        "PRGO", "PRGS", "PRH", "PRHI", "PRHIZ", "PRI", "PRIF^D", "PRIF^K", "PRIF^L", "PRIM",
-        "PRK", "PRKS", "PRLB", "PRLD", "PRM", "PRMB", "PRME", "PROF", "PROK", "PROP",
-        "PROV", "PRPL", "PRPO", "PRQR", "PRS", "PRSO", "PRSU", "PRT", "PRTA", "PRTC",
-        "PRTH", "PRTS", "PRU", "PRVA", "PRZO", "PSA", "PSA^F", "PSA^G", "PSA^H", "PSA^I",
-        "PSA^J", "PSA^K", "PSA^L", "PSA^M", "PSA^N", "PSA^O", "PSA^P", "PSA^Q", "PSA^R", "PSA^S",
-        "PSBD", "PSEC", "PSEC^A", "PSF", "PSFE", "PSHG", "PSIG", "PSIX", "PSKY", "PSMT",
-        "PSN", "PSNL", "PSNY", "PSNYW", "PSO", "PSQH", "PSTL", "PSTV", "PSX", "PTA",
-        "PTC", "PTCT", "PTEN", "PTGX", "PTHS", "PTLE", "PTLO", "PTN", "PTON", "PTOR",
-        "PTORU", "PTORW", "PTRN", "PTY", "PUBM", "PUK", "PULM", "PUMP", "PURR", "PVH",
-        "PVL", "PVLA", "PW", "PW^A", "PWP", "PWR", "PXED", "PXLW", "PXS", "PYPD",
-        "PYPL", "PYT", "PYXS", "PZG", "PZZA", "Q", "QADRU", "QBTS", "QCLS", "QCOM",
-        "QCRH", "QDEL", "QETA", "QETAR", "QFIN", "QGEN", "QLYS", "QMCO", "QNC", "QNCX",
-        "QNRX", "QNST", "QNTM", "QQQX", "QRHC", "QRVO", "QS", "QSEA", "QSEAU", "QSI",
-        "QSIAW", "QSR", "QTI", "QTRX", "QTTB", "QTWO", "QUAD", "QUBT", "QUCY", "QUIK",
-        "QUMS", "QURE", "QXO", "QXO^B", "R", "RA", "RAAQ", "RAAQU", "RAAQW", "RAC",
-        "RAC/WS", "RACE", "RADX", "RAIL", "RAIN", "RAINW", "RAL", "RAMP", "RAND", "RANG",
-        "RANGR", "RANI", "RAPP", "RARE", "RAVE", "RAY", "RAYA", "RBA", "RBB", "RBBN",
-        "RBC", "RBCAA", "RBKB", "RBLX", "RBNE", "RBRK", "RC", "RC^C", "RC^E", "RCAT",
-        "RCD", "RCEL", "RCG", "RCI", "RCKT", "RCKTW", "RCKY", "RCL", "RCMT", "RCON",
-        "RCS", "RCT", "RCUS", "RDAC", "RDACU", "RDAG", "RDAGU", "RDAGW", "RDCM", "RDDT",
-        "RDGT", "RDHL", "RDI", "RDIB", "RDN", "RDNT", "RDNW", "RDVT", "RDW", "RDWR",
-        "RDY", "RDZN", "RDZNW", "REAL", "REAX", "REBN", "RECT", "REE", "REED", "REFI",
-        "REFR", "REG", "REGCO", "REGCP", "REGN", "REI", "REKR", "RELL", "RELX", "RELY",
-        "RENT", "RENX", "REPL", "REPX", "RERE", "RES", "RETO", "REVB", "REVBW", "REX",
-        "REXR", "REXR^B", "REXR^C", "REYN", "REZI", "RF", "RF^C", "RF^E", "RF^F", "RFAI",
-        "RFAIR", "RFAM", "RFAMU", "RFI", "RFIL", "RFL", "RFM", "RFMZ", "RGA", "RGC",
-        "RGCO", "RGEN", "RGLD", "RGNT", "RGNX", "RGP", "RGR", "RGS", "RGT", "RGTI",
-        "RGTIW", "RH", "RHI", "RHLD", "RHP", "RIBB", "RICK", "RIG", "RIGL", "RILY",
-        "RILYG", "RILYL", "RILYN", "RILYP", "RILYT", "RILYZ", "RIME", "RIO", "RIOT", "RITM",
-        "RITM^A", "RITM^B", "RITM^C", "RITM^D", "RITM^E", "RITM^F", "RITR", "RIV", "RIV^A", "RIVN",
-        "RJET", "RJF", "RKDA", "RKLB", "RKT", "RL", "RLAY", "RLGT", "RLI", "RLJ",
-        "RLJ^A", "RLMD", "RLTY", "RLX", "RLYB", "RM", "RMAX", "RMBI", "RMBS", "RMCF",
-        "RMCO", "RMCOW", "RMD", "RMI", "RMIX", "RMM", "RMMZ", "RMNI", "RMR", "RMSG",
-        "RMSGW", "RMT", "RMTI", "RNA", "RNAC", "RNAZ", "RNG", "RNGR", "RNGT", "RNGTU",
-        "RNGTW", "RNP", "RNR", "RNR^F", "RNR^G", "RNST", "RNTX", "RNW", "RNWWW", "RNXT",
-        "ROAD", "ROC", "ROCK", "ROG", "ROIV", "ROK", "ROKU", "ROL", "ROLR", "ROMA",
-        "ROOT", "ROP", "ROST", "RPAY", "RPC", "RPD", "RPGL", "RPID", "RPM", "RPRX",
-        "RPT", "RPT^C", "RQI", "RR", "RRBI", "RRC", "RRGB", "RRR", "RRX", "RS",
-        "RSF", "RSG", "RSI", "RSKD", "RSSS", "RSVR", "RSVRW", "RTAC", "RTACU", "RTACW",
-        "RTO", "RTX", "RUBI", "RUM", "RUMBW", "RUN", "RUSHA", "RUSHB", "RVI", "RVLV",
-        "RVMD", "RVMDW", "RVP", "RVPH", "RVSB", "RVSN", "RVSNW", "RVT", "RVTY", "RVYL",
-        "RWAY", "RWAYI", "RWAYL", "RWT", "RWT^A", "RWTN", "RWTO", "RWTP", "RWTQ", "RXO",
-        "RXRX", "RXST", "RXT", "RY", "RYAAY", "RYAM", "RYAN", "RYDE", "RYET", "RYM",
-        "RYN", "RYOJ", "RYTM", "RYZ", "RZB", "RZC", "RZLT", "RZLV", "RZLVW", "S",
-        "SA", "SAAQ", "SAAQU", "SAAQW", "SABA", "SABR", "SABS", "SABSW", "SAC", "SACH",
-        "SACH^A", "SAFE", "SAFT", "SAFX", "SAGT", "SAH", "SAIA", "SAIC", "SAIH", "SAIHW",
-        "SAIL", "SAJ", "SAM", "SAMG", "SAN", "SANA", "SANG", "SANM", "SAP", "SAR",
-        "SARO", "SAT", "SATA", "SATL", "SATLW", "SATS", "SAV", "SAY", "SAZ", "SB",
-        "SB^C", "SB^D", "SBAC", "SBC", "SBCF", "SBCWW", "SBET", "SBEV", "SBFG", "SBFM",
-        "SBGI", "SBH", "SBI", "SBLK", "SBLX", "SBR", "SBRA", "SBS", "SBSI", "SBSW",
-        "SBUX", "SBXD", "SCAG", "SCAGW", "SCCD", "SCCE", "SCCF", "SCCG", "SCCO", "SCD",
-        "SCE^G", "SCE^L", "SCE^M", "SCE^N", "SCHL", "SCHW", "SCHW^D", "SCHW^J", "SCI", "SCII",
-        "SCIIR", "SCIIU", "SCKT", "SCL", "SCLX", "SCLXW", "SCM", "SCNI", "SCNX", "SCOR",
-        "SCPQ", "SCPQU", "SCPQW", "SCSC", "SCVL", "SCWO", "SCYX", "SCZM", "SD", "SDA",
-        "SDAWW", "SDEV", "SDGR", "SDHC", "SDHI", "SDHIU", "SDHY", "SDOT", "SDRL", "SDST",
-        "SDSTW", "SE", "SEAL^A", "SEAL^B", "SEAT", "SEATW", "SEB", "SEDG", "SEED", "SEER",
-        "SEG", "SEGG", "SEI", "SEIC", "SELF", "SELX", "SEM", "SEMR", "SENEA", "SENEB",
-        "SENS", "SEPN", "SER", "SERA", "SERV", "SES", "SEV", "SEVN", "SEZL", "SF",
-        "SF^B", "SF^C", "SF^D", "SFB", "SFBC", "SFBS", "SFD", "SFHG", "SFIX", "SFL",
-        "SFM", "SFNC", "SFST", "SFWL", "SG", "SGA", "SGC", "SGHC", "SGHT", "SGI",
-        "SGLY", "SGML", "SGMO", "SGMT", "SGP", "SGRP", "SGRY", "SGU", "SHAK", "SHAZ",
-        "SHBI", "SHC", "SHEL", "SHEN", "SHFS", "SHFSW", "SHG", "SHIM", "SHIP", "SHLS",
-        "SHMD", "SHMDW", "SHO", "SHO^H", "SHO^I", "SHOO", "SHOP", "SHPH", "SHW", "SI",
-        "SIBN", "SID", "SIDU", "SIEB", "SIF", "SIFY", "SIG", "SIGA", "SIGI", "SIGIP",
-        "SII", "SILA", "SILC", "SILO", "SIM", "SIMA", "SIMAW", "SIMO", "SINT", "SION",
-        "SIRI", "SITC", "SITE", "SITM", "SJ", "SJM", "SJT", "SKBL", "SKE", "SKIL",
-        "SKIN", "SKK", "SKLZ", "SKM", "SKT", "SKWD", "SKY", "SKYE", "SKYH", "SKYQ",
-        "SKYT", "SKYW", "SKYX", "SLAB", "SLAI", "SLB", "SLDB", "SLDE", "SLDP", "SLDPW",
-        "SLE", "SLF", "SLG", "SLG^I", "SLGB", "SLGL", "SLGN", "SLI", "SLM", "SLMBP",
-        "SLMT", "SLN", "SLND", "SLNG", "SLNH", "SLNHP", "SLNO", "SLP", "SLQT", "SLRC",
-        "SLS", "SLSN", "SLSR", "SLVM", "SLXN", "SLXNW", "SM", "SMA", "SMBC", "SMBK",
-        "SMC", "SMCI", "SMFG", "SMG", "SMHI", "SMID", "SMJF", "SMMT", "SMP", "SMPL",
-        "SMR", "SMRT", "SMSI", "SMTC", "SMTI", "SMTK", "SMWB", "SMX", "SMXT", "SMXWW",
-        "SN", "SNA", "SNAL", "SNAP", "SNBR", "SNCY", "SND", "SNDA", "SNDK", "SNDL",
-        "SNDR", "SNDX", "SNES", "SNEX", "SNFCA", "SNGX", "SNN", "SNOA", "SNOW", "SNPS",
-        "SNSE", "SNT", "SNTG", "SNTI", "SNWV", "SNX", "SNY", "SNYR", "SO", "SOAR",
-        "SOBO", "SOBR", "SOC", "SOCA", "SOCAU", "SOFI", "SOGP", "SOHU", "SOJC", "SOJD",
-        "SOJE", "SOJF", "SOLS", "SOLV", "SOMN", "SON", "SONM", "SONO", "SONY", "SOPA",
-        "SOPH", "SOR", "SORA", "SORN", "SOS", "SOTK", "SOUL", "SOUN", "SOUNW", "SOWG",
-        "SPAI", "SPB", "SPCB", "SPCE", "SPE", "SPE^C", "SPEG", "SPEGR", "SPEGU", "SPFI",
-        "SPG", "SPG^J", "SPGI", "SPH", "SPHL", "SPHR", "SPIR", "SPKL", "SPKLW", "SPMA",
-        "SPMC", "SPME", "SPNT", "SPOK", "SPOT", "SPPL", "SPRB", "SPRC", "SPRO", "SPRU",
-        "SPRY", "SPSC", "SPT", "SPWH", "SPWR", "SPWRW", "SPXC", "SPXX", "SQFT", "SQFTP",
-        "SQFTW", "SQM", "SQNS", "SR", "SRAD", "SRBK", "SRCE", "SRE", "SREA", "SRFM",
-        "SRG", "SRG^A", "SRI", "SRJN", "SRL", "SRPT", "SRRK", "SRTA", "SRTAW", "SRTS",
-        "SRV", "SRXH", "SRZN", "SSAC", "SSACR", "SSACW", "SSB", "SSBI", "SSD", "SSEA",
-        "SSII", "SSL", "SSM", "SSNC", "SSP", "SSRM", "SSSS", "SSSSL", "SST", "SSTI",
-        "SSTK", "SSYS", "ST", "STAA", "STAG", "STAK", "STBA", "STC", "STE", "STEL",
-        "STEM", "STEP", "STEW", "STEX", "STFS", "STG", "STGW", "STHO", "STI", "STIM",
-        "STK", "STKE", "STKH", "STKL", "STKS", "STLA", "STLD", "STM", "STN", "STNE",
-        "STNG", "STOK", "STRA", "STRC", "STRD", "STRF", "STRK", "STRL", "STRO", "STRR",
-        "STRRP", "STRS", "STRT", "STRW", "STRZ", "STSS", "STSSW", "STT", "STT^G", "STTK",
-        "STUB", "STVN", "STWD", "STX", "STXS", "STZ", "SU", "SUGP", "SUI", "SUIG",
-        "SUIS", "SUMA", "SUMAR", "SUMAU", "SUN", "SUNB", "SUNC", "SUNE", "SUNS", "SUPN",
-        "SUPV", "SUPX", "SURG", "SUUN", "SUZ", "SVAC", "SVACW", "SVAQ", "SVAQU", "SVC",
-        "SVCC", "SVCCW", "SVCO", "SVIV", "SVIVU", "SVIVW", "SVM", "SVRA", "SVRE", "SVREW",
-        "SVRN", "SVV", "SW", "SWAG", "SWAGW", "SWBI", "SWIM", "SWK", "SWKHL", "SWKS",
-        "SWMR", "SWVL", "SWVLW", "SWX", "SWZ", "SXC", "SXI", "SXT", "SXTC", "SXTP",
-        "SXTPW", "SY", "SYBT", "SYF", "SYF^A", "SYF^B", "SYK", "SYM", "SYNA", "SYNX",
-        "SYPR", "SYRE", "SYY", "SZZL", "SZZLR", "SZZLU", "T", "T^A", "T^C", "TAC",
-        "TACH", "TACHW", "TACO", "TACOU", "TACOW", "TACT", "TAK", "TAL", "TALK", "TALKW",
-        "TALO", "TANH", "TAOP", "TAOX", "TAP", "TARA", "TARS", "TASK", "TATT", "TAVI",
-        "TAVIR", "TAYD", "TBB", "TBBB", "TBBK", "TBCH", "TBH", "TBI", "TBLA", "TBLAW",
-        "TBLD", "TBN", "TBPH", "TBRG", "TC", "TCBI", "TCBIO", "TCBK", "TCBS", "TCBX",
-        "TCI", "TCMD", "TCOM", "TCPA", "TCPC", "TCRT", "TCRX", "TCX", "TD", "TDAC",
-        "TDACW", "TDAY", "TDC", "TDF", "TDG", "TDIC", "TDOC", "TDOG", "TDS", "TDS^U",
-        "TDS^V", "TDTH", "TDUP", "TDW", "TDWDR", "TDY", "TE", "TEAD", "TEAM", "TECH",
-        "TECK", "TECX", "TEI", "TEL", "TELA", "TELO", "TEM", "TEN", "TEN^E", "TEN^F",
-        "TENB", "TENX", "TEO", "TER", "TERN", "TEVA", "TEX", "TFC", "TFC^I", "TFC^O",
-        "TFC^R", "TFII", "TFIN", "TFIN^", "TFPM", "TFSL", "TFX", "TG", "TGB", "TGE",
-        "TGEN", "TGHL", "TGL", "TGLS", "TGS", "TGT", "TGTX", "TH", "THC", "THCH",
-        "THFF", "THG", "THH", "THM", "THO", "THQ", "THR", "THRM", "THRY", "THW",
-        "TIC", "TIGO", "TIGR", "TII", "TIL", "TILE", "TIMB", "TIPT", "TISI", "TITN",
-        "TIVC", "TJGC", "TJX", "TK", "TKC", "TKLF", "TKNO", "TKO", "TKR", "TLF",
-        "TLIH", "TLK", "TLN", "TLNC", "TLNCU", "TLNCW", "TLPH", "TLRY", "TLS", "TLSA",
-        "TLSI", "TLSIW", "TLX", "TLYS", "TM", "TMC", "TMCI", "TMCR", "TMCWW", "TMDE",
-        "TMDX", "TME", "TMHC", "TMO", "TMP", "TMQ", "TMTS", "TMTSU", "TMUS", "TMUSI",
-        "TMUSL", "TMUSZ", "TNC", "TNDM", "TNET", "TNGX", "TNK", "TNL", "TNMG", "TNON",
-        "TNXP", "TNYA", "TOI", "TOIIW", "TOL", "TOMZ", "TONX", "TOON", "TOP", "TOPP",
-        "TOPS", "TORO", "TOST", "TOUR", "TOVX", "TOWN", "TOYO", "TPB", "TPC", "TPCS",
-        "TPET", "TPG", "TPGXL", "TPH", "TPL", "TPR", "TPST", "TPTA", "TPVG", "TR",
-        "TRAD", "TRAK", "TRAW", "TRAX", "TRC", "TRDA", "TREE", "TREX", "TRGP", "TRGS",
-        "TRGSR", "TRGSU", "TRI", "TRIB", "TRIN", "TRINI", "TRINZ", "TRIP", "TRMB", "TRMD",
-        "TRMK", "TRN", "TRNO", "TRNR", "TRNS", "TRON", "TROO", "TROW", "TROX", "TRP",
-        "TRS", "TRSG", "TRST", "TRT", "TRTN^A", "TRTN^B", "TRTN^C", "TRTN^D", "TRTN^E", "TRTN^F",
-        "TRTN^G", "TRTX", "TRTX^C", "TRU", "TRUG", "TRUP", "TRV", "TRVG", "TRVI", "TRX",
-        "TS", "TSAT", "TSBK", "TSCO", "TSEM", "TSHA", "TSI", "TSLA", "TSLX", "TSM",
-        "TSN", "TSQ", "TSSI", "TSUI", "TT", "TTAM", "TTAN", "TTC", "TTD", "TTE",
-        "TTEC", "TTEK", "TTGT", "TTI", "TTMI", "TTRX", "TTWO", "TU", "TULP", "TURB",
-        "TUSK", "TUYA", "TV", "TVA", "TVACU", "TVACW", "TVAI", "TVAIR", "TVC", "TVE",
-        "TVGN", "TVGNW", "TVRD", "TVTX", "TW", "TWAV", "TWFG", "TWG", "TWI", "TWIN",
-        "TWLO", "TWLV", "TWLVU", "TWN", "TWO", "TWO^A", "TWO^B", "TWO^C", "TWOD", "TWST",
-        "TX", "TXG", "TXMD", "TXN", "TXNM", "TXO", "TXRH", "TXT", "TY", "TY^",
-        "TYG", "TYGO", "TYL", "TYRA", "TZOO", "U", "UA", "UAA", "UAC", "UAL",
-        "UAMY", "UAN", "UAVS", "UBCP", "UBER", "UBS", "UBSI", "UBXG", "UCAR", "UCB",
-        "UCL", "UCTT", "UDMY", "UDR", "UE", "UEC", "UEIC", "UFCS", "UFG", "UFI",
-        "UFPI", "UFPT", "UG", "UGI", "UGP", "UGRO", "UHAL", "UHG", "UHGWW", "UHS",
-        "UHT", "UI", "UIS", "UK", "UL", "ULBI", "ULCC", "ULH", "ULS", "ULTA",
-        "UMAC", "UMBF", "UMBFO", "UMC", "UMH", "UMH^D", "UNB", "UNCY", "UNF", "UNFI",
-        "UNH", "UNIT", "UNM", "UNMA", "UNP", "UNTY", "UONE", "UONEK", "UP", "UPB",
-        "UPBD", "UPC", "UPLD", "UPS", "UPST", "UPWK", "UPXI", "URBN", "URG", "URGN",
-        "URI", "UROY", "USA", "USAC", "USAR", "USAS", "USAU", "USB", "USB^A", "USB^H",
-        "USB^P", "USB^Q", "USB^R", "USB^S", "USBC", "USCB", "USEA", "USEG", "USFD", "USGO",
-        "USGOW", "USIO", "USLM", "USNA", "USPH", "UTF", "UTG", "UTHR", "UTI", "UTL",
-        "UTMD", "UTSI", "UTZ", "UUU", "UUUU", "UVE", "UVSP", "UVV", "UWMC", "UXIN",
-        "UYSC", "UZD", "UZE", "UZF", "V", "VABK", "VAC", "VACH", "VACHW", "VACI",
-        "VAL", "VALE", "VALN", "VALU", "VANI", "VATE", "VAVX", "VBF", "VBIX", "VBNK",
-        "VC", "VCEL", "VCIG", "VCTR", "VCV", "VCX", "VCYT", "VECO", "VEEA", "VEEAW",
-        "VEEE", "VEEV", "VEL", "VELO", "VENU", "VEON", "VERA", "VERI", "VERU", "VERX",
-        "VET", "VFC", "VFF", "VFL", "VFS", "VFSWW", "VG", "VGAS", "VGASW", "VGI",
-        "VGM", "VGNT", "VGZ", "VHC", "VHCP", "VHCPU", "VHI", "VHUB", "VIA", "VIASP",
-        "VIAV", "VICI", "VICR", "VIK", "VINP", "VIOT", "VIPS", "VIR", "VIRC", "VIRT",
-        "VISN", "VIST", "VITL", "VIV", "VIVO", "VIVS", "VKI", "VKQ", "VKTX", "VLGEA",
-        "VLN", "VLO", "VLRS", "VLT", "VLTO", "VLY", "VLYPN", "VLYPO", "VLYPP", "VMAR",
-        "VMC", "VMD", "VMET", "VMI", "VMO", "VNCE", "VNDA", "VNET", "VNME", "VNMEU",
-        "VNO", "VNO^L", "VNO^M", "VNO^N", "VNO^O", "VNOM", "VNRX", "VNT", "VNTG", "VOC",
-        "VOD", "VOR", "VOXR", "VOYA", "VOYA^B", "VOYG", "VPG", "VPV", "VRA", "VRAX",
-        "VRCA", "VRDN", "VRE", "VREX", "VRM", "VRME", "VRNS", "VRRM", "VRSK", "VRSN",
-        "VRT", "VRTS", "VRTX", "VS", "VSA", "VSAT", "VSCO", "VSEC", "VSECU", "VSEE",
-        "VSEEW", "VSH", "VSME", "VSNT", "VST", "VSTD", "VSTM", "VSTS", "VTAK", "VTEX",
-        "VTGN", "VTIX", "VTMX", "VTN", "VTOL", "VTR", "VTRS", "VTS", "VTSI", "VTVT",
-        "VUZI", "VVOS", "VVR", "VVV", "VVX", "VWAV", "VWAVW", "VYGR", "VYNE", "VYX",
-        "VZ", "VZLA", "W", "WAB", "WABC", "WAFD", "WAFDP", "WAFU", "WAI", "WAL",
-        "WAL^A", "WALD", "WALDW", "WASH", "WAT", "WATT", "WAVE", "WAY", "WB", "WBD",
-        "WBI", "WBS", "WBS^F", "WBS^G", "WBTN", "WBUY", "WBX", "WCC", "WCN", "WCT",
-        "WD", "WDAY", "WDC", "WDFC", "WDH", "WDI", "WDS", "WEA", "WEAV", "WEC",
-        "WELL", "WEN", "WENN", "WENNW", "WERN", "WES", "WEST", "WETH", "WETO", "WEX",
-        "WEYS", "WF", "WFC", "WFC^A", "WFC^C", "WFC^D", "WFC^L", "WFC^Y", "WFC^Z", "WFCF",
-        "WFF", "WFG", "WFRD", "WGO", "WGRX", "WGS", "WGSWW", "WH", "WHD", "WHF",
-        "WHFCL", "WHG", "WHLR", "WHLRD", "WHLRP", "WHR", "WHR^A", "WHWK", "WIA", "WILC",
-        "WIMI", "WINA", "WING", "WIT", "WIW", "WIX", "WK", "WKC", "WKEY", "WKHS",
-        "WKSP", "WLAC", "WLACW", "WLDN", "WLDS", "WLDSW", "WLFC", "WLII", "WLIIU", "WLIIW",
-        "WLK", "WLKP", "WLTH", "WLY", "WLYB", "WM", "WMB", "WMG", "WMK", "WMS",
-        "WMT", "WNC", "WNEB", "WNW", "WOK", "WOLF", "WOOF", "WOR", "WPAC", "WPC",
-        "WPM", "WPP", "WPRT", "WRAP", "WRB", "WRB^E", "WRB^F", "WRB^G", "WRB^H", "WRBY",
-        "WRD", "WRLD", "WRN", "WS", "WSBC", "WSBCO", "WSBF", "WSBK", "WSC", "WSFS",
-        "WSHP", "WSM", "WSO", "WSO/B", "WSR", "WST", "WSTN", "WSTNR", "WSTNU", "WT",
-        "WTBA", "WTF", "WTFC", "WTFCN", "WTG", "WTI", "WTM", "WTO", "WTRG", "WTS",
-        "WTTR", "WTW", "WU", "WULF", "WVE", "WVVI", "WVVIP", "WW", "WWD", "WWR",
-        "WWW", "WXM", "WY", "WYFI", "WYHG", "WYNN", "WYY", "XAIR", "XBIO", "XBIT",
-        "XBP", "XBPEW", "XCBE", "XCBEU", "XCH", "XCUR", "XE", "XEL", "XELB", "XELLL",
-        "XENE", "XERS", "XFLH", "XFLT", "XFOR", "XGN", "XHG", "XHLD", "XHR", "XIFR",
-        "XLO", "XMTR", "XNCR", "XNDU", "XNET", "XOM", "XOMA", "XOMAO", "XOMAP", "XOS",
-        "XOSWW", "XP", "XPEL", "XPER", "XPEV", "XPL", "XPO", "XPOF", "XPON", "XPRO",
-        "XRAY", "XRN", "XRN^A", "XRN^B", "XRPN", "XRPNU", "XRPNW", "XRTX", "XRX", "XRXDW",
-        "XSLL", "XSLLU", "XSLLW", "XTIA", "XTLB", "XTNT", "XWEL", "XWIN", "XXI", "XXII",
-        "XYF", "XYL", "XYZ", "XZO", "YAAS", "YALA", "YB", "YCBD", "YCY", "YDDL",
-        "YDES", "YDESW", "YDKG", "YELP", "YETI", "YEXT", "YHC", "YHGJ", "YHNA", "YHNAR",
-        "YI", "YIBO", "YJ", "YMAT", "YMM", "YMT", "YOOV", "YORW", "YOU", "YOUL",
-        "YPF", "YQ", "YRD", "YSG", "YSS", "YSWY", "YSXT", "YTRA", "YUM", "YUMC",
-        "YXT", "YYAI", "YYGH", "Z", "ZBAI", "ZBAO", "ZBH", "ZBIO", "ZBRA", "ZCMD",
-        "ZD", "ZDAI", "ZDGE", "ZENA", "ZEO", "ZEOWW", "ZEPP", "ZETA", "ZG", "ZGN",
-        "ZH", "ZIM", "ZION", "ZIONP", "ZIP", "ZJK", "ZJYL", "ZKH", "ZKIN", "ZKP",
-        "ZKPW", "ZLAB", "ZM", "ZNB", "ZNTL", "ZONE", "ZOOZ", "ZOOZW", "ZS", "ZSPC",
-        "ZSTK", "ZTEK", "ZTG", "ZTO", "ZTR", "ZTS", "ZUMZ", "ZURA", "ZVIA", "ZVRA",
-        "ZWS", "ZYBT", "ZYME",
+        "CNQ.TO","SU.TO","CVE.TO","ENB.TO","TRP.TO","PPL.TO","AEM.TO","ABX.TO","FNV.TO","WPM.TO",
+        "BMO.TO","BNS.TO","CM.TO","NA.TO","RY.TO","TD.TO","MFC.TO","SLF.TO","FFH.TO","GWO.TO",
+        "SHOP.TO","CSU.TO","CAE.TO","CGI.TO","OTEX.TO","KXS.TO","DSG.TO","DND.TO","MDA.TO","LSPD.TO",
+        "CP.TO","CNR.TO","FTS.TO","H.TO","EMA.TO","CU.TO","AQN.TO","BEP-PR-M.TO","NPI.TO","INE.TO",
+        "L.TO","DOL.TO","EMP-A.TO","ATD.TO","MRU.TO","QSR.TO","GFL.TO","WCN.TO","STN.TO","SJ.TO",
+        "BAM.TO","BN.TO","IFC.TO","POW.TO","EQB.TO","IAG.TO","X.TO","NTR.TO","AG.TO","LUN.TO",
     ]
 
 
-def _cad_seed():
-    # Auto-generated by fetch_tsx_tickers.py — 2226 TSX listings
+def _usd_priority():
+    """Top ~500 NYSE/NASDAQ names worth analyzing daily."""
     return [
-        "AAB.TO", "AAPL.TO", "AAPU.TO", "AAUC.TO", "AAV.TO", "ABBV.TO", "ABHI.TO", "ABNB.TO", "ABRA.TO", "ABT.TO", "ABX.TO", "ABXU.TO", "ABXX.TO", "AC.TO", "ACAA.TO", "ACB.TO", "ACD.TO", "ACO-X.TO", "ACQ.TO", "ACX.TO", "AD-DB-A.TO", "ADBE.TO", "ADCO.TO", "ADEN.TO", "ADIV.TO", "ADN.TO", "ADW-A.TO", "AEG.TO", "AEM.TO", "AEME.TO",
-        "AFN.TO", "AG.TO", "AGCC.TO", "AGF-B.TO", "AGG.TO", "AGI.TO", "AGMR.TO", "AGSL.TO", "AGTF.TO", "AI.TO", "AIAI.TO", "AIDX.TO", "AIF.TO", "AII.TO", "AIM.TO", "AIQ.TO", "AKT-A.TO", "ALA.TO", "ALC.TO", "ALK.TO", "ALPU.TO", "ALS.TO", "ALYA.TO", "ALZ.TO", "AMAT.TO", "AMAX.TO", "AMC.TO", "AMD.TO", "AMDY.TO", "AMGN.TO",
-        "AMGR.TO", "AMHE.TO", "AMZH.TO", "AMZN.TO", "AMZU.TO", "ANET.TO", "ANRG.TO", "AP-UN.TO", "APH.TO", "APLE.TO", "APLI.TO", "APM.TO", "APPS.TO", "APR-UN.TO", "APS.TO", "AQN.TO", "ARA.TO", "ARB.TO", "ARE.TO", "ARG.TO", "ARIS.TO", "ARTI.TO", "ARX.TO", "ASCU.TO", "ASM.TO", "ASML.TO", "ASTL.TO", "ATD.TO", "ATH.TO", "ATRL.TO",
-        "ATS.TO", "ATSX.TO", "ATX.TO", "ATZ.TO", "AUGB-F.TO", "AUMN.TO", "AVCN.TO", "AVGO.TO", "AVGY.TO", "AVL.TO", "AVNT.TO", "AW.TO", "AXP.TO", "AYA.TO", "AZO.TO", "BA.TO", "BAAA.TO", "BABY.TO", "BAM.TO", "BAMI.TO", "BANK.TO", "BASE.TO", "BB.TO", "BBBB.TO", "BBD-A.TO", "BBUC.TO", "BCE.TO", "BCEE.TO", "BCHI.TO", "BCHT.TO",
-        "BCT.TO", "BDGI.TO", "BDI.TO", "BDIV.TO", "BDT.TO", "BEI-UN.TO", "BEK-B.TO", "BENZ.TO", "BEP-PR-M.TO", "BEPC.TO", "BEPR.TO", "BESG.TO", "BFIN.TO", "BGAU.TO", "BGC.TO", "BGI-UN.TO", "BGIE.TO", "BGU.TO", "BHC.TO", "BIGY.TO", "BIP-PR-E.TO", "BIPC.TO", "BIR.TO", "BITI.TO", "BIVC.TO", "BIVU.TO", "BK.TO", "BKCC.TO", "BKCL.TO", "BKI.TO",
-        "BKNG.TO", "BLCK.TO", "BLCO.TO", "BLDP.TO", "BLK.TO", "BLKY.TO", "BLN.TO", "BLOV.TO", "BLX.TO", "BMAX.TO", "BMO.TO", "BMW.TO", "BN.TO", "BNC.TO", "BND.TO", "BNE.TO", "BNG.TO", "BNK.TO", "BNKL.TO", "BNKR.TO", "BNKU.TO", "BNS.TO", "BNT.TO", "BOFA.TO", "BOIL.TO", "BOND.TO", "BOS.TO", "BPF-UN.TO", "BPO-PR-A.TO", "BPRF.TO",
-        "BPS-PR-A.TO", "BPYP-PR-A.TO", "BR.TO", "BRAG.TO", "BRE.TO", "BRF-PR-A.TO", "BRK.TO", "BRY.TO", "BSKT.TO", "BSX.TO", "BTB-DB-I.TO", "BTCC.TO", "BTCO-B.TO", "BTCQ.TO", "BTCX.TO", "BTCY.TO", "BTE.TO", "BTO.TO", "BU.TO", "BX.TO", "BXF.TO", "BYD.TO", "BYL.TO", "CACB.TO", "CACE.TO", "CADE.TO", "CAE.TO", "CAEM.TO", "CAGE.TO", "CAGG.TO",
-        "CAGS.TO", "CALB.TO", "CALL.TO", "CALV.TO", "CANL.TO", "CANY.TO", "CAPG.TO", "CAPI.TO", "CAPM.TO", "CAPW.TO", "CAR-UN.TO", "CARS.TO", "CAS.TO", "CASH.TO", "CASV.TO", "CATR.TO", "CAUS.TO", "CAUV.TO", "CBAL.TO", "CBAP.TO", "CBCX.TO", "CBGR.TO", "CBH.TO", "CBIL.TO", "CBIN.TO", "CBL.TO", "CBLN.TO", "CBND.TO", "CBNK.TO", "CBO.TO",
-        "CBUG.TO", "CCA.TO", "CCAD.TO", "CCBD.TO", "CCBI.TO", "CCCB.TO", "CCCX.TO", "CCDC.TO", "CCEI.TO", "CCHI.TO", "CCL-A.TO", "CCM.TO", "CCNS.TO", "CCNV.TO", "CCO.TO", "CCOE.TO", "CCOM.TO", "CCON.TO", "CCOU.TO", "CCRE.TO", "CCS-PR-C.TO", "CDE.TO", "CDEF.TO", "CDIV.TO", "CDLB.TO", "CDR.TO", "CDZ.TO", "CEF.TO", "CEGS.TO", "CEMI.TO",
-        "CEMX.TO", "CEQP.TO", "CEQT.TO", "CEQY.TO", "CEU.TO", "CEW.TO", "CF.TO", "CFF.TO", "CFLX.TO", "CFOD.TO", "CFOU.TO", "CFP.TO", "CFRN.TO", "CFRT.TO", "CFW.TO", "CG.TO", "CGAA.TO", "CGBI.TO", "CGDI.TO", "CGDV.TO", "CGG.TO", "CGHY.TO", "CGI.TO", "CGIN.TO", "CGL.TO", "CGLO.TO", "CGMD.TO", "CGMU.TO", "CGO.TO", "CGQD-B.TO",
-        "CGR.TO", "CGRA.TO", "CGRB.TO", "CGRE.TO", "CGRN.TO", "CGRO.TO", "CGRW.TO", "CGX.TO", "CGXF.TO", "CGY.TO", "CHE-DB-H.TO", "CHEV.TO", "CHNA-B.TO", "CHP-UN.TO", "CHPS.TO", "CHQQ.TO", "CHR.TO", "CIA.TO", "CIAI.TO", "CIBR.TO", "CIC.TO", "CIEH.TO", "CIEI.TO", "CIEM.TO", "CIF.TO", "CIGI.TO", "CINF.TO", "CINT.TO", "CINV.TO", "CITI.TO",
-        "CIU-PR-A.TO", "CJ.TO", "CJR-B.TO", "CJT.TO", "CKI.TO", "CLCH.TO", "CLF.TO", "CLG.TO", "CLHI.TO", "CLML.TO", "CLS.TO", "CLSA.TO", "CM.TO", "CMAG.TO", "CMAR.TO", "CMAX.TO", "CMCC.TO", "CMCL.TO", "CMCX.TO", "CMDO.TO", "CMEY.TO", "CMG.TO", "CMGG.TO", "CMGS.TO", "CMNY.TO", "CMOM.TO", "CMR.TO", "CMVP.TO", "CNAO.TO", "CNCC.TO",
-        "CNCL.TO", "CNDD.TO", "CNDI.TO", "CNDU.TO", "CNDX.TO", "CNL.TO", "CNQ.TO", "CNQE.TO", "CNQU.TO", "CNR.TO", "CNT.TO", "CNV.TO", "CNYE.TO", "COID.TO", "COIL.TO", "COIN.TO", "COIU.TO", "COLA.TO", "COMM.TO", "COMU.TO", "COMX.TO", "CONY.TO", "COP-U.TO", "COPP.TO", "COPR.TO", "CORE.TO", "COST.TO", "COSY.TO", "COW.TO", "CP.TO",
-        "CPCC.TO", "CPD.TO", "CPH.TO", "CPKR.TO", "CPLS.TO", "CPX.TO", "CQHI.TO", "CRCY.TO", "CRDL.TO", "CRED.TO", "CRHI.TO", "CRM.TO", "CROC.TO", "CRON.TO", "CROP.TO", "CRR-UN.TO", "CRRX.TO", "CRT-UN.TO", "CRWD.TO", "CRWN.TO", "CRWV.TO", "CRWY.TO", "CS.TO", "CSAV.TO", "CSBI.TO", "CSCI.TO", "CSCO.TO", "CSE-PR-A.TO", "CSH-UN.TO", "CSHI.TO",
-        "CSMD.TO", "CSU.TO", "CSUC.TO", "CSUU.TO", "CSW-A.TO", "CTC.TO", "CTF-UN.TO", "CTGO.TO", "CTMA.TO", "CTMB.TO", "CTMC.TO", "CTX.TO", "CU.TO", "CUBD.TO", "CUD.TO", "CUDC.TO", "CUDV.TO", "CUEH.TO", "CUEI.TO", "CUIG.TO", "CUP-U.TO", "CURA.TO", "CUSD-U.TO", "CUTL.TO", "CVD.TO", "CVE.TO", "CVG.TO", "CVLU.TO", "CVO.TO", "CVS.TO",
-        "CVVY.TO", "CWEB.TO", "CWIN.TO", "CWL.TO", "CWW.TO", "CXF.TO", "CXI.TO", "CYB.TO", "CYBR.TO", "CYH.TO", "D-UN.TO", "DAMG.TO", "DANC.TO", "DATA.TO", "DBM.TO", "DBO.TO", "DC-A.TO", "DCBC.TO", "DCBO.TO", "DCC.TO", "DCG.TO", "DCM.TO", "DCP.TO", "DCS.TO", "DCU.TO", "DEER.TO", "DF.TO", "DFN.TO", "DFY.TO", "DGLM.TO",
-        "DGR.TO", "DGRC.TO", "DGS.TO", "DHI.TO", "DHT-U.TO", "DIAM.TO", "DII-A.TO", "DIR-UN.TO", "DIS.TO", "DISC.TO", "DIV.TO", "DIVS.TO", "DLCG.TO", "DLR.TO", "DMEC.TO", "DMEE.TO", "DMEI.TO", "DMEU.TO", "DMID.TO", "DML.TO", "DMQC.TO", "DND.TO", "DNG.TO", "DOL.TO", "DOO.TO", "DPM.TO", "DR.TO", "DRCU.TO", "DRFC.TO", "DRFD.TO",
-        "DRFE.TO", "DRFG.TO", "DRFU.TO", "DRM.TO", "DRMC.TO", "DRMD.TO", "DRME.TO", "DRMU.TO", "DRT.TO", "DRX.TO", "DS.TO", "DSG.TO", "DSV.TO", "DTOL.TO", "DUIG.TO", "DXAU.TO", "DXB.TO", "DXBB.TO", "DXBC.TO", "DXBG.TO", "DXBU.TO", "DXC.TO", "DXCB.TO", "DXCO.TO", "DXCP.TO", "DXDB.TO", "DXDU-U.TO", "DXEM.TO", "DXF.TO", "DXG.TO",
-        "DXGE.TO", "DXID.TO", "DXIF.TO", "DXMO.TO", "DXN.TO", "DXO.TO", "DXP.TO", "DXQ.TO", "DXR.TO", "DXRE.TO", "DXT.TO", "DXU.TO", "DXUS.TO", "DXV.TO", "DXW.TO", "DXZ.TO", "DYA.TO", "E.TO", "EAGR.TO", "EARN.TO", "EASY.TO", "EBIT.TO", "EBNK.TO", "ECHI.TO", "ECN-DB-A.TO", "ECO.TO", "ECOR.TO", "EDGE.TO", "EDGF.TO", "EDR.TO",
-        "EDT.TO", "EDV.TO", "EFN.TO", "EFR.TO", "EFX.TO", "EGIF.TO", "EGLX.TO", "EHE.TO", "EIF.TO", "EIT-PR-A.TO", "ELD.TO", "ELE.TO", "ELEF.TO", "ELF.TO", "ELO.TO", "ELR.TO", "ELVA.TO", "EMA.TO", "EMAX.TO", "EMP-A.TO", "EMV-B.TO", "ENB.TO", "ENBE.TO", "ENCC.TO", "ENCL.TO", "ENGH.TO", "ENHI.TO", "ENI-UN.TO", "ENS.TO", "EPRX.TO",
-        "EQB.TO", "EQCC.TO", "EQCL.TO", "EQL.TO", "EQLI.TO", "EQLT.TO", "EQX.TO", "EQY.TO", "ERD.TO", "ERO.TO", "ESG.TO", "ESGA.TO", "ESGB.TO", "ESGC.TO", "ESGE.TO", "ESGF.TO", "ESGG.TO", "ESGY.TO", "ESI.TO", "ESM.TO", "ESP.TO", "ESPX.TO", "ET.TO", "ETC.TO", "ETG.TO", "ETHH.TO", "ETHI.TO", "ETHO-B.TO", "ETHQ.TO", "ETHR.TO",
-        "ETHX.TO", "ETHY.TO", "ETP.TO", "ETSX.TO", "EVO.TO", "EVT.TO", "EXE.TO", "F.TO", "FAP.TO", "FAR.TO", "FAUS.TO", "FBGO.TO", "FBT.TO", "FBTC.TO", "FC.TO", "FCAB.TO", "FCAE.TO", "FCCD.TO", "FCCQ.TO", "FCCV.TO", "FCD-UN.TO", "FCGI.TO", "FCID.TO", "FCII.TO", "FCIQ.TO", "FCIV.TO", "FCMI.TO", "FCQH.TO", "FCR-UN.TO", "FCRC.TO",
-        "FCRI.TO", "FCRR.TO", "FCRU.TO", "FCUB.TO", "FCUD.TO", "FCUH.TO", "FCUQ.TO", "FCUV.TO", "FCVH.TO", "FCXS.TO", "FDL.TO", "FDN.TO", "FDY.TO", "FEBB-F.TO", "FEC.TO", "FEMO.TO", "FETH.TO", "FF.TO", "FFAB.TO", "FFH.TO", "FFM.TO", "FFN.TO", "FGBL.TO", "FGCV.TO", "FGEB.TO", "FGEP.TO", "FGO.TO", "FGOV.TO", "FGRW.TO", "FGSM.TO",
-        "FHG.TO", "FHH.TO", "FHI.TO", "FHIS.TO", "FHQ.TO", "FIE.TO", "FIG.TO", "FIH-U.TO", "FINC.TO", "FINO.TO", "FINT.TO", "FISV.TO", "FLCI.TO", "FLCP.TO", "FLGA.TO", "FLI.TO", "FLNT.TO", "FLSD.TO", "FLSE.TO", "FLT.TO", "FLUS.TO", "FLX.TO", "FM.TO", "FMAB.TO", "FMAE.TO", "FMAX.TO", "FMPB.TO", "FMPG.TO", "FMPI.TO", "FMR.TO",
-        "FNV.TO", "FOOD.TO", "FORA.TO", "FPR.TO", "FRU.TO", "FRX.TO", "FSB.TO", "FSF.TO", "FSL.TO", "FST.TO", "FSV.TO", "FSY.TO", "FSZ.TO", "FT.TO", "FTG.TO", "FTHI.TO", "FTLS.TO", "FTN.TO", "FTS.TO", "FTT.TO", "FTU.TO", "FUD.TO", "FURY.TO", "FVI.TO", "FVL.TO", "FXM.TO", "GASD.TO", "GASU.TO", "GASX.TO", "GAU.TO",
-        "GBAL.TO", "GBSL.TO", "GBT.TO", "GBUL.TO", "GCBD.TO", "GCEI.TO", "GCFE.TO", "GCNS.TO", "GCSC.TO", "GCTB.TO", "GCU.TO", "GDC.TO", "GDL.TO", "GDV.TO", "GDXD.TO", "GDXU.TO", "GE.TO", "GEC.TO", "GEI.TO", "GENM.TO", "GEO.TO", "GEQT.TO", "GEV.TO", "GFGE.TO", "GFL.TO", "GFP.TO", "GFR.TO", "GGD.TO", "GGEP.TO", "GGPY.TO",
-        "GGRO.TO", "GH.TO", "GIB-A.TO", "GIDY.TO", "GIES.TO", "GIGC.TO", "GIL.TO", "GILD.TO", "GIQG.TO", "GIUS.TO", "GLCC.TO", "GLCL.TO", "GLDD.TO", "GLDE.TO", "GLDU.TO", "GLDX.TO", "GLO.TO", "GMIN.TO", "GMX.TO", "GO-U.TO", "GOGY.TO", "GOHI.TO", "GOLD.TO", "GOOG.TO", "GOOS.TO", "GRA.TO", "GRC.TO", "GRCC.TO", "GRGD.TO", "GRID.TO",
-        "GRN.TO", "GRO.TO", "GRT-UN.TO", "GS.TO", "GSDB.TO", "GSY.TO", "GTE.TO", "GTRI.TO", "GTWO.TO", "GUD.TO", "GURU.TO", "GUTB-U.TO", "GVC.TO", "GWO.TO", "H.TO", "HAB.TO", "HAC.TO", "HAD.TO", "HAF.TO", "HAI.TO", "HAL.TO", "HALO.TO", "HAZ.TO", "HBA.TO", "HBAL.TO", "HBB.TO", "HBDV.TO", "HBF.TO", "HBGD.TO", "HBIE.TO",
-        "HBIG.TO", "HBIL.TO", "HBLK.TO", "HBM.TO", "HBND.TO", "HBNK.TO", "HBOP.TO", "HBP.TO", "HBTA.TO", "HCA.TO", "HCAL.TO", "HCLN.TO", "HCON.TO", "HCRE.TO", "HD.TO", "HDGE.TO", "HDIF.TO", "HDIV.TO", "HEB.TO", "HEQL.TO", "HEQT.TO", "HERO.TO", "HEWB.TO", "HFG.TO", "HFIN.TO", "HFN.TO", "HFPC-U.TO", "HFR.TO", "HGGG.TO", "HGR.TO",
-        "HGRW.TO", "HGY.TO", "HHIC.TO", "HHIH.TO", "HHIS.TO", "HHL.TO", "HHLE.TO", "HIG.TO", "HIND.TO", "HISU-U.TO", "HIVE.TO", "HLF.TO", "HLIF.TO", "HLIT.TO", "HLPR.TO", "HLS.TO", "HMAX.TO", "HMM-A.TO", "HMMJ.TO", "HMP.TO", "HND.TO", "HNU.TO", "HOD.TO", "HODY.TO", "HOM-U.TO", "HON.TO", "HOOD.TO", "HOT-DB-V.TO", "HOU.TO", "HPF.TO",
-        "HPR.TO", "HPS-A.TO", "HPYB.TO", "HPYE.TO", "HPYM.TO", "HPYT.TO", "HR-UN.TO", "HRIF.TO", "HRMS.TO", "HSAV.TO", "HSH.TO", "HSLV.TO", "HSUV-U.TO", "HTA.TO", "HTAE.TO", "HTB.TO", "HUBL.TO", "HUC.TO", "HUG.TO", "HULC.TO", "HUM.TO", "HUN.TO", "HURA.TO", "HUT.TO", "HUTE.TO", "HUTL.TO", "HUTS.TO", "HUZ.TO", "HVOI.TO", "HVOL.TO",
-        "HWO.TO", "HWX.TO", "HXCN.TO", "HXDM.TO", "HXE.TO", "HXEM.TO", "HXF.TO", "HXH.TO", "HXQ.TO", "HXS.TO", "HXT.TO", "HXX.TO", "HYBR.TO", "HYLD.TO", "IAG.TO", "IAU.TO", "IBM.TO", "ICAE.TO", "ICCB.TO", "ICE.TO", "ICGB.TO", "ICPB.TO", "IDEF-B.TO", "IDIV-B.TO", "IE.TO", "IFA.TO", "IFC.TO", "IFP.TO", "IFRF.TO", "IGAF.TO",
-        "IGB.TO", "IGBT-UN.TO", "IGCF.TO", "IGEO.TO", "IGET.TO", "IGM.TO", "IIAE.TO", "IICE.TO", "III.TO", "IIMF.TO", "IIP-UN.TO", "ILGB.TO", "ILLM.TO", "IMAX.TO", "IMFE.TO", "IMG.TO", "IMO.TO", "IMP.TO", "INAI.TO", "INC-UN.TO", "INCM.TO", "INFR.TO", "INGS.TO", "INHI.TO", "INO-UN.TO", "INOC.TO", "INTC.TO", "INTU.TO", "INTY.TO", "IPCO.TO",
-        "IPO.TO", "IQD.TO", "IS.TO", "ISC.TO", "ISCB.TO", "ISIF.TO", "ISO.TO", "ISRG.TO", "ITH.TO", "ITIN.TO", "IUAE.TO", "IUFR-U.TO", "IUMF.TO", "IVN.TO", "IVQ.TO", "IWBE.TO", "IWEB.TO", "JAG.TO", "JAPN.TO", "JAVA.TO", "JBND.TO", "JCOR.TO", "JEPH.TO", "JEPI.TO", "JEPQ.TO", "JFS-UN.TO", "JGLO.TO", "JGRO.TO", "JIDE.TO", "JNJ.TO",
-        "JNJY.TO", "JOY.TO", "JPHE.TO", "JPM.TO", "JPQH.TO", "JPST.TO", "JWEL.TO", "K.TO", "KBL.TO", "KEEL.TO", "KEI.TO", "KEL.TO", "KEY.TO", "KGHI.TO", "KILO.TO", "KITS.TO", "KKR.TO", "KLAC.TO", "KLS.TO", "KMP-UN.TO", "KNGC.TO", "KNGG.TO", "KNGU.TO", "KNGX.TO", "KNT.TO", "KPT.TO", "KRN.TO", "KSI.TO", "KXS.TO", "L.TO",
-        "LABS.TO", "LAC.TO", "LAM.TO", "LAR.TO", "LAS-A.TO", "LB.TO", "LBIT.TO", "LBS.TO", "LCFS.TO", "LCS.TO", "LEAD.TO", "LETH.TO", "LFE.TO", "LGD.TO", "LGO.TO", "LIF.TO", "LIFE.TO", "LLHE.TO", "LLY.TO", "LLYH.TO", "LMAX.TO", "LMCU.TO", "LMT.TO", "LNF.TO", "LNR.TO", "LONG.TO", "LORL.TO", "LOVE.TO", "LPAY.TO", "LRCX.TO",
-        "LSPD.TO", "LUC.TO", "LUG.TO", "LULU.TO", "LUN.TO", "LVMH.TO", "LYCT.TO", "LYFR.TO", "LYUV-U.TO", "MA.TO", "MAAA.TO", "MAEC.TO", "MAGV.TO", "MAK-U.TO", "MAL.TO", "MALX.TO", "MARI.TO", "MART.TO", "MATR.TO", "MAU.TO", "MAUG.TO", "MAUV.TO", "MAYB-F.TO", "MBAL.TO", "MBAP.TO", "MBQG.TO", "MBX.TO", "MCAD.TO", "MCAN.TO", "MCAP.TO",
-        "MCB.TO", "MCDS.TO", "MCLC.TO", "MCLV.TO", "MCON.TO", "MCOR.TO", "MCSB.TO", "MCSM.TO", "MCYC.TO", "MDA.TO", "MDEF.TO", "MDI.TO", "MDIF.TO", "MDIV.TO", "MDNA.TO", "MDP.TO", "MDS-UN.TO", "MEDX.TO", "MEME-B.TO", "MEQ.TO", "MEQT.TO", "MER.TO", "META.TO", "METE.TO", "MFC.TO", "MFI.TO", "MFT.TO", "MFUN.TO", "MG.TO", "MGA.TO",
-        "MGAB.TO", "MGAP.TO", "MGB.TO", "MGDV.TO", "MGQE.TO", "MGRW.TO", "MHC-U.TO", "MHCD.TO", "MHDC.TO", "MHDU.TO", "MI-UN.TO", "MIC-PR-A.TO", "MID-UN.TO", "MIDB.TO", "MINF.TO", "MINT.TO", "MIPC.TO", "MIQE.TO", "MIVG.TO", "MIX.TO", "MKB.TO", "MKP.TO", "MKZ-UN.TO", "MMAC.TO", "MMMM.TO", "MMP-UN.TO", "MNO.TO", "MNS.TO", "MNT.TO", "MNU-U.TO",
-        "MNXT.TO", "MNY.TO", "MOAT.TO", "MOLY.TO", "MORE.TO", "MPAY.TO", "MPC.TO", "MPCT-DB.TO", "MPVD.TO", "MPY.TO", "MRC.TO", "MRD.TO", "MRE.TO", "MREL.TO", "MRG-DB-B.TO", "MRK.TO", "MRT-DB-A.TO", "MRU.TO", "MRV.TO", "MS.TO", "MSA.TO", "MSBP.TO", "MSCL.TO", "MSFH.TO", "MSFT.TO", "MSFU.TO", "MSHE.TO", "MSTE.TO", "MSTR.TO", "MSTU.TO",
-        "MSTY.TO", "MSTZ.TO", "MSV.TO", "MTBA.TO", "MTBB.TO", "MTEK.TO", "MTL.TO", "MTRX.TO", "MTY.TO", "MU.TO", "MUB.TO", "MULC.TO", "MULV.TO", "MUMC.TO", "MUSA.TO", "MUSC.TO", "MUSD-U.TO", "MUX.TO", "MWLV.TO", "MX.TO", "MXG.TO", "NA.TO", "NACO.TO", "NALT.TO", "NANO.TO", "NBAL.TO", "NBBX.TO", "NBCG.TO", "NBCU.TO", "NBCX.TO",
-        "NBEM.TO", "NBGE.TO", "NBIE.TO", "NBIV.TO", "NBIX.TO", "NBND.TO", "NBQC.TO", "NBSC.TO", "NBUE.TO", "NBUX.TO", "NCF.TO", "NCPB.TO", "NDIV.TO", "NDM.TO", "NEE.TO", "NEO.TO", "NEXT.TO", "NFI.TO", "NFLX.TO", "NFLY.TO", "NG.TO", "NGEX.TO", "NGPE.TO", "NHYB.TO", "NINT.TO", "NINV.TO", "NKE.TO", "NMBL.TO", "NMEQ.TO", "NMGR.TO",
-        "NMMO.TO", "NMNG.TO", "NNRG.TO", "NOA.TO", "NOC.TO", "NOU.TO", "NOVB-F.TO", "NOVO.TO", "NOVY.TO", "NOWS.TO", "NPI.TO", "NPK.TO", "NPRF.TO", "NPS.TO", "NREA.TO", "NRGD.TO", "NRGI.TO", "NRGU.TO", "NRGY.TO", "NRR-UN.TO", "NSAV.TO", "NSCB.TO", "NSCC.TO", "NSCE.TO", "NSDG.TO", "NSDI.TO", "NSDU.TO", "NSGE.TO", "NSSB.TO", "NSTL.TO",
-        "NTGA.TO", "NTGB.TO", "NTGC.TO", "NTGD.TO", "NTGE.TO", "NTGF.TO", "NTR.TO", "NUAG.TO", "NUBF.TO", "NUSA.TO", "NVDA.TO", "NVDD.TO", "NVDH.TO", "NVDU.TO", "NVHE.TO", "NVHI.TO", "NVO.TO", "NVS.TO", "NWC.TO", "NXE.TO", "NXF.TO", "NXR-UN.TO", "NXTG.TO", "NYSX.TO", "OBE.TO", "OCG.TO", "OGC.TO", "OGD.TO", "OGI.TO", "OILD.TO",
-        "OILU.TO", "OILY.TO", "OLA.TO", "OLY.TO", "OM.TO", "ONEB.TO", "ONEC.TO", "ONEQ.TO", "ONEX.TO", "OR.TO", "ORAC.TO", "ORBX.TO", "ORCY.TO", "ORE.TO", "ORIO.TO", "ORV.TO", "OTEX.TO", "OVV.TO", "OXY.TO", "PAAS.TO", "PABF.TO", "PACF.TO", "PAGF.TO", "PANW.TO", "PAVE.TO", "PAYF.TO", "PAYG.TO", "PAYL.TO", "PAYM.TO", "PAYS.TO",
-        "PBAL.TO", "PBD.TO", "PBH.TO", "PBI.TO", "PBL.TO", "PBY-UN.TO", "PCON.TO", "PCOR.TO", "PD.TO", "PDC.TO", "PDF.TO", "PDI.TO", "PDIV.TO", "PDN.TO", "PDV.TO", "PEP.TO", "PET.TO", "PEY.TO", "PFAA.TO", "PFAE.TO", "PFCB.TO", "PFCO.TO", "PFE.TO", "PFIA.TO", "PFIG.TO", "PFIN.TO", "PFL.TO", "PFLS.TO", "PFMN.TO", "PFMS.TO",
-        "PG.TO", "PGI-UN.TO", "PGIC.TO", "PHE.TO", "PHR.TO", "PHW.TO", "PHX.TO", "PHYS.TO", "PIC-A.TO", "PID.TO", "PIF.TO", "PIN.TO", "PINC.TO", "PINV.TO", "PLDI.TO", "PLHI.TO", "PLTE.TO", "PLTR.TO", "PLZ-UN.TO", "PME.TO", "PMEI-UN.TO", "PMET.TO", "PMIF.TO", "PMM.TO", "PMNT.TO", "PMZ-UN.TO", "PNC-A.TO", "PNE.TO", "PNP.TO", "POU.TO",
-        "POW.TO", "PPL.TO", "PPLN.TO", "PPR.TO", "PPTA.TO", "PR.TO", "PRA.TO", "PREF.TO", "PRL.TO", "PRM.TO", "PRN.TO", "PRP.TO", "PRQ.TO", "PRU.TO", "PRV-DB.TO", "PSA.TO", "PSB.TO", "PSD.TO", "PSI.TO", "PSK.TO", "PSLV.TO", "PSU-U.TO", "PTM.TO", "PVS-PR-H.TO", "PWF-PF-A.TO", "PWI.TO", "PWRS.TO", "PXC.TO", "PXS.TO", "PXT.TO",
-        "PXU-F.TO", "PYF.TO", "PYPL.TO", "PYR.TO", "PZA.TO", "PZW.TO", "QAH.TO", "QASH.TO", "QBB.TO", "QBR-A.TO", "QBTC.TO", "QBTL.TO", "QCE.TO", "QCLN.TO", "QCN.TO", "QCOM.TO", "QDX.TO", "QDXB.TO", "QDXH.TO", "QEBH.TO", "QEBL.TO", "QEC.TO", "QEE.TO", "QETH-U.TO", "QHY.TO", "QINF.TO", "QLB.TO", "QMAX.TO", "QMVP.TO", "QQC.TO",
-        "QQCC.TO", "QQCE.TO", "QQCI.TO", "QQCL.TO", "QQD.TO", "QQEQ.TO", "QQI.TO", "QQJR.TO", "QQQD.TO", "QQQL.TO", "QQQQ.TO", "QQQT.TO", "QQQU.TO", "QQQX.TO", "QQQY.TO", "QQU.TO", "QRC.TO", "QRET.TO", "QSB.TO", "QSP-UN.TO", "QSR.TO", "QTLT.TO", "QTRH.TO", "QUB.TO", "QUIG.TO", "QUU.TO", "QXM.TO", "RAAA.TO", "RATE.TO", "RAV-UN.TO",
-        "RAY.TO", "RBA.TO", "RBCU.TO", "RBN-UN.TO", "RBND.TO", "RBNK.TO", "RBO.TO", "RBOT.TO", "RBY.TO", "RCAN.TO", "RCD.TO", "RCDC.TO", "RCH.TO", "RCI-A.TO", "RCTR.TO", "RDBH.TO", "RDDT.TO", "RDDY.TO", "REAL.TO", "REI-UN.TO", "REIT.TO", "RFA.TO", "RGBM.TO", "RGQO.TO", "RGQP.TO", "RGQQ.TO", "RGQR.TO", "RGQS.TO", "RGQT.TO", "RGQU.TO",
-        "RGSI.TO", "RIC.TO", "RID.TO", "RIDH.TO", "RIFI.TO", "RIGE.TO", "RIIN.TO", "RING.TO", "RIO.TO", "RIRA.TO", "RIT.TO", "RKLC.TO", "RLB.TO", "RM.TO", "RMAX.TO", "RNCC.TO", "RNCL.TO", "ROG.TO", "ROOT.TO", "RPD.TO", "RPDH.TO", "RPF.TO", "RPR-DB-A.TO", "RQCA.TO", "RQIN.TO", "RQO.TO", "RQP.TO", "RQQ.TO", "RQR.TO", "RQS.TO",
-        "RQT.TO", "RQU.TO", "RQUS.TO", "RS.TO", "RSI.TO", "RTG.TO", "RTX.TO", "RUA.TO", "RUD.TO", "RUDB.TO", "RUDC.TO", "RUDH.TO", "RUP.TO", "RUQO.TO", "RUQP.TO", "RUQQ.TO", "RUQR.TO", "RUQS.TO", "RUQT.TO", "RUQU.TO", "RUS.TO", "RUSA.TO", "RUSB.TO", "RUST.TO", "RVX.TO", "RY.TO", "RYHE.TO", "RYHI.TO", "S.TO", "SAFE.TO",
-        "SAM.TO", "SAP.TO", "SAPS.TO", "SAU.TO", "SBC.TO", "SBI.TO", "SBLG.TO", "SBLI.TO", "SBT.TO", "SBUL.TO", "SBUX.TO", "SCHN.TO", "SCHW.TO", "SCND.TO", "SCR.TO", "SDE.TO", "SEA.TO", "SEC.TO", "SES.TO", "SFC.TO", "SFD.TO", "SFI.TO", "SGD.TO", "SGR-U.TO", "SGRD.TO", "SGY.TO", "SHHI.TO", "SHLD.TO", "SHLE.TO", "SHOP.TO",
-        "SHPD.TO", "SHPE.TO", "SHPU.TO", "SIA.TO", "SIH-UN.TO", "SII.TO", "SIS.TO", "SIXY.TO", "SJ.TO", "SKE.TO", "SKYY.TO", "SLCA.TO", "SLF.TO", "SLGC.TO", "SLR.TO", "SLS.TO", "SLSC.TO", "SLT.TO", "SLVD.TO", "SLVR.TO", "SLVU.TO", "SLVX.TO", "SMAX.TO", "SMCI.TO", "SMNS.TO", "SMVP.TO", "SNDK.TO", "SNY.TO", "SOBO.TO", "SOFY.TO",
-        "SOIL.TO", "SOLA.TO", "SOLL.TO", "SOLQ.TO", "SOLX.TO", "SOXD.TO", "SOXU.TO", "SPAC-RT-U.TO", "SPAY.TO", "SPB.TO", "SPFD.TO", "SPGI.TO", "SPLT.TO", "SPPP.TO", "SPXD.TO", "SPXI.TO", "SPXU.TO", "SPYD.TO", "SPYU.TO", "SQQQ.TO", "SRSL.TO", "SRU-UN.TO", "SRV-UN.TO", "SSPX.TO", "SSRM.TO", "STC.TO", "STCK.TO", "STG.TO", "STGO.TO", "STLR.TO",
-        "STN.TO", "STPL.TO", "STZ.TO", "SU.TO", "SUHE.TO", "SUHI.TO", "SVA.TO", "SVB.TO", "SVCC.TO", "SVCL.TO", "SVI.TO", "SVM.TO", "SVR.TO", "SWIN.TO", "SWP.TO", "SXGC.TO", "SXP.TO", "SYK.TO", "SYLD.TO", "SYZ.TO", "T.TO", "TA.TO", "TAL.TO", "TBAL.TO", "TBCF.TO", "TBCG.TO", "TBCH.TO", "TBCI.TO", "TBCJ.TO", "TBIL.TO",
-        "TBL.TO", "TBNK.TO", "TBUF-U.TO", "TBUG-U.TO", "TC.TO", "TCCA.TO", "TCCB.TO", "TCEU.TO", "TCL-A.TO", "TCLB.TO", "TCLV.TO", "TCND.TO", "TCOM.TO", "TCON.TO", "TCS.TO", "TCSB.TO", "TCSH.TO", "TCUS.TO", "TCW.TO", "TCWW.TO", "TD.TO", "TDB.TO", "TDHE.TO", "TDHI.TO", "TDNA.TO", "TDOC.TO", "TDU.TO", "TEC.TO", "TECH.TO", "TECI.TO",
-        "TECK-A.TO", "TECX.TO", "TEHE.TO", "TELY.TO", "TEQT.TO", "TERM.TO", "TERP.TO", "TF.TO", "TFII.TO", "TFPM.TO", "TGAF.TO", "TGED.TO", "TGFI.TO", "TGGR.TO", "TGO.TO", "TGRE.TO", "TGRO.TO", "THE.TO", "THNC.TO", "THU.TO", "TI.TO", "TIF.TO", "TIH.TO", "TILV.TO", "TINF.TO", "TINY.TO", "TJX.TO", "TKN.TO", "TKO.TO", "TLF.TO",
-        "TLG.TO", "TLO.TO", "TLRY.TO", "TLTX.TO", "TLV.TO", "TMO.TO", "TMQ.TO", "TMUS.TO", "TNT-UN.TO", "TNZ.TO", "TOKN.TO", "TOT.TO", "TOU.TO", "TOY.TO", "TPE.TO", "TPRF.TO", "TPU.TO", "TPX-A.TO", "TPZ.TO", "TQCD.TO", "TQGD.TO", "TQGM.TO", "TQQQ.TO", "TQSM.TO", "TRI.TO", "TRP.TO", "TRSL.TO", "TRVI.TO", "TRVL.TO", "TRX.TO",
-        "TRZ.TO", "TSAT.TO", "TSHI.TO", "TSK.TO", "TSL.TO", "TSLA.TO", "TSLD.TO", "TSLU.TO", "TSLY.TO", "TSND.TO", "TSPX.TO", "TSTB.TO", "TSTX.TO", "TSU.TO", "TTES.TO", "TTP.TO", "TTTX.TO", "TUED.TO", "TUEX.TO", "TUHY.TO", "TULB.TO", "TULV.TO", "TUSB.TO", "TUSD-U.TO", "TUST.TO", "TVA-B.TO", "TVE.TO", "TVK.TO", "TWC.TO", "TWM.TO",
-        "TXF.TO", "TXG.TO", "TXN.TO", "TXP.TO", "U-U.TO", "UBER.TO", "UBIL-U.TO", "UBNK.TO", "UBSS.TO", "UCSH-U.TO", "UDA.TO", "UDEF.TO", "UDIV.TO", "ULV-C.TO", "UMAX.TO", "UMI.TO", "UMNY-U.TO", "UMRT.TO", "UMVP.TO", "UNC.TO", "UNH.TO", "UNI.TO", "UNP.TO", "UPS.TO", "URB.TO", "URC.TO", "URCC.TO", "URE.TO", "USA.TO", "USCC.TO",
-        "USCL.TO", "USSL.TO", "USSX.TO", "UTES.TO", "UTIL.TO", "VA.TO", "VAB.TO", "VALT.TO", "VBAL.TO", "VBNK.TO", "VCB.TO", "VCE.TO", "VCIP.TO", "VCM.TO", "VCN.TO", "VCNS.TO", "VDU.TO", "VDY.TO", "VE.TO", "VEE.TO", "VEF.TO", "VEQT.TO", "VET.TO", "VFV.TO", "VGG.TO", "VGH.TO", "VGRO.TO", "VGV.TO", "VGZ.TO", "VHI.TO",
-        "VI.TO", "VIDY.TO", "VISA.TO", "VITL-DB-H.TO", "VIU.TO", "VLB.TO", "VLE.TO", "VLN.TO", "VMET.TO", "VMO.TO", "VNP.TO", "VOLX.TO", "VOXR.TO", "VRE.TO", "VRIF.TO", "VRT.TO", "VRTS.TO", "VSB.TO", "VSC.TO", "VSP.TO", "VUDV.TO", "VUN.TO", "VUS.TO", "VVL.TO", "VVO.TO", "VVSG.TO", "VXC.TO", "VXM.TO", "VZ.TO", "VZLA.TO",
-        "WAAV.TO", "WAST.TO", "WCM-A.TO", "WCN.TO", "WCP.TO", "WDC.TO", "WDO.TO", "WEED.TO", "WEF.TO", "WELL.TO", "WFC.TO", "WFCS.TO", "WFG.TO", "WGX.TO", "WILD.TO", "WJX.TO", "WM.TO", "WMT.TO", "WN.TO", "WNDR.TO", "WPK.TO", "WPM.TO", "WPRT.TO", "WRG.TO", "WRN.TO", "WRX.TO", "WSP.TO", "WSRD.TO", "WSRI.TO", "WTE.TO",
-        "WXM.TO", "X.TO", "XAD.TO", "XAGG.TO", "XAGH.TO", "XAU.TO", "XAW.TO", "XBAL.TO", "XBB.TO", "XBM.TO", "XCB.TO", "XCBG.TO", "XCBU.TO", "XCD.TO", "XCG.TO", "XCH.TO", "XCHP.TO", "XCLN.TO", "XCNS.TO", "XCS.TO", "XCSR.TO", "XCV.TO", "XDG.TO", "XDGH.TO", "XDIV.TO", "XDNA.TO", "XDRV.TO", "XDSR.TO", "XDU.TO", "XDUH.TO",
-        "XDV.TO", "XEB.TO", "XEC.TO", "XEF.TO", "XEG.TO", "XEH.TO", "XEI.TO", "XEM.TO", "XEMC.TO", "XEN.TO", "XEQT.TO", "XESG.TO", "XETM.TO", "XEU.TO", "XEXP.TO", "XFH.TO", "XFLB.TO", "XFLI.TO", "XFLX.TO", "XFN.TO", "XFR.TO", "XGB.TO", "XGD.TO", "XGI.TO", "XGRO.TO", "XHAK.TO", "XHB.TO", "XHC.TO", "XHD.TO", "XHU.TO",
-        "XHY.TO", "XIC.TO", "XID.TO", "XIG.TO", "XIGS.TO", "XIN.TO", "XINC.TO", "XIT.TO", "XIU.TO", "XLB.TO", "XLY.TO", "XMA.TO", "XMC.TO", "XMD.TO", "XMF-A.TO", "XMH.TO", "XMI.TO", "XML.TO", "XMM.TO", "XMS.TO", "XMTM.TO", "XMU.TO", "XMV.TO", "XMW.TO", "XMY.TO", "XNDU.TO", "XOM.TO", "XPF.TO", "XQB.TO", "XQLT.TO",
-        "XQQ.TO", "XQQU.TO", "XRB.TO", "XRE.TO", "XRP.TO", "XRPP.TO", "XRPQ.TO", "XSAB.TO", "XSB.TO", "XSC.TO", "XSE.TO", "XSEA.TO", "XSEM.TO", "XSH.TO", "XSHG.TO", "XSHU.TO", "XSI.TO", "XSMB.TO", "XSMC.TO", "XSMH.TO", "XSP.TO", "XSPC.TO", "XST.TO", "XSTB.TO", "XSTH.TO", "XSTP.TO", "XSU.TO", "XSUS.TO", "XTC.TO", "XTD.TO",
-        "XTG.TO", "XTLH.TO", "XTLT.TO", "XTOH.TO", "XTOT.TO", "XTR.TO", "XTRA.TO", "XUH.TO", "XUS.TO", "XUSC.TO", "XUSF.TO", "XUSR.TO", "XUT.TO", "XUU.TO", "XVLU.TO", "XWD.TO", "Y.TO", "YCM.TO", "YGR.TO", "YRB.TO", "ZACE.TO", "ZAG.TO", "ZBAL.TO", "ZBBB.TO", "ZBI.TO", "ZBK.TO", "ZCB.TO", "ZCDB.TO", "ZCH.TO", "ZCLN.TO",
-        "ZCM.TO", "ZCN.TO", "ZCON.TO", "ZCS.TO", "ZDB.TO", "ZDH.TO", "ZDI.TO", "ZDIV.TO", "ZDJ.TO", "ZDM.TO", "ZDV.TO", "ZDY.TO", "ZEA.TO", "ZEAT.TO", "ZEB.TO", "ZEF.TO", "ZEM.TO", "ZEO.TO", "ZEQ.TO", "ZEQL.TO", "ZEQT.TO", "ZESG.TO", "ZESM.TO", "ZFC.TO", "ZFH.TO", "ZFL.TO", "ZFM.TO", "ZFN.TO", "ZFS.TO", "ZGB.TO",
-        "ZGD.TO", "ZGI.TO", "ZGLD.TO", "ZGLH.TO", "ZGQ.TO", "ZGRN.TO", "ZGRO.TO", "ZHP.TO", "ZHU.TO", "ZHY.TO", "ZIC.TO", "ZID.TO", "ZIN.TO", "ZIQ.TO", "ZIU.TO", "ZJG.TO", "ZJK.TO", "ZJPN.TO", "ZLB.TO", "ZLC.TO", "ZLD.TO", "ZLE.TO", "ZLH.TO", "ZLI.TO", "ZLSC.TO", "ZLSU.TO", "ZLU.TO", "ZMBS.TO", "ZMI.TO", "ZMID.TO",
-        "ZMMK.TO", "ZMP.TO", "ZMT.TO", "ZMU.TO", "ZNQ.TO", "ZPAY.TO", "ZPH.TO", "ZPL.TO", "ZPR.TO", "ZPS.TO", "ZPW.TO", "ZQB.TO", "ZQQ.TO", "ZRE.TO", "ZRR.TO", "ZSB.TO", "ZSDB.TO", "ZSML.TO", "ZSP.TO", "ZST.TO", "ZSU.TO", "ZTIP.TO", "ZUAG.TO", "ZUB.TO", "ZUCM.TO", "ZUD.TO", "ZUE.TO", "ZUH.TO", "ZUP.TO", "ZUQ.TO",
-        "ZUS-U.TO", "ZUT.TO", "ZVC.TO", "ZVU.TO", "ZWA.TO", "ZWB.TO", "ZWC.TO", "ZWE.TO", "ZWEN.TO", "ZWG.TO", "ZWGD.TO", "ZWH.TO", "ZWHC.TO", "ZWK.TO", "ZWP.TO", "ZWQT.TO", "ZWS.TO", "ZWT.TO", "ZWU.TO", "ZXCO.TO", "ZXCP.TO", "ZXCQ.TO", "ZXLB.TO", "ZXLC.TO", "ZXLE.TO", "ZXLF.TO", "ZXLI.TO", "ZXLK.TO", "ZXLP.TO", "ZXLR.TO",
-        "ZXLU.TO", "ZXLV.TO", "ZXLY.TO", "ZXM.TO", "ZYNS.TO", "ZZZD.TO",
+        # Mega-cap tech
+        "AAPL","MSFT","NVDA","GOOGL","AMZN","META","TSLA","AVGO","ORCL","CRM",
+        "ADBE","AMD","QCOM","TXN","AMAT","LRCX","KLAC","MU","INTC","MRVL",
+        # Financials
+        "JPM","BAC","GS","MS","WFC","C","BLK","SCHW","AXP","V","MA","PYPL","SQ",
+        # Healthcare
+        "UNH","JNJ","LLY","PFE","MRK","ABBV","TMO","ABT","DHR","ISRG","REGN","VRTX",
+        # Industrials & Energy
+        "CAT","DE","HON","GE","RTX","LMT","NOC","BA","XOM","CVX","COP","EOG","SLB",
+        # Consumer
+        "AMZN","COST","WMT","HD","MCD","SBUX","NKE","TGT","LOW","TJX","BKNG","MAR",
+        # Communication
+        "NFLX","DIS","CMCSA","T","VZ","TMUS","SPOT","SNAP","PINS",
+        # Cloud/SaaS
+        "NOW","SNOW","DDOG","CRWD","PANW","ZS","OKTA","NET","MDB","GTLB","HUBS",
+        "TEAM","WDAY","VEEV","COUP","BILL","SMAR","BOX","DOCN","DOMO",
+        # AI/Robotics
+        "PLTR","AI","BBAI","IONQ","RKLB","PATH","UiPATH","SOUN",
+        # Materials & Mining
+        "NEM","GOLD","FCX","AA","CLF","NUE","X","MP",
+        # REITs
+        "PLD","AMT","EQIX","CCI","SPG","O","WELL","AVB","EQR",
+        # ETFs (macro)
+        "SPY","QQQ","IWM","DIA","GLD","SLV","TLT","HYG","XLE","XLF","XLK","XLV",
+        # Mid/small high-conviction
+        "ALAB","ARM","SMCI","DELL","HPE","WDC","STX","PSTG",
+        "DUOL","CAVA","BIRK","CELH","ONON","DECK","CROX","LULU",
+        "HOOD","COIN","MSTR","RIOT","MARA","HUT",
+        "RVMD","RXRX","NTLA","BEAM","CRSP","EDIT","PACB",
+        "ENPH","SEDG","RUN","FSLR","PLUG","BLDP",
+        "RIVN","LCID","BLNK","CHPT","EVGO",
+        # Dividend/value
+        "BRK/B","JNJ","KO","PEP","PG","MMM","IBM","CVX","XOM",
+        "MO","PM","BTI","T","VZ","SO","DUK","NEE","D",
     ]
 
 
-# ── Data Fetcher ──────────────────────────────────────────────────────────────
+# ── Helpers ───────────────────────────────────────────────────────────────────
 
-def fetch_fundamentals(ticker: str) -> dict:
+def safe_float(val, default=None):
     try:
-        t    = yf.Ticker(ticker)
-        info = t.info
-        hist = t.history(period="1y")
-
-        if hist.empty or len(hist) < 50:
-            return {"ticker": ticker, "error": "Insufficient price history"}
-
-        close = hist["Close"]
-        ma50  = float(close.rolling(50).mean().iloc[-1])
-        ma200 = float(close.rolling(200).mean().iloc[-1]) if len(close) >= 200 else None
-        price = float(close.iloc[-1])
-
-        delta = close.diff()
-        gain  = delta.clip(lower=0).rolling(14).mean()
-        loss  = (-delta.clip(upper=0)).rolling(14).mean()
-        rs    = gain / loss
-        rsi   = float((100 - 100 / (1 + rs)).iloc[-1])
-
-        fcf        = info.get("freeCashflow")
-        div_yield  = info.get("dividendYield") or 0
-        roe        = info.get("returnOnEquity")
-        net_debt   = (info.get("totalDebt") or 0) - (info.get("totalCash") or 0)
-        ebitda     = info.get("ebitda")
-        market_cap = info.get("marketCap")
-        rev_growth = info.get("revenueGrowth")
-        sector     = info.get("sector", "Unknown")
-        name       = info.get("shortName", ticker)
-
-        net_debt_ebitda = (net_debt / ebitda) if ebitda else None
-        fcf_yield       = (fcf / market_cap)  if (fcf and market_cap) else None
-
-        return {
-            "ticker":          ticker,
-            "name":            name,
-            "sector":          sector,
-            "price":           round(price, 2),
-            "ma50":            round(ma50, 2),
-            "ma200":           round(ma200, 2) if ma200 is not None else None,
-            "rsi":             round(rsi, 2),
-            "roe":             round(roe, 4)             if roe             is not None else None,
-            "net_debt_ebitda": round(net_debt_ebitda, 2) if net_debt_ebitda is not None else None,
-            "fcf_yield":       round(fcf_yield, 4)       if fcf_yield       is not None else None,
-            "div_yield":       round(div_yield, 4),
-            "rev_growth":      round(rev_growth, 4)      if rev_growth      is not None else None,
-            "error":           None,
-        }
-    except Exception as e:
-        return {"ticker": ticker, "error": str(e)}
+        v = float(val)
+        return default if (math.isnan(v) or math.isinf(v)) else v
+    except Exception:
+        return default
 
 
-# ── Rating Engine ─────────────────────────────────────────────────────────────
-
-def rate_stock(d: dict) -> dict:
-    if d.get("error"):
-        return {**d, "rating": "N/A", "thesis": "Data error", "risk": d["error"], "score": None}
-
-    score = 0
-    flags = []
-    risks = []
-
-    # Trend
-    if d["ma200"] and d["price"] > d["ma50"] > d["ma200"]:
-        score += 2
-        flags.append("above 50/200 MA")
-    elif d["ma200"] and d["price"] < d["ma200"]:
-        score -= 2
-        flags.append("below 200 MA")
-
-    # Momentum
-    if 40 <= d["rsi"] <= 65:
-        score += 1
-    elif d["rsi"] > 75:
-        score -= 1
-        risks.append("overbought RSI")
-    elif d["rsi"] < 30:
-        score += 1
-        flags.append("oversold — mean reversion candidate")
-
-    # Quality: ROE
-    if d["roe"] and d["roe"] > 0.12:
-        score += 1
-        flags.append(f"ROE {d['roe']*100:.1f}%")
-    elif d["roe"] and d["roe"] < 0:
-        score -= 1
-        risks.append("negative ROE")
-
-    # Leverage
-    if d["net_debt_ebitda"] is not None:
-        if d["net_debt_ebitda"] < 4.0:
-            score += 1
-        elif d["net_debt_ebitda"] > 6.0:
-            score -= 2
-            risks.append(f"high leverage {d['net_debt_ebitda']:.1f}x")
-
-    # FCF vs Dividend (Schilit forensic check)
-    if d["fcf_yield"] is not None:
-        if d["fcf_yield"] > d["div_yield"]:
-            score += 1
-            flags.append("FCF covers dividend")
-        elif d["div_yield"] > 0 and d["fcf_yield"] < d["div_yield"]:
-            score -= 1
-            risks.append("dividend not covered by FCF")
-
-    # Growth
-    if d["rev_growth"] and d["rev_growth"] > 0.15:
-        score += 1
-        flags.append(f"rev growth {d['rev_growth']*100:.1f}%")
-
-    rating = "BUY" if score >= 4 else ("HOLD" if score >= 1 else "SELL")
-    thesis = "; ".join(flags) if flags else "No strong signals"
-    risk   = "; ".join(risks) if risks else "Execution risk / macro headwinds"
-
-    return {**d, "rating": rating, "thesis": thesis, "risk": risk, "score": score}
+def cap_tier(market_cap_usd):
+    if market_cap_usd is None:
+        return "unknown"
+    if market_cap_usd >= MEGA_CAP:
+        return "mega"
+    if market_cap_usd >= LARGE_CAP:
+        return "large"
+    if market_cap_usd >= MID_CAP:
+        return "mid"
+    return "small"
 
 
-# ── Main Runner ───────────────────────────────────────────────────────────────
+def rsi_14(closes):
+    """Compute RSI-14 from a pandas Series of closing prices."""
+    if closes is None or len(closes) < 15:
+        return None
+    delta  = closes.diff().dropna()
+    gain   = delta.clip(lower=0).rolling(14).mean()
+    loss   = (-delta.clip(upper=0)).rolling(14).mean()
+    rs     = gain / loss.replace(0, float('nan'))
+    rsi    = 100 - (100 / (1 + rs))
+    last   = rsi.dropna()
+    return safe_float(last.iloc[-1]) if not last.empty else None
 
-def run_analysis(seed_fn, label: str) -> list:
-    tickers = seed_fn()
-    print(f"[{label}] Analysing {len(tickers)} tickers...")
+
+def shenanigan_check(info):
+    """Simple Schilit red-flag: net income up but operating cash flow down."""
+    ni_curr  = safe_float(info.get("netIncomeToCommon"))
+    ocf_curr = safe_float(info.get("operatingCashflow"))
+    if ni_curr is None or ocf_curr is None:
+        return False
+    # Flag if earnings >> cash (divergence ratio > 2x)
+    if ni_curr > 0 and ocf_curr > 0:
+        return (ni_curr / ocf_curr) > 2.0
+    if ni_curr > 0 and ocf_curr <= 0:
+        return True
+    return False
+
+
+def insider_buy_signal(ticker_obj):
+    """True if insiders own >1% and institutional ownership is rising."""
+    try:
+        holders = ticker_obj.major_holders
+        if holders is None or holders.empty:
+            return False
+        # Row 0 is % shares held by insiders
+        insider_pct = safe_float(str(holders.iloc[0, 0]).replace("%", ""))
+        return insider_pct is not None and insider_pct > 1.0
+    except Exception:
+        return False
+
+
+def score_ticker(info, hist, ticker_obj):
+    """
+    Returns a dict: { horizon: { rating, score, thesis, risk } }
+    All input factors are normalised to 0–1 before weighting.
+    """
+    # ── Raw factor extraction ─────────────────────────────────────────────
+    roe_raw       = safe_float(info.get("returnOnEquity"))          # decimal e.g. 0.15
+    fcf_raw       = safe_float(info.get("freeCashflow"))            # absolute $
+    mkt_cap       = safe_float(info.get("marketCap"))
+    div_yield_raw = safe_float(info.get("dividendYield"), 0.0)
+    debt_ebitda   = safe_float(info.get("debtToEquity"))            # proxy for D/EBITDA
+    revenue       = safe_float(info.get("totalRevenue"))
+
+    # FCF yield = FCF / MarketCap
+    fcf_yield = (fcf_raw / mkt_cap) if (fcf_raw and mkt_cap and mkt_cap > 0) else None
+
+    # ── Technical ────────────────────────────────────────────────────────
+    closes   = hist["Close"].dropna() if hist is not None and not hist.empty else None
+    rsi_val  = rsi_14(closes) if closes is not None else None
+    above_50 = above_200 = None
+    if closes is not None and len(closes) > 0:
+        last_price = float(closes.iloc[-1])
+        if len(closes) >= 50:
+            above_50  = last_price > float(closes.rolling(50).mean().dropna().iloc[-1])
+        if len(closes) >= 200:
+            above_200 = last_price > float(closes.rolling(200).mean().dropna().iloc[-1])
+
+    # ── Insider & shenanigan ──────────────────────────────────────────────
+    ins_buy  = insider_buy_signal(ticker_obj)
+    shenan   = shenanigan_check(info)
+
+    # ── Moat proxy: gross margin * revenue stability (simple) ─────────────
+    gross_margin = safe_float(info.get("grossMargins"), 0.0)
+    pe_fwd       = safe_float(info.get("forwardPE"))
+    # moat score 0-1 based on gross margin strength
+    moat_score   = min(1.0, max(0.0, gross_margin)) if gross_margin else 0.0
+
+    # ── Normalise each factor to 0-1 ─────────────────────────────────────
+    def n_roe(v):       # ROE: 0%=0, 20%+=1
+        if v is None: return 0.5
+        return min(1.0, max(0.0, v / 0.20))
+
+    def n_fcf(v):       # FCF yield: 0%=0, 8%+=1
+        if v is None: return 0.5
+        return min(1.0, max(0.0, v / 0.08))
+
+    def n_debt(v):      # Debt/Equity (lower=better): 0=1, 200=0
+        if v is None: return 0.5
+        return min(1.0, max(0.0, 1 - (v / 200)))
+
+    def n_rsi(v):       # RSI bullish zone 40-70 → high score
+        if v is None: return 0.5
+        if v < 30: return 0.3
+        if v > 70: return 0.4   # overbought → slight discount
+        return min(1.0, (v - 30) / 40)
+
+    n_factors = dict(
+        roe       = n_roe(roe_raw),
+        fcf       = n_fcf(fcf_yield),
+        debt      = n_debt(debt_ebitda),
+        rsi       = n_rsi(rsi_val),
+        ma50      = 1.0 if above_50 else 0.0  if above_50 is not None else 0.5,
+        ma200     = 1.0 if above_200 else 0.0 if above_200 is not None else 0.5,
+        insider   = 1.0 if ins_buy else 0.0,
+        shenanigan= 1.0 if shenan  else 0.0,   # penalty applied via negative weight
+        moat      = moat_score,
+    )
+
+    results = {}
+    for hz in HORIZONS:
+        wt  = HORIZON_WEIGHTS[hz]
+        raw = sum(wt[k] * n_factors[k] for k in wt)
+        # Normalise to 0-100
+        raw_score = max(0, min(100, raw * 100))
+
+        # Rating thresholds
+        if raw_score >= 58:
+            rating = "BUY"
+        elif raw_score >= 40:
+            rating = "HOLD"
+        else:
+            rating = "SELL"
+
+        # ── Thesis builder ────────────────────────────────────────────────
+        thesis_parts = []
+        if roe_raw and roe_raw > 0.12:
+            thesis_parts.append(f"ROE {roe_raw*100:.0f}%")
+        if fcf_yield and fcf_yield > 0.03:
+            thesis_parts.append(f"FCF yield {fcf_yield*100:.1f}%")
+        if above_50:  thesis_parts.append("above 50-DMA")
+        if above_200: thesis_parts.append("above 200-DMA")
+        if ins_buy:   thesis_parts.append("insider buying")
+        if gross_margin > 0.50: thesis_parts.append(f"wide margins ({gross_margin*100:.0f}%)")
+        if rsi_val and rsi_val < 35: thesis_parts.append(f"oversold RSI {rsi_val:.0f}")
+        thesis = "; ".join(thesis_parts) if thesis_parts else "No strong signals"
+
+        # ── Risk builder ──────────────────────────────────────────────────
+        risk_parts = []
+        if shenan:                              risk_parts.append("earnings-OCF divergence")
+        if debt_ebitda and debt_ebitda > 150:   risk_parts.append("high leverage")
+        if rsi_val and rsi_val > 70:            risk_parts.append("overbought RSI")
+        if not above_200:                       risk_parts.append("below 200-DMA")
+        if pe_fwd and pe_fwd > 50:             risk_parts.append(f"stretched valuation (P/E {pe_fwd:.0f}x)")
+        risk = "; ".join(risk_parts) if risk_parts else "Monitor macro conditions"
+
+        results[hz] = dict(
+            rating  = rating,
+            score   = round(raw_score, 1),
+            label   = HORIZON_LABELS[hz],
+            thesis  = thesis,
+            risk    = risk,
+        )
+
+    return results, dict(
+        market_cap_usd = mkt_cap,
+        roe            = roe_raw,
+        fcf_yield      = fcf_yield,
+        div_yield      = div_yield_raw,
+        debt_ebitda    = debt_ebitda,
+        rsi_14         = rsi_val,
+        above_50ma     = above_50,
+        above_200ma    = above_200,
+        insider_buy_signal = ins_buy,
+        shenanigan_flag    = shenan,
+        gross_margin   = gross_margin,
+        pe_fwd         = pe_fwd,
+        cap_tier       = cap_tier(mkt_cap),
+    )
+
+
+# ── Batch fetcher ─────────────────────────────────────────────────────────────
+
+def fetch_batch(tickers):
+    """Return list of processed stock dicts for a batch of tickers."""
     results = []
-    for t in tickers:
-        rated = rate_stock(fetch_fundamentals(t))
-        rated["market"] = label
-        if rated.get("rating") != "N/A":
-            results.append(rated)
-    # Sort highest score → lowest so the frontend slice(0, 30) gets the best stocks
-    results.sort(key=lambda x: (x.get("score") or -99), reverse=True)
+    for ticker in tickers:
+        try:
+            t    = yf.Ticker(ticker)
+            info = t.info or {}
+            if not info.get("symbol") and not info.get("shortName"):
+                continue  # no data returned
+
+            hist = t.history(period="1y", auto_adjust=True)
+            horizons, metrics = score_ticker(info, hist, t)
+
+            # Detect exchange
+            ex = info.get("exchange", "")
+            if ticker.endswith(".TO") or ticker.endswith(".V"):
+                exchange = "TSX" if ticker.endswith(".TO") else "TSXV"
+            elif ex in ("NYQ", "NYSE"):
+                exchange = "NYSE"
+            else:
+                exchange = "NASDAQ"
+
+            results.append(dict(
+                ticker   = ticker,
+                name     = info.get("shortName") or info.get("longName") or ticker,
+                exchange = exchange,
+                sector   = info.get("sector") or info.get("industryDisp") or "Unknown",
+                industry = info.get("industry") or "",
+                **metrics,
+                horizons = horizons,
+            ))
+        except Exception:
+            pass  # skip broken tickers silently
     return results
 
 
-if __name__ == "__main__":
-    os.makedirs("public", exist_ok=True)
+# ── Main ─────────────────────────────────────────────────────────────────────
 
-    usd_results = run_analysis(_usd_seed, "USD")
-    cad_results = run_analysis(_cad_seed, "CAD")
+def main():
+    cad_tickers = _load_cad_tickers()[:MAX_TICKERS_PER_SIDE]
+    usd_tickers = list(dict.fromkeys(_usd_priority()))[:MAX_TICKERS_PER_SIDE]
 
-    out = {
-        "generated_at": datetime.now(timezone.utc).isoformat(),
-        "cad": cad_results,
-        "usd": usd_results,
-    }
+    cad_stocks = []
+    usd_stocks = []
 
-    out_path = "public/recommendations.json"
+    print(f"[CAD] Processing {len(cad_tickers)} tickers in batches of {BATCH_SIZE}")
+    for i in range(0, len(cad_tickers), BATCH_SIZE):
+        batch = cad_tickers[i:i + BATCH_SIZE]
+        cad_stocks.extend(fetch_batch(batch))
+        print(f"  CAD batch {i//BATCH_SIZE + 1}: {len(cad_stocks)} valid so far")
+        time.sleep(SLEEP_S)
+
+    print(f"[USD] Processing {len(usd_tickers)} tickers in batches of {BATCH_SIZE}")
+    for i in range(0, len(usd_tickers), BATCH_SIZE):
+        batch = usd_tickers[i:i + BATCH_SIZE]
+        usd_stocks.extend(fetch_batch(batch))
+        print(f"  USD batch {i//BATCH_SIZE + 1}: {len(usd_stocks)} valid so far")
+        time.sleep(SLEEP_S)
+
+    # Sort each side: BUYs first, then by short-horizon score desc
+    def sort_key(s):
+        rating_order = {"BUY": 0, "HOLD": 1, "SELL": 2}
+        r = rating_order.get(s.get("horizons", {}).get("short", {}).get("rating", "HOLD"), 1)
+        score = s.get("horizons", {}).get("short", {}).get("score", 50)
+        return (r, -score)
+
+    cad_stocks.sort(key=sort_key)
+    usd_stocks.sort(key=sort_key)
+
+    payload = dict(
+        generated_at = datetime.now(timezone.utc).isoformat(),
+        cad          = cad_stocks,
+        usd          = usd_stocks,
+        meta = dict(
+            horizons = HORIZON_LABELS,
+            cap_tiers = {
+                "mega":  ">= $200B",
+                "large": "$10B – $200B",
+                "mid":   "$2B – $10B",
+                "small": "< $2B",
+            },
+            note = "For informational purposes only. Not financial advice.",
+        )
+    )
+
+    out_path = os.path.abspath(OUT_PATH)
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
     with open(out_path, "w") as f:
-        json.dump(out, f, indent=2)
+        json.dump(payload, f, indent=2, default=str)
 
-    print(f"\n✅ Wrote {len(cad_results)} CAD + {len(usd_results)} USD recommendations to {out_path}")
+    print(f"\n✅  Wrote {len(cad_stocks)} CAD + {len(usd_stocks)} USD stocks → {out_path}")
+    print(f"    CAD BUYs: {sum(1 for s in cad_stocks if s['horizons']['short']['rating']=='BUY')}")
+    print(f"    USD BUYs: {sum(1 for s in usd_stocks if s['horizons']['short']['rating']=='BUY')}")
+
+
+if __name__ == "__main__":
+    main()

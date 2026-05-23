@@ -1,399 +1,203 @@
 import { useState } from 'react'
 
-const RS_LIGHT = {
-  BUY:  { bg: 'rgba(46,107,62,.12)',   border: '#2E6B3E', color: '#2E6B3E', glow: 'rgba(46,107,62,.20)'   },
-  HOLD: { bg: 'rgba(122,107,80,.10)',  border: '#7A6B50', color: '#7A6B50', glow: 'rgba(122,107,80,.15)'  },
-  SELL: { bg: 'rgba(163,58,42,.10)',   border: '#A33A2A', color: '#A33A2A', glow: 'rgba(163,58,42,.18)'   },
-}
-const RS_DARK = {
-  BUY:  { bg: 'rgba(58,158,95,.15)',   border: '#3A9E5F', color: '#3A9E5F', glow: 'rgba(58,158,95,.28)'   },
-  HOLD: { bg: 'rgba(156,163,175,.10)', border: '#9CA3AF', color: '#9CA3AF', glow: 'rgba(156,163,175,.16)' },
-  SELL: { bg: 'rgba(255,107,107,.12)', border: '#FF6B6B', color: '#FF6B6B', glow: 'rgba(255,107,107,.22)' },
+const RATING_COLORS = {
+  BUY:  { bg: 'color-mix(in oklch,#22c55e 15%,transparent)', border: 'color-mix(in oklch,#22c55e 35%,transparent)', text: '#16a34a' },
+  HOLD: { bg: 'color-mix(in oklch,#f59e0b 15%,transparent)', border: 'color-mix(in oklch,#f59e0b 35%,transparent)', text: '#d97706' },
+  SELL: { bg: 'color-mix(in oklch,#ef4444 15%,transparent)', border: 'color-mix(in oklch,#ef4444 35%,transparent)', text: '#dc2626' },
 }
 
-const HX = {
-  ultra_short: {
-    technical: 'RSI momentum + volume surge',
-    macro:     'Earnings date / PDUFA catalyst / MOC imbalance',
-    risks:     ['Earnings miss vs consensus', 'Sector rotation out of momentum names'],
-  },
-  short: {
-    technical: 'Price vs 50-day MA + RSI trend',
-    macro:     'Bank of Canada / Fed rate trajectory impact on sector',
-    risks:     ['Rate hike surprise', 'Revenue growth deceleration'],
-  },
-  medium: {
-    technical: 'Price vs 200-day MA trend integrity',
-    macro:     'WCS/WTI spread (energy) or AISC cost curve (mining)',
-    risks:     ['EBITDA compression from input cost inflation', 'Dividend cut signal'],
-  },
-  long: {
-    technical: '200-day MA slope + multi-year base formation',
-    macro:     'AI infrastructure moat / AISC reserve quality / Lassonde Curve',
-    risks:     ['Competitive moat erosion', 'Jurisdiction/regulatory risk for resource names'],
-  },
-  ultra_long: {
-    technical: 'Decade-scale price channel & accumulation patterns',
-    macro:     'Demographics, CO₂/capita trends, energy transition, resource lifecycle',
-    risks:     ['Structural demand shift (e.g. EV vs oil)', 'Population decline in core markets'],
-  },
+const CAP_COLORS = {
+  mega:    { bg: 'color-mix(in oklch,#8b5cf6 12%,transparent)', text: '#7c3aed', label: 'MEGA' },
+  large:   { bg: 'color-mix(in oklch,#3b82f6 12%,transparent)', text: '#2563eb', label: 'LARGE' },
+  mid:     { bg: 'color-mix(in oklch,#f59e0b 12%,transparent)', text: '#d97706', label: 'MID'   },
+  small:   { bg: 'color-mix(in oklch,#6b7280 12%,transparent)', text: '#4b5563', label: 'SMALL' },
+  unknown: { bg: 'color-mix(in oklch,#6b7280 10%,transparent)', text: '#6b7280', label: '—'     },
 }
 
-function ExchangeBadge({ exchange, market }) {
-  const label = exchange || (market === 'CAD' ? 'TSX' : 'NYSE')
-  const isCAD = market === 'CAD'
+function fmt(n, decimals = 1, suffix = '') {
+  if (n == null) return '—'
+  return `${(n * 100).toFixed(decimals)}${suffix}`
+}
+
+function fmtCap(n) {
+  if (n == null) return '—'
+  if (n >= 1e12) return `$${(n / 1e12).toFixed(1)}T`
+  if (n >= 1e9)  return `$${(n / 1e9).toFixed(1)}B`
+  if (n >= 1e6)  return `$${(n / 1e6).toFixed(1)}M`
+  return `$${n.toFixed(0)}`
+}
+
+export default function StockCard({ stock, horizon, rank }) {
+  const [expanded, setExpanded] = useState(false)
+
+  const hz   = stock.horizons?.[horizon] || {}
+  const rc   = RATING_COLORS[hz.rating] || RATING_COLORS.HOLD
+  const tier = stock.cap_tier || 'unknown'
+  const cc   = CAP_COLORS[tier] || CAP_COLORS.unknown
+
+  return (
+    <div
+      onClick={() => setExpanded(e => !e)}
+      style={{
+        background:    'var(--color-surface)',
+        border:        '1px solid var(--color-border)',
+        borderRadius:  'var(--radius-lg)',
+        padding:       '12px 14px',
+        cursor:        'pointer',
+        transition:    'box-shadow 180ms ease, background 180ms ease',
+      }}
+      onMouseEnter={e => e.currentTarget.style.boxShadow = 'var(--shadow-md)'}
+      onMouseLeave={e => e.currentTarget.style.boxShadow = 'none'}
+    >
+      {/* ── Top row ── */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+
+        {/* Rank */}
+        <span style={{ fontSize: '0.65rem', color: 'var(--color-text-faint)', minWidth: '18px', textAlign: 'right' }}>
+          {rank}
+        </span>
+
+        {/* Rating badge */}
+        <span style={{
+          fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.06em',
+          padding: '2px 7px', borderRadius: 'var(--radius-full)',
+          background: rc.bg, border: `1px solid ${rc.border}`, color: rc.text,
+        }}>
+          {hz.rating || '—'}
+        </span>
+
+        {/* Cap tier badge */}
+        <span style={{
+          fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.07em',
+          padding: '2px 6px', borderRadius: 'var(--radius-full)',
+          background: cc.bg, color: cc.text,
+        }}>
+          {cc.label}
+        </span>
+
+        {/* Ticker */}
+        <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--color-text)', letterSpacing: '0.01em' }}>
+          {stock.ticker?.replace('.TO','').replace('.V','')}
+        </span>
+
+        {/* Name */}
+        <span style={{
+          fontSize: '0.75rem', color: 'var(--color-text-muted)',
+          flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+        }}>
+          {stock.name}
+        </span>
+
+        {/* Score */}
+        <span style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--color-text-muted)', marginLeft: 'auto' }}>
+          {hz.score != null ? hz.score.toFixed(0) : '—'}
+          <span style={{ fontSize: '0.6rem', fontWeight: 400, color: 'var(--color-text-faint)', marginLeft: '1px' }}>/100</span>
+        </span>
+
+        {/* Expand chevron */}
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-faint)" strokeWidth="2.5"
+          strokeLinecap="round" strokeLinejoin="round"
+          style={{ transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 180ms ease', flexShrink: 0 }}>
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </div>
+
+      {/* ── Expanded detail ── */}
+      {expanded && (
+        <div style={{ marginTop: '12px', borderTop: '1px solid var(--color-divider)', paddingTop: '12px' }}>
+
+          {/* Key metrics row */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginBottom: '10px' }}>
+            {[
+              { label: 'Market Cap',  value: fmtCap(stock.market_cap_usd) },
+              { label: 'Cap Tier',    value: cc.label },
+              { label: 'ROE',         value: fmt(stock.roe, 1, '%') },
+              { label: 'FCF Yield',   value: fmt(stock.fcf_yield, 1, '%') },
+              { label: 'Div Yield',   value: fmt(stock.div_yield, 1, '%') },
+              { label: 'D/E',         value: stock.debt_ebitda != null ? stock.debt_ebitda.toFixed(0) : '—' },
+              { label: 'RSI-14',      value: stock.rsi_14 != null ? stock.rsi_14.toFixed(0) : '—' },
+              { label: 'Fwd P/E',     value: stock.pe_fwd != null ? `${stock.pe_fwd.toFixed(0)}x` : '—' },
+              { label: 'Gross Margin',value: fmt(stock.gross_margin, 0, '%') },
+            ].map(({ label, value }) => (
+              <div key={label} style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
+                <span style={{ fontSize: '0.6rem', color: 'var(--color-text-faint)', letterSpacing: '0.05em', textTransform: 'uppercase' }}>{label}</span>
+                <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-text)' }}>{value}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Signals row */}
+          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '10px' }}>
+            {stock.above_50ma  && <Pill text="▲ 50-DMA"  green />}
+            {stock.above_200ma && <Pill text="▲ 200-DMA" green />}
+            {stock.insider_buy_signal && <Pill text="🏦 Insider Buy" green />}
+            {stock.shenanigan_flag    && <Pill text="⚠ Earnings Flag" red   />}
+            {!stock.above_50ma  && stock.above_50ma  !== null && <Pill text="▼ 50-DMA"  red />}
+            {!stock.above_200ma && stock.above_200ma !== null && <Pill text="▼ 200-DMA" red />}
+          </div>
+
+          {/* All 5 horizon ratings */}
+          <div style={{ marginBottom: '10px' }}>
+            <span style={{ fontSize: '0.6rem', color: 'var(--color-text-faint)', letterSpacing: '0.05em', textTransform: 'uppercase' }}>All Time Horizons</span>
+            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '4px' }}>
+              {[
+                { key: 'ultra_short', label: '0-3m'   },
+                { key: 'short',       label: '0-12m'  },
+                { key: 'medium',      label: '0-36m'  },
+                { key: 'long',        label: '0-60m'  },
+                { key: 'ultra_long',  label: '0-360m' },
+              ].map(({ key, label }) => {
+                const h = stock.horizons?.[key] || {}
+                const hc = RATING_COLORS[h.rating] || RATING_COLORS.HOLD
+                return (
+                  <div key={key} style={{
+                    display: 'flex', flexDirection: 'column', alignItems: 'center',
+                    gap: '2px', padding: '6px 10px', borderRadius: 'var(--radius-md)',
+                    background: hc.bg, border: `1px solid ${hc.border}`,
+                    minWidth: '62px',
+                  }}>
+                    <span style={{ fontSize: '0.58rem', color: 'var(--color-text-faint)' }}>{label}</span>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 700, color: hc.text }}>{h.rating || '—'}</span>
+                    <span style={{ fontSize: '0.65rem', color: 'var(--color-text-muted)' }}>{h.score != null ? h.score.toFixed(0) : '—'}</span>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Thesis & Risk */}
+          <InfoRow label="Thesis" value={hz.thesis} />
+          <InfoRow label="Key Risk" value={hz.risk} />
+
+          {/* Sector */}
+          <InfoRow label="Sector / Exchange" value={`${stock.sector || '—'}  ·  ${stock.exchange || '—'}`} />
+        </div>
+      )}
+    </div>
+  )
+}
+
+function Pill({ text, green, red }) {
+  const color = green ? '#16a34a' : red ? '#dc2626' : '#6b7280'
   return (
     <span style={{
-      fontFamily: 'var(--font-body)', fontSize: '0.68rem', fontWeight: 700,
-      padding: '2px 7px', borderRadius: 'var(--radius-full)',
-      letterSpacing: '0.06em', textTransform: 'uppercase',
-      background: isCAD
-        ? 'color-mix(in oklch,var(--color-primary) 12%,transparent)'
-        : 'color-mix(in oklch,var(--color-navy) 12%,transparent)',
-      color: isCAD ? 'var(--color-primary)' : 'var(--color-navy)',
-      border: `1px solid ${isCAD
-        ? 'color-mix(in oklch,var(--color-primary) 25%,transparent)'
-        : 'color-mix(in oklch,var(--color-navy) 25%,transparent)'}`,
+      fontSize: '0.62rem', fontWeight: 600, padding: '2px 7px',
+      borderRadius: 'var(--radius-full)',
+      background: `color-mix(in oklch,${color} 10%,transparent)`,
+      border:     `1px solid color-mix(in oklch,${color} 25%,transparent)`,
+      color,
     }}>
-      {label}
+      {text}
     </span>
   )
 }
 
-function MetricChip({ label, value, good, warn }) {
-  const color = good ? 'var(--color-buy)' : warn ? 'var(--color-sell)' : 'var(--color-text-muted)'
-  const bg = good
-    ? 'color-mix(in oklch,var(--color-buy) 10%,transparent)'
-    : warn
-    ? 'color-mix(in oklch,var(--color-sell) 8%,transparent)'
-    : 'var(--color-surface-offset)'
+function InfoRow({ label, value }) {
+  if (!value) return null
   return (
-    <div style={{
-      display: 'flex', flexDirection: 'column', alignItems: 'center',
-      padding: '8px 12px', borderRadius: 'var(--radius-lg)',
-      background: bg,
-      border: `1px solid color-mix(in oklch,${color} 20%,transparent)`,
-    }}>
-      <span style={{
-        fontSize: '0.7rem', fontWeight: 600, marginBottom: '2px',
-        color: 'var(--color-text-faint)', fontFamily: 'var(--font-body)',
-      }}>
-        {label}
-      </span>
-      <span style={{
-        fontSize: '0.85rem', fontWeight: 700, color,
-        fontFamily: 'var(--font-body)', fontVariantNumeric: 'tabular-nums',
-      }}>
-        {value ?? '—'}
-      </span>
-    </div>
-  )
-}
-
-function RiskBadge({ text }) {
-  return (
-    <div style={{
-      display: 'flex', alignItems: 'flex-start', gap: '8px', fontSize: '0.75rem',
-      padding: '8px 12px', borderRadius: 'var(--radius-lg)',
-      background: 'color-mix(in oklch,var(--color-sell) 7%,transparent)',
-      border: '1px solid color-mix(in oklch,var(--color-sell) 20%,transparent)',
-      color: 'var(--color-sell)', fontFamily: 'var(--font-body)',
-    }}>
-      <span style={{ flexShrink: 0, marginTop: '1px' }}>⚠</span>
-      <span>{text}</span>
-    </div>
-  )
-}
-
-function yahooUrl(ticker) {
-  return `https://ca.finance.yahoo.com/quote/${encodeURIComponent(ticker)}`
-}
-
-export default function StockCard({ stock, horizon, darkMode }) {
-  const [expanded, setExpanded] = useState(false)
-
-  const h        = stock.horizons?.[horizon]
-  const rating   = h?.rating || 'HOLD'
-  const thesis   = h?.thesis  || 'No thesis available.'
-  const score    = h?.score   || 50
-  const RS       = darkMode ? RS_DARK : RS_LIGHT
-  const rs       = RS[rating] || RS.HOLD
-  const ctx      = HX[horizon] || HX.short
-  const above200 = stock.price > stock.ma200
-
-  const sectorMatch = thesis.match(/\[.*?·\s*(.*?)\]/)
-  const sector      = sectorMatch ? sectorMatch[1] : stock.market
-  const yUrl        = stock.yahoo_url || yahooUrl(stock.ticker)
-  const isUltraLong = horizon === 'ultra_long'
-  const capB        = stock.market_cap_usd ? (stock.market_cap_usd / 1e9).toFixed(0) : null
-  const maDist      = stock.ma200 > 0
-    ? (((stock.price - stock.ma200) / stock.ma200) * 100).toFixed(1)
-    : null
-
-  return (
-    <div
-      className="stock-card"
-      style={{
-        borderColor: expanded ? `color-mix(in oklch,${rs.border} 60%,var(--color-border))` : undefined,
-        boxShadow:   expanded ? `var(--shadow-md), 0 0 20px ${rs.glow}` : undefined,
-      }}
-    >
-      {stock.shenanigan_flag && (
-        <div style={{
-          borderRadius: 'var(--radius-2xl) var(--radius-2xl) 0 0',
-          padding: '6px 16px', fontSize: '0.72rem', fontWeight: 700,
-          display: 'flex', alignItems: 'center', gap: '8px',
-          background: 'color-mix(in oklch,var(--color-warn) 12%,transparent)',
-          color: 'var(--color-warn)',
-          borderBottom: '1px solid color-mix(in oklch,var(--color-warn) 22%,transparent)',
-          fontFamily: 'var(--font-body)',
-        }}>
-          🚩 Forensic Flag · {stock.shenanigan_detail}
-        </div>
-      )}
-
-      <div style={{ padding: '16px', cursor: 'pointer' }} onClick={() => setExpanded(e => !e)}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{
-            width: '44px', height: '44px', borderRadius: 'var(--radius-xl)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            flexShrink: 0, fontFamily: 'var(--font-display)', fontWeight: 700,
-            fontSize: '0.8rem', letterSpacing: '-0.01em',
-            background: rs.bg, color: rs.color,
-            border: `1.5px solid color-mix(in oklch,${rs.border} 35%,transparent)`,
-          }}>
-            {stock.ticker.replace('.TO', '').replace('-', '').slice(0, 3)}
-          </div>
-
-          <div style={{ minWidth: 0, flex: 1 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-              <a
-                href={yUrl} target="_blank" rel="noopener noreferrer"
-                onClick={e => e.stopPropagation()}
-                style={{
-                  fontFamily: 'var(--font-display)', fontWeight: 700,
-                  fontSize: '1.05rem', letterSpacing: '-0.01em',
-                  color: 'var(--color-text)', textDecoration: 'none',
-                  display: 'inline-flex', alignItems: 'center', gap: '4px',
-                }}
-                onMouseOver={e => e.currentTarget.style.color = 'var(--color-primary)'}
-                onMouseOut={e  => e.currentTarget.style.color = 'var(--color-text)'}
-              >
-                {stock.ticker}
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-                     style={{ opacity: 0.4, flexShrink: 0 }}>
-                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-                  <polyline points="15 3 21 3 21 9"/>
-                  <line x1="10" y1="14" x2="21" y2="3"/>
-                </svg>
-              </a>
-              <ExchangeBadge exchange={stock.exchange} market={stock.market} />
-            </div>
-            <div style={{
-              fontSize: '0.75rem', color: 'var(--color-text-muted)',
-              fontFamily: 'var(--font-body)', marginTop: '2px',
-              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '220px',
-            }}>
-              {stock.name}
-            </div>
-            <div style={{ fontSize: '0.7rem', color: 'var(--color-text-faint)', fontFamily: 'var(--font-body)', marginTop: '2px' }}>
-              {sector}
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-              <span style={{
-                fontFamily: 'var(--font-body)', fontSize: '0.72rem', fontWeight: 800,
-                padding: '5px 12px', borderRadius: 'var(--radius-full)',
-                letterSpacing: '0.07em', textTransform: 'uppercase',
-                background: rs.bg, color: rs.color,
-                border: `1.5px solid ${rs.border}`,
-                boxShadow: `0 0 10px ${rs.glow}`,
-              }}>
-                {rating}
-              </span>
-              <span style={{
-                fontSize: '0.68rem', color: 'var(--color-text-faint)',
-                fontFamily: 'var(--font-body)', fontVariantNumeric: 'tabular-nums',
-              }}>
-                {score}/100
-              </span>
-            </div>
-            <div style={{
-              transition: 'transform 280ms ease',
-              transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
-              color: 'var(--color-text-faint)',
-            }}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                   stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="6 9 12 15 18 9"/>
-              </svg>
-            </div>
-          </div>
-        </div>
-
-        <div style={{
-          marginTop: '12px', height: '3px', borderRadius: 'var(--radius-full)',
-          background: 'var(--color-surface-offset)', overflow: 'hidden',
-        }}>
-          <div style={{
-            height: '100%', borderRadius: 'var(--radius-full)',
-            width: `${score}%`, transition: 'width 700ms ease',
-            background: `linear-gradient(90deg,color-mix(in oklch,${rs.border} 50%,transparent),${rs.border})`,
-          }} />
-        </div>
-      </div>
-
-      {expanded && (
-        <div
-          style={{ padding: '0 16px 20px', borderTop: '1px solid var(--color-divider)' }}
-          onClick={e => e.stopPropagation()}
-        >
-          {isUltraLong && (
-            <div style={{
-              margin: '12px 0', display: 'flex', alignItems: 'center', gap: '8px',
-              padding: '8px 12px', borderRadius: 'var(--radius-lg)',
-              background: 'color-mix(in oklch,var(--color-primary) 8%,transparent)',
-              border: '1px solid color-mix(in oklch,var(--color-primary) 22%,transparent)',
-              fontSize: '0.75rem', color: 'var(--color-primary)', fontFamily: 'var(--font-body)',
-            }}>
-              🏰 <span><strong>Ultra Long:</strong> ranked by Economic Moat &amp; TAM — RSI de-weighted</span>
-            </div>
-          )}
-
-          <div style={{ marginTop: '16px', marginBottom: '16px' }}>
-            <div style={{
-              fontFamily: 'var(--font-display)', fontSize: '0.7rem', fontWeight: 700,
-              letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '8px', color: rs.color,
-            }}>
-              § The Why
-            </div>
-            <p style={{ fontFamily: 'var(--font-body)', fontSize: '0.875rem', lineHeight: 1.7, color: 'var(--color-text-muted)' }}>
-              {thesis.replace(/\[.*?\]\s*/, '').split(' | ')[0]}
-            </p>
-            {thesis.split(' | ')[1] && (
-              <p style={{ fontFamily: 'var(--font-body)', fontSize: '0.85rem', lineHeight: 1.65, marginTop: '6px', color: 'var(--color-text-faint)' }}>
-                {thesis.split(' | ').slice(1).join(' | ')}
-              </p>
-            )}
-          </div>
-
-          <div style={{ marginBottom: '16px' }}>
-            <div style={{
-              fontFamily: 'var(--font-display)', fontSize: '0.7rem', fontWeight: 700,
-              letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '12px', color: rs.color,
-            }}>
-              § Data Matrix
-            </div>
-            <div style={{
-              fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase',
-              letterSpacing: '0.08em', color: 'var(--color-text-faint)',
-              fontFamily: 'var(--font-body)', marginBottom: '8px',
-            }}>
-              Fundamentals
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '8px', marginBottom: '12px' }}>
-              {stock.roe != null && stock.roe !== 0 && (
-                <MetricChip label="ROE" value={`${stock.roe.toFixed(1)}%`} good={stock.roe > 12} warn={stock.roe < 8} />
-              )}
-              {stock.nd_ebitda != null && stock.nd_ebitda < 90 && (
-                <MetricChip label="ND/EBITDA" value={`${stock.nd_ebitda.toFixed(1)}x`} good={stock.nd_ebitda < 2} warn={stock.nd_ebitda > 4} />
-              )}
-              {stock.fcf_yield != null && (
-                <MetricChip label="FCF Yield" value={`${stock.fcf_yield.toFixed(1)}%`}
-                            good={stock.fcf_yield > stock.div_yield && stock.fcf_yield > 0}
-                            warn={stock.fcf_yield < stock.div_yield} />
-              )}
-              {stock.div_yield != null && stock.div_yield > 0 && (
-                <MetricChip label="Div Yield" value={`${stock.div_yield.toFixed(1)}%`} />
-              )}
-              {stock.revenue_cagr != null && stock.revenue_cagr !== 0 && (
-                <MetricChip label="Rev CAGR" value={`${stock.revenue_cagr.toFixed(1)}%`} good={stock.revenue_cagr > 10} warn={stock.revenue_cagr < 0} />
-              )}
-              {isUltraLong && capB && (
-                <MetricChip label="Mkt Cap" value={`$${capB}B`} good={stock.market_cap_usd > 100e9} />
-              )}
-            </div>
-            <div style={{
-              fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase',
-              letterSpacing: '0.08em', color: 'var(--color-text-faint)',
-              fontFamily: 'var(--font-body)', marginBottom: '8px',
-            }}>
-              Technicals
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '10px' }}>
-              <MetricChip label="RSI (14)" value={stock.rsi?.toFixed(0)} good={stock.rsi < 40} warn={stock.rsi > 70} />
-              <MetricChip label="vs 200-MA" value={above200 ? 'Above ✓' : 'Below ✗'} good={above200} warn={!above200} />
-            </div>
-            {maDist && (
-              <div style={{
-                fontSize: '0.75rem', padding: '8px 12px', borderRadius: 'var(--radius-lg)',
-                background: 'var(--color-surface-2)', border: '1px solid var(--color-border)',
-                color: 'var(--color-text-muted)', marginBottom: '10px', fontFamily: 'var(--font-body)',
-              }}>
-                <span style={{ fontWeight: 700, color: 'var(--color-text-faint)' }}>200-MA distance: </span>
-                {maDist}% &nbsp;·&nbsp;
-                <span style={{ fontWeight: 700, color: 'var(--color-text-faint)' }}>Signal: </span>
-                {ctx.technical}
-              </div>
-            )}
-            <div style={{
-              fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase',
-              letterSpacing: '0.08em', color: 'var(--color-text-faint)',
-              fontFamily: 'var(--font-body)', marginBottom: '8px',
-            }}>
-              Macro / Micro Catalyst
-            </div>
-            <div style={{
-              fontSize: '0.75rem', padding: '8px 12px', borderRadius: 'var(--radius-lg)',
-              background: 'var(--color-surface-2)', border: '1px solid var(--color-border)',
-              color: 'var(--color-text-muted)', fontFamily: 'var(--font-body)',
-            }}>
-              {ctx.macro}
-            </div>
-          </div>
-
-          <div style={{ marginBottom: '16px' }}>
-            <div style={{
-              fontFamily: 'var(--font-display)', fontSize: '0.7rem', fontWeight: 700,
-              letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '8px', color: 'var(--color-sell)',
-            }}>
-              § Primary Risk Factor
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              {ctx.risks.map((r, i) => <RiskBadge key={i} text={r} />)}
-            </div>
-          </div>
-
-          <div style={{ paddingTop: '12px', borderTop: '1px solid var(--color-divider)' }}>
-            <a
-              href={yUrl} target="_blank" rel="noopener noreferrer"
-              onClick={e => e.stopPropagation()}
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: '6px',
-                fontSize: '0.75rem', fontWeight: 700, fontFamily: 'var(--font-body)',
-                padding: '7px 16px', borderRadius: 'var(--radius-full)',
-                background: 'color-mix(in oklch,var(--color-primary) 10%,transparent)',
-                color: 'var(--color-primary)',
-                border: '1px solid color-mix(in oklch,var(--color-primary) 28%,transparent)',
-                textDecoration: 'none', transition: 'opacity 0.2s ease',
-              }}
-              onMouseOver={e => e.currentTarget.style.opacity = '0.75'}
-              onMouseOut={e  => e.currentTarget.style.opacity = '1'}
-            >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
-                   stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-                <polyline points="15 3 21 3 21 9"/>
-                <line x1="10" y1="14" x2="21" y2="3"/>
-              </svg>
-              View on Yahoo Finance →
-            </a>
-          </div>
-        </div>
-      )}
+    <div style={{ display: 'flex', gap: '6px', marginTop: '6px', flexWrap: 'wrap' }}>
+      <span style={{ fontSize: '0.62rem', color: 'var(--color-text-faint)', textTransform: 'uppercase', letterSpacing: '0.05em', flexShrink: 0, paddingTop: '1px' }}>{label}:</span>
+      <span style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)', flex: 1 }}>{value}</span>
     </div>
   )
 }

@@ -2,7 +2,7 @@ name: Update Stock Recommendations
 
 on:
   schedule:
-    - cron: '0 11 * * 1-5'      # 11:00 UTC = 6 AM EST, weekdays
+    - cron: '0 14 * * 1-5'      # 14:00 UTC = 10:00 AM ET (EDT), weekdays
   repository_dispatch:
     types: [refresh-analysis]
   workflow_dispatch:
@@ -10,7 +10,7 @@ on:
 jobs:
   analyze:
     runs-on:         ubuntu-latest
-    timeout-minutes: 360          # 6 hours — covers 1700 CAD + USD tickers
+    timeout-minutes: 360
     permissions:
       contents: write
 
@@ -39,6 +39,6 @@ jobs:
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name  "github-actions[bot]"
-          git add public/recommendations.json backend/analyze_stocks.py
+          git add public/recommendations.json backend/tsx_tickers_cache.txt
           git diff --staged --quiet || git commit -m "chore: update recommendations $(date -u +'%Y-%m-%d %H:%M UTC')"
           git push
