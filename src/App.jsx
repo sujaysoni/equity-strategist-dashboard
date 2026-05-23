@@ -11,8 +11,21 @@ const HORIZONS = [
   { key: 'ultra_long',  label: 'Ultra Long',  sub: '0–360m' },
 ]
 
-// Number of stocks shown per market column
 const TOP_N = 30
+
+// Ticker tape items — static market labels
+const TICKER_ITEMS = [
+  { label: 'TSX Composite', tag: 'TSX' },
+  { label: 'S&P 500', tag: 'SPX' },
+  { label: 'NASDAQ 100', tag: 'NDX' },
+  { label: 'TSXV', tag: 'TSXV' },
+  { label: 'NYSE Comp.', tag: 'NYA' },
+  { label: 'TSX Financials', tag: 'TFI' },
+  { label: 'S&P/TSX 60', tag: 'TX60' },
+  { label: 'Russell 2000', tag: 'RUT' },
+  { label: 'Dow Jones', tag: 'DJIA' },
+  { label: 'TSX Energy', tag: 'TTEN' },
+]
 
 function sortStocks(stocks, horizon) {
   return [...stocks].sort((a, b) => {
@@ -31,7 +44,7 @@ function sortStocks(stocks, horizon) {
 
 function SunIcon() {
   return (
-    <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
          stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="12" cy="12" r="5"/>
       <line x1="12" y1="1"  x2="12" y2="3"/>
@@ -48,10 +61,45 @@ function SunIcon() {
 
 function MoonIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
          stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
     </svg>
+  )
+}
+
+function LogoMark() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-label="Equity Strategist logo">
+      <rect width="24" height="24" rx="6" fill="var(--color-primary)" opacity="0.15"/>
+      <polyline points="3,16 8,9 12,12 19,5" stroke="var(--color-primary)" strokeWidth="2"
+                strokeLinecap="round" strokeLinejoin="round"/>
+      <polyline points="15,5 19,5 19,9" stroke="var(--color-primary)" strokeWidth="2"
+                strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  )
+}
+
+function TickerBand() {
+  const items = [...TICKER_ITEMS, ...TICKER_ITEMS] // duplicate for seamless loop
+  return (
+    <div className="ticker-band" role="marquee" aria-label="Market index ticker">
+      <div className="ticker-band-inner">
+        {items.map((item, i) => (
+          <span key={i} className="ticker-item">
+            <span style={{ color: 'var(--color-text-faint)', fontWeight: 400 }}>{item.label}</span>
+            <span style={{
+              color: 'var(--color-primary)',
+              background: 'color-mix(in oklch, var(--color-primary) 10%, transparent)',
+              padding: '1px 6px',
+              borderRadius: 'var(--radius-sm)',
+              fontSize: '0.65rem',
+              letterSpacing: '0.06em',
+            }}>{item.tag}</span>
+          </span>
+        ))}
+      </div>
+    </div>
   )
 }
 
@@ -66,14 +114,16 @@ export default function App() {
   const [fadeKey,     setFadeKey]     = useState(0)
 
   const [darkMode, setDarkMode] = useState(() => {
-    const saved = localStorage.getItem('theme')
-    if (saved) return saved === 'dark'
+    try {
+      const saved = localStorage.getItem('theme')
+      if (saved) return saved === 'dark'
+    } catch {}
     return window.matchMedia('(prefers-color-scheme: dark)').matches
   })
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light')
-    localStorage.setItem('theme', darkMode ? 'dark' : 'light')
+    try { localStorage.setItem('theme', darkMode ? 'dark' : 'light') } catch {}
   }, [darkMode])
 
   const fetchData = useCallback(async () => {
@@ -112,58 +162,51 @@ export default function App() {
     setTimeout(() => { fetchData(); setRefreshing(false); setScanning(false) }, 4000)
   }
 
-  // Sort then slice to TOP_N — ranked highest score → lowest
   const cad = useMemo(() => sortStocks(data?.cad || [], horizon).slice(0, TOP_N), [data, horizon])
   const usd = useMemo(() => sortStocks(data?.usd || [], horizon).slice(0, TOP_N), [data, horizon])
 
-  const cadBuys    = cad.filter(s => s.horizons?.[horizon]?.rating === 'BUY').length
-  const usdBuys    = usd.filter(s => s.horizons?.[horizon]?.rating === 'BUY').length
-  const cadTotal   = data?.cad?.length || 0
-  const usdTotal   = data?.usd?.length || 0
+  const cadBuys  = cad.filter(s => s.horizons?.[horizon]?.rating === 'BUY').length
+  const usdBuys  = usd.filter(s => s.horizons?.[horizon]?.rating === 'BUY').length
+  const cadTotal = data?.cad?.length || 0
+  const usdTotal = data?.usd?.length || 0
   const isUltraLong = horizon === 'ultra_long'
 
-  return (
-    <div style={{ minHeight: '100vh', background: 'var(--color-bg)', fontFamily: 'var(--font-body)' }}>
+  const now = new Date()
+  const dateStr = now.toLocaleDateString('en-CA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
 
-      {/* Ambient glow */}
-      <div style={{
-        position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0,
-        background: 'radial-gradient(ellipse 70% 45% at 50% -5%, color-mix(in oklch,var(--color-primary) 6%,transparent), transparent)',
-      }} />
+  return (
+    <div className="bg-ambient" style={{ minHeight: '100vh', fontFamily: 'var(--font-body)' }}>
 
       {/* ── HEADER ── */}
-      <header className="sticky top-0 z-50 glassmorphism"
-              style={{ borderBottom: '1px solid var(--color-divider)' }}>
+      <header className="sticky top-0 z-50 glassmorphism" style={{ borderBottom: '1px solid var(--color-divider)' }}>
         <div style={{
-          maxWidth: '1200px', margin: '0 auto', padding: '14px 24px',
+          maxWidth: '1200px', margin: '0 auto',
+          padding: '12px 24px',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           gap: '16px', flexWrap: 'wrap',
         }}>
-
-          {/* Logo + title */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{
-              width: '40px', height: '40px', borderRadius: 'var(--radius-xl)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-              background: 'linear-gradient(135deg, var(--color-primary), color-mix(in oklch,var(--color-primary) 60%,var(--color-navy)))',
-              boxShadow: '0 0 18px color-mix(in oklch,var(--color-primary) 35%,transparent)',
-            }}>
-              <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
-                <polyline points="2,14 7,8 11,11 18,4" stroke="white" strokeWidth="2.5"
-                          strokeLinecap="round" strokeLinejoin="round"/>
-                <polyline points="13,4 18,4 18,9" stroke="white" strokeWidth="2.5"
-                          strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
+          {/* Logo */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <LogoMark />
             <div>
               <div style={{
-                fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1rem',
-                letterSpacing: '-0.01em', color: 'var(--color-text)',
+                fontFamily: 'var(--font-display)',
+                fontWeight: 400,
+                fontSize: '1.05rem',
+                letterSpacing: '-0.01em',
+                color: 'var(--color-text)',
+                lineHeight: 1.1,
               }}>
                 Equity Strategist
               </div>
-              <div style={{ fontSize: '0.72rem', color: 'var(--color-text-faint)', fontFamily: 'var(--font-body)' }}>
-                TSX · TSXV · NYSE · NASDAQ — Multi-Timeframe AI
+              <div style={{
+                fontSize: '0.65rem',
+                fontWeight: 600,
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                color: 'var(--color-text-faint)',
+              }}>
+                TSX · TSXV · NYSE · NASDAQ
               </div>
             </div>
           </div>
@@ -172,115 +215,154 @@ export default function App() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             {scanning && (
               <div style={{
-                display: 'flex', alignItems: 'center', gap: '7px',
-                fontSize: '0.75rem', fontWeight: 600,
-                color: 'var(--color-primary)', fontFamily: 'var(--font-body)',
+                display: 'flex', alignItems: 'center', gap: '6px',
+                fontSize: '0.72rem', fontWeight: 600,
+                color: 'var(--color-primary)',
               }}>
-                <div style={{
-                  width: '7px', height: '7px', borderRadius: '50%',
-                  background: 'var(--color-primary)',
-                  animation: 'pulse 1.2s ease-in-out infinite',
-                }} />
+                <span className="pulse-dot" />
                 Scanning markets…
               </div>
             )}
-
             <RefreshButton onClick={handleRefresh} refreshing={refreshing} />
-
             <button
+              className="btn-theme"
               onClick={() => setDarkMode(d => !d)}
-              style={{
-                width: '36px', height: '36px', borderRadius: 'var(--radius-full)',
-                border: '1px solid var(--color-border)',
-                background: 'var(--color-surface)',
-                color: 'var(--color-text-muted)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                cursor: 'pointer', transition: 'all 0.2s ease',
-              }}
-              title="Toggle theme"
+              title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+              aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
             >
               {darkMode ? <SunIcon /> : <MoonIcon />}
             </button>
           </div>
         </div>
 
-        {/* Horizon toggle */}
-        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px 12px' }}>
-          <HorizonToggle horizons={HORIZONS} active={horizon} onChange={handleHorizonChange} />
+        {/* Horizon toggle strip */}
+        <div style={{ borderTop: '1px solid var(--color-divider)', background: 'color-mix(in oklch, var(--color-surface-2) 70%, transparent)' }}>
+          <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
+            <HorizonToggle horizons={HORIZONS} active={horizon} onChange={handleHorizonChange} />
+          </div>
         </div>
       </header>
 
-      {/* ── MAIN CONTENT ── */}
-      <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '32px 24px' }}>
+      {/* ── TICKER BAND ── */}
+      <TickerBand />
 
-        {/* Last updated + stats bar */}
+      {/* ── HERO SECTION ── */}
+      <div className="hero-section">
+        <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+          <div className="fade-in-up" style={{ animationDelay: '0.05s' }}>
+            <span className="hero-eyebrow">
+              <span className="pulse-dot" style={{ width: '6px', height: '6px' }} />
+              AI-Powered · Multi-Timeframe Analysis
+            </span>
+          </div>
+          <h1 className="hero-title fade-in-up" style={{ animationDelay: '0.12s' }}>
+            North American <em>Equity Intelligence</em>
+          </h1>
+          <p className="hero-subtitle fade-in-up" style={{ animationDelay: '0.2s' }}>
+            BUY · HOLD · SELL signals across TSX, TSXV, NYSE, and NASDAQ — ranked by fundamental
+            strength, technical momentum, and macro context across five time horizons.
+          </p>
+
+          {/* Hero stats row */}
+          {!loading && data && (
+            <div className="hero-stat-row fade-in-up" style={{ animationDelay: '0.28s' }}>
+              <div className="hero-stat">
+                <span className="hero-stat-value tabular">{cadBuys}</span>
+                <span className="hero-stat-label">CAD BUYs</span>
+              </div>
+              <div className="hero-stat-divider" />
+              <div className="hero-stat">
+                <span className="hero-stat-value tabular">{usdBuys}</span>
+                <span className="hero-stat-label">USD BUYs</span>
+              </div>
+              <div className="hero-stat-divider" />
+              <div className="hero-stat">
+                <span className="hero-stat-value tabular">{cadTotal + usdTotal}</span>
+                <span className="hero-stat-label">Stocks Tracked</span>
+              </div>
+              <div className="hero-stat-divider" />
+              <div className="hero-stat">
+                <span className="hero-stat-value" style={{ fontSize: '1.1rem', color: 'var(--color-text-muted)' }}>5</span>
+                <span className="hero-stat-label">Time Horizons</span>
+              </div>
+            </div>
+          )}
+
+          {loading && (
+            <div className="hero-stat-row fade-in-up">
+              {[80, 80, 100, 70].map((w, i) => (
+                <div key={i} className="skeleton" style={{ width: `${w}px`, height: '44px', borderRadius: 'var(--radius-md)' }} />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ── MAIN CONTENT ── */}
+      <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '28px 24px 0' }}>
+
+        {/* Meta bar */}
         {lastUpdated && !loading && (
           <div style={{
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            flexWrap: 'wrap', gap: '12px', marginBottom: '28px',
+            flexWrap: 'wrap', gap: '10px', marginBottom: '24px',
           }}>
-            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-faint)', fontFamily: 'var(--font-body)' }}>
-              Last updated: {lastUpdated.toLocaleString()}
+            <div style={{ fontSize: '0.72rem', color: 'var(--color-text-faint)' }}>
+              <span style={{ marginRight: '4px' }}>📅</span>
+              {dateStr} · Last refreshed: <strong style={{ color: 'var(--color-text-muted)' }}>{lastUpdated.toLocaleTimeString()}</strong>
             </div>
-            <div style={{ display: 'flex', gap: '12px' }}>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
               {[
-                { label: `CAD BUYs  (top ${TOP_N} of ${cadTotal})`, value: cadBuys, color: 'var(--color-buy)' },
-                { label: `USD BUYs  (top ${TOP_N} of ${usdTotal})`, value: usdBuys, color: 'var(--color-navy)' },
-              ].map(({ label, value, color }) => (
-                <div key={label} style={{
-                  fontSize: '0.75rem', fontFamily: 'var(--font-body)',
-                  padding: '4px 12px', borderRadius: 'var(--radius-full)',
+                { label: `${cadBuys} BUYs of ${cadTotal} CAD`, color: 'var(--color-buy)' },
+                { label: `${usdBuys} BUYs of ${usdTotal} USD`, color: 'var(--color-navy)' },
+              ].map(({ label, color }) => (
+                <span key={label} className="stat-pill" style={{
                   background: `color-mix(in oklch,${color} 10%,transparent)`,
                   border: `1px solid color-mix(in oklch,${color} 25%,transparent)`,
                   color,
                 }}>
-                  <strong>{value}</strong> {label}
-                </div>
+                  {label}
+                </span>
               ))}
-            </div>
-          </div>
-        )}
-
-        {/* Loading state */}
-        {loading && (
-          <div style={{
-            display: 'flex', flexDirection: 'column', alignItems: 'center',
-            justifyContent: 'center', minHeight: '40vh', gap: '16px',
-          }}>
-            <div style={{
-              width: '40px', height: '40px', borderRadius: '50%',
-              border: '3px solid var(--color-surface-offset)',
-              borderTop: '3px solid var(--color-primary)',
-              animation: 'spin 0.8s linear infinite',
-            }} />
-            <div style={{ fontSize: '0.85rem', color: 'var(--color-text-faint)', fontFamily: 'var(--font-body)' }}>
-              Loading recommendations…
             </div>
           </div>
         )}
 
         {/* Error state */}
         {error && !loading && (
-          <div style={{
-            padding: '20px 24px', borderRadius: 'var(--radius-xl)',
-            background: 'color-mix(in oklch,var(--color-sell) 8%,transparent)',
-            border: '1px solid color-mix(in oklch,var(--color-sell) 25%,transparent)',
-            color: 'var(--color-sell)', fontFamily: 'var(--font-body)', fontSize: '0.875rem',
-            marginBottom: '24px',
-          }}>
-            ⚠ Failed to load recommendations: {error}
+          <div className="info-banner info-banner-error fade-in" style={{ marginBottom: '20px' }}>
+            <span>⚠</span>
+            <span>Failed to load recommendations: <strong>{error}</strong></span>
           </div>
         )}
 
         {/* Ultra Long notice */}
         {isUltraLong && !loading && (
-          <div style={{
-            padding: '12px 20px', borderRadius: 'var(--radius-xl)', marginBottom: '24px',
-            background: 'color-mix(in oklch,var(--color-primary) 7%,transparent)',
-            border: '1px solid color-mix(in oklch,var(--color-primary) 20%,transparent)',
-            fontSize: '0.8rem', color: 'var(--color-primary)', fontFamily: 'var(--font-body)',
-          }}>
-            🏰 <strong>Ultra Long (0–360m):</strong> Ranked by Economic Moat × Market Cap. RSI signals de-weighted in favour of TAM, structural demand, and competitive durability.
+          <div className="info-banner info-banner-primary fade-in" style={{ marginBottom: '20px' }}>
+            <span>🏰</span>
+            <div>
+              <strong style={{ color: 'var(--color-primary)' }}>Ultra Long (0–360m):</strong>{' '}
+              Ranked by Economic Moat × Market Cap. RSI signals de-weighted in favour of TAM,
+              structural demand, and competitive durability.
+            </div>
+          </div>
+        )}
+
+        {/* Loading state — skeleton */}
+        {loading && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%,520px),1fr))', gap: '28px' }}>
+            {[0, 1].map(col => (
+              <div key={col}>
+                <div className="skeleton" style={{ height: '52px', borderRadius: 'var(--radius-xl) var(--radius-xl) 0 0', marginBottom: '1px' }} />
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="skeleton" style={{
+                    height: '72px', marginBottom: '8px',
+                    borderRadius: i === 5 ? '0 0 var(--radius-xl) var(--radius-xl)' : 'var(--radius-md)',
+                    animationDelay: `${i * 0.08}s`,
+                  }} />
+                ))}
+              </div>
+            ))}
           </div>
         )}
 
@@ -289,97 +371,71 @@ export default function App() {
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 520px), 1fr))',
-            gap: '32px',
+            gap: '28px',
             alignItems: 'start',
           }}>
 
             {/* CAD Column */}
             <section>
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px',
-              }}>
-                <div style={{
-                  fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1rem',
+              <div className="market-section-header">
+                <span style={{ fontSize: '1rem' }}>🍁</span>
+                <span style={{
+                  fontFamily: 'var(--font-display)',
+                  fontWeight: 400, fontSize: '1rem',
                   color: 'var(--color-text)', letterSpacing: '-0.01em',
-                }}>
-                  🍁 Canadian Markets
-                </div>
-                <span style={{
-                  fontSize: '0.68rem', fontWeight: 700, padding: '2px 8px',
-                  borderRadius: 'var(--radius-full)', letterSpacing: '0.06em',
-                  background: 'color-mix(in oklch,var(--color-primary) 12%,transparent)',
+                }}>Canadian Markets</span>
+                <span className="stat-pill" style={{
+                  background: 'color-mix(in oklch,var(--color-primary) 10%,transparent)',
+                  border: '1px solid color-mix(in oklch,var(--color-primary) 22%,transparent)',
                   color: 'var(--color-primary)',
-                  border: '1px solid color-mix(in oklch,var(--color-primary) 25%,transparent)',
-                }}>
-                  TSX · TSXV
-                </span>
-                {/* Rank badge */}
-                <span style={{
-                  fontSize: '0.68rem', fontWeight: 600, padding: '2px 8px',
-                  borderRadius: 'var(--radius-full)',
-                  background: 'var(--color-surface-offset)',
-                  color: 'var(--color-text-muted)',
-                  border: '1px solid var(--color-border)',
+                }}>TSX · TSXV</span>
+                <span className="stat-pill" style={{
                   marginLeft: 'auto',
+                  background: 'var(--color-surface-offset)',
+                  border: '1px solid var(--color-border)',
+                  color: 'var(--color-text-muted)',
                 }}>
                   Top {Math.min(TOP_N, cad.length)} of {cadTotal}
                 </span>
               </div>
-              <div
-                key={`cad-${fadeKey}`}
-                style={{ display: 'flex', flexDirection: 'column', gap: '10px', animation: 'fadeIn 0.35s ease' }}
-              >
-                {cad.length === 0
-                  ? <EmptyState />
-                  : cad.map((s, i) => (
-                      <StockCard key={s.ticker} stock={s} horizon={horizon} darkMode={darkMode} rank={i + 1} />
-                    ))
-                }
+              <div className="market-section-body">
+                <div key={`cad-${fadeKey}`} style={{ display: 'flex', flexDirection: 'column', gap: '8px', animation: 'fadeIn 0.35s ease' }}>
+                  {cad.length === 0 ? <EmptyState /> : cad.map((s, i) => (
+                    <StockCard key={s.ticker} stock={s} horizon={horizon} darkMode={darkMode} rank={i + 1} />
+                  ))}
+                </div>
               </div>
             </section>
 
             {/* USD Column */}
             <section>
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px',
-              }}>
-                <div style={{
-                  fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1rem',
+              <div className="market-section-header">
+                <span style={{ fontSize: '1rem' }}>🦅</span>
+                <span style={{
+                  fontFamily: 'var(--font-display)',
+                  fontWeight: 400, fontSize: '1rem',
                   color: 'var(--color-text)', letterSpacing: '-0.01em',
-                }}>
-                  🦅 U.S. Markets
-                </div>
-                <span style={{
-                  fontSize: '0.68rem', fontWeight: 700, padding: '2px 8px',
-                  borderRadius: 'var(--radius-full)', letterSpacing: '0.06em',
-                  background: 'color-mix(in oklch,var(--color-navy) 12%,transparent)',
+                }}>U.S. Markets</span>
+                <span className="stat-pill" style={{
+                  background: 'color-mix(in oklch,var(--color-navy) 10%,transparent)',
+                  border: '1px solid color-mix(in oklch,var(--color-navy) 22%,transparent)',
                   color: 'var(--color-navy)',
-                  border: '1px solid color-mix(in oklch,var(--color-navy) 25%,transparent)',
-                }}>
-                  NYSE · NASDAQ
-                </span>
-                {/* Rank badge */}
-                <span style={{
-                  fontSize: '0.68rem', fontWeight: 600, padding: '2px 8px',
-                  borderRadius: 'var(--radius-full)',
-                  background: 'var(--color-surface-offset)',
-                  color: 'var(--color-text-muted)',
-                  border: '1px solid var(--color-border)',
+                }}>NYSE · NASDAQ</span>
+                <span className="stat-pill" style={{
                   marginLeft: 'auto',
+                  background: 'var(--color-surface-offset)',
+                  border: '1px solid var(--color-border)',
+                  color: 'var(--color-text-muted)',
                 }}>
                   Top {Math.min(TOP_N, usd.length)} of {usdTotal}
                 </span>
               </div>
-              <div
-                key={`usd-${fadeKey}`}
-                style={{ display: 'flex', flexDirection: 'column', gap: '10px', animation: 'fadeIn 0.35s ease' }}
-              >
-                {usd.length === 0
-                  ? <EmptyState />
-                  : usd.map((s, i) => (
-                      <StockCard key={s.ticker} stock={s} horizon={horizon} darkMode={darkMode} rank={i + 1} />
-                    ))
-                }
+              <div className="market-section-body">
+                <div key={`usd-${fadeKey}`} style={{ display: 'flex', flexDirection: 'column', gap: '8px', animation: 'fadeIn 0.35s ease' }}>
+                  {usd.length === 0 ? <EmptyState /> : usd.map((s, i) => (
+                    <StockCard key={s.ticker} stock={s} horizon={horizon} darkMode={darkMode} rank={i + 1} />
+                  ))}
+                </div>
               </div>
             </section>
 
@@ -388,19 +444,30 @@ export default function App() {
       </main>
 
       {/* ── FOOTER ── */}
-      <footer style={{
-        borderTop: '1px solid var(--color-divider)',
-        padding: '20px 24px',
-        marginTop: '48px',
-      }}>
-        <div style={{
-          maxWidth: '1200px', margin: '0 auto',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          flexWrap: 'wrap', gap: '8px',
-          fontSize: '0.72rem', color: 'var(--color-text-faint)', fontFamily: 'var(--font-body)',
-        }}>
-          <span>Equity Strategist Dashboard — for informational purposes only. Not financial advice.</span>
-          <span>Data via yFinance · Refreshed 06:00 ET weekdays</span>
+      <footer className="site-footer">
+        <div className="site-footer-inner">
+          <div className="site-footer-top">
+            <div className="site-footer-logo">
+              <LogoMark />
+              <span style={{
+                fontFamily: 'var(--font-display)',
+                fontSize: '0.95rem',
+                color: 'var(--color-text)',
+              }}>Equity Strategist</span>
+            </div>
+            <nav className="site-footer-links" aria-label="Footer navigation">
+              <a href="#">TSX Markets</a>
+              <a href="#">US Markets</a>
+              <a href="#">Methodology</a>
+              <a href="https://github.com/sujaysoni/equity-strategist-dashboard" target="_blank" rel="noopener noreferrer">
+                GitHub
+              </a>
+            </nav>
+          </div>
+          <div className="site-footer-bottom">
+            <span>For informational purposes only. Not financial advice. Always do your own research.</span>
+            <span>Data via yFinance · Refreshed 06:00 ET weekdays · © {new Date().getFullYear()} Equity Strategist</span>
+          </div>
         </div>
       </footer>
 
@@ -411,11 +478,12 @@ export default function App() {
 function EmptyState() {
   return (
     <div style={{
-      padding: '40px 24px', textAlign: 'center',
+      padding: '48px 24px', textAlign: 'center',
       borderRadius: 'var(--radius-xl)',
       border: '1px dashed var(--color-border)',
-      color: 'var(--color-text-faint)', fontFamily: 'var(--font-body)', fontSize: '0.85rem',
+      color: 'var(--color-text-faint)', fontSize: '0.85rem',
     }}>
+      <div style={{ fontSize: '1.5rem', marginBottom: '8px', opacity: 0.5 }}>📊</div>
       No data available — trigger a refresh to run the analysis.
     </div>
   )
