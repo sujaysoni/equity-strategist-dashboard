@@ -2,7 +2,7 @@ name: Update Stock Recommendations
 
 on:
   schedule:
-    - cron: '0 14 * * 1-5'      # 14:00 UTC = 10:00 AM ET (EDT), weekdays
+    - cron: '0 14 * * 1-5'      # 14:00 UTC = 10:00 AM ET, weekdays
   repository_dispatch:
     types: [refresh-analysis]
   workflow_dispatch:
@@ -24,10 +24,13 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
 
-      - name: Refresh TSX ticker seed from TMX API
+      - name: Refresh TSX ticker cache from TMX API
         run: python backend/fetch_tsx_tickers.py
+        continue-on-error: true   # cache failure must NOT abort the whole run
 
       - name: Run full universe analysis
         env:
@@ -35,10 +38,11 @@ jobs:
           ALPHA_VANTAGE_KEY: ${{ secrets.ALPHA_VANTAGE_KEY }}
         run: python backend/analyze_stocks.py
 
-      - name: Commit updated recommendations & seed
+      - name: Commit updated recommendations
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name  "github-actions[bot]"
-          git add public/recommendations.json backend/tsx_tickers_cache.txt
+          git add public/recommendations.json
+          git add backend/tsx_tickers_cache.txt || true
           git diff --staged --quiet || git commit -m "chore: update recommendations $(date -u +'%Y-%m-%d %H:%M UTC')"
           git push
