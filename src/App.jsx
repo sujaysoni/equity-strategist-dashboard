@@ -81,7 +81,7 @@ function LogoMark() {
 }
 
 function TickerBand() {
-  const items = [...TICKER_ITEMS, ...TICKER_ITEMS] // duplicate for seamless loop
+  const items = [...TICKER_ITEMS, ...TICKER_ITEMS]
   return (
     <div className="ticker-band" role="marquee" aria-label="Market index ticker">
       <div className="ticker-band-inner">
@@ -467,6 +467,39 @@ export default function App() {
           <div className="site-footer-bottom">
             <span>For informational purposes only. Not financial advice. Always do your own research.</span>
             <span>Data via yFinance · Refreshed 06:00 ET weekdays · © {new Date().getFullYear()} Equity Strategist</span>
+          </div>
+          {/* Managed by line */}
+          <div style={{
+            paddingTop: '10px',
+            textAlign: 'center',
+            fontSize: '0.7rem',
+            color: 'var(--color-text-faint)',
+            letterSpacing: '0.03em',
+          }}>
+            Managed by{' '}
+            <a
+              href="https://sujaysoni.github.io/Career-Journey-/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                color: 'var(--color-primary)',
+                textDecoration: 'none',
+                fontWeight: 600,
+                borderBottom: '1px solid color-mix(in oklch, var(--color-primary) 40%, transparent)',
+                paddingBottom: '1px',
+                transition: 'color 180ms ease, border-color 180ms ease',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.color = 'var(--color-primary-hover)'
+                e.currentTarget.style.borderBottomColor = 'var(--color-primary-hover)'
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.color = 'var(--color-primary)'
+                e.currentTarget.style.borderBottomColor = 'color-mix(in oklch, var(--color-primary) 40%, transparent)'
+              }}
+            >
+              Sujay Soni
+            </a>
           </div>
         </div>
       </footer>
