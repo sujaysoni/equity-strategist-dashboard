@@ -13,7 +13,6 @@ const HORIZONS = [
 
 const TOP_N = 30
 
-// Ticker tape items — static market labels
 const TICKER_ITEMS = [
   { label: 'TSX Composite', tag: 'TSX' },
   { label: 'S&P 500', tag: 'SPX' },
@@ -185,57 +184,36 @@ export default function App() {
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           gap: '16px', flexWrap: 'wrap',
         }}>
-          {/* Logo */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <LogoMark />
             <div>
               <div style={{
                 fontFamily: 'var(--font-display)',
-                fontWeight: 400,
-                fontSize: '1.05rem',
-                letterSpacing: '-0.01em',
-                color: 'var(--color-text)',
-                lineHeight: 1.1,
-              }}>
-                Equity Strategist
-              </div>
+                fontWeight: 400, fontSize: '1.05rem',
+                letterSpacing: '-0.01em', color: 'var(--color-text)', lineHeight: 1.1,
+              }}>Equity Strategist</div>
               <div style={{
-                fontSize: '0.65rem',
-                fontWeight: 600,
-                letterSpacing: '0.08em',
-                textTransform: 'uppercase',
+                fontSize: '0.65rem', fontWeight: 600,
+                letterSpacing: '0.08em', textTransform: 'uppercase',
                 color: 'var(--color-text-faint)',
-              }}>
-                TSX · TSXV · NYSE · NASDAQ
-              </div>
+              }}>TSX · TSXV · NYSE · NASDAQ</div>
             </div>
           </div>
-
-          {/* Right controls */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             {scanning && (
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: '6px',
-                fontSize: '0.72rem', fontWeight: 600,
-                color: 'var(--color-primary)',
-              }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.72rem', fontWeight: 600, color: 'var(--color-primary)' }}>
                 <span className="pulse-dot" />
                 Scanning markets…
               </div>
             )}
             <RefreshButton onClick={handleRefresh} refreshing={refreshing} />
-            <button
-              className="btn-theme"
-              onClick={() => setDarkMode(d => !d)}
+            <button className="btn-theme" onClick={() => setDarkMode(d => !d)}
               title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-              aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-            >
+              aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}>
               {darkMode ? <SunIcon /> : <MoonIcon />}
             </button>
           </div>
         </div>
-
-        {/* Horizon toggle strip */}
         <div style={{ borderTop: '1px solid var(--color-divider)', background: 'color-mix(in oklch, var(--color-surface-2) 70%, transparent)' }}>
           <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
             <HorizonToggle horizons={HORIZONS} active={horizon} onChange={handleHorizonChange} />
@@ -262,8 +240,6 @@ export default function App() {
             BUY · HOLD · SELL signals across TSX, TSXV, NYSE, and NASDAQ — ranked by fundamental
             strength, technical momentum, and macro context across five time horizons.
           </p>
-
-          {/* Hero stats row */}
           {!loading && data && (
             <div className="hero-stat-row fade-in-up" style={{ animationDelay: '0.28s' }}>
               <div className="hero-stat">
@@ -287,7 +263,6 @@ export default function App() {
               </div>
             </div>
           )}
-
           {loading && (
             <div className="hero-stat-row fade-in-up">
               {[80, 80, 100, 70].map((w, i) => (
@@ -300,13 +275,8 @@ export default function App() {
 
       {/* ── MAIN CONTENT ── */}
       <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '28px 24px 0' }}>
-
-        {/* Meta bar */}
         {lastUpdated && !loading && (
-          <div style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            flexWrap: 'wrap', gap: '10px', marginBottom: '24px',
-          }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px', marginBottom: '24px' }}>
             <div style={{ fontSize: '0.72rem', color: 'var(--color-text-faint)' }}>
               <span style={{ marginRight: '4px' }}>📅</span>
               {dateStr} · Last refreshed: <strong style={{ color: 'var(--color-text-muted)' }}>{lastUpdated.toLocaleTimeString()}</strong>
@@ -320,15 +290,12 @@ export default function App() {
                   background: `color-mix(in oklch,${color} 10%,transparent)`,
                   border: `1px solid color-mix(in oklch,${color} 25%,transparent)`,
                   color,
-                }}>
-                  {label}
-                </span>
+                }}>{label}</span>
               ))}
             </div>
           </div>
         )}
 
-        {/* Error state */}
         {error && !loading && (
           <div className="info-banner info-banner-error fade-in" style={{ marginBottom: '20px' }}>
             <span>⚠</span>
@@ -336,7 +303,6 @@ export default function App() {
           </div>
         )}
 
-        {/* Ultra Long notice */}
         {isUltraLong && !loading && (
           <div className="info-banner info-banner-primary fade-in" style={{ marginBottom: '20px' }}>
             <span>🏰</span>
@@ -348,7 +314,6 @@ export default function App() {
           </div>
         )}
 
-        {/* Loading state — skeleton */}
         {loading && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%,520px),1fr))', gap: '28px' }}>
             {[0, 1].map(col => (
@@ -366,37 +331,18 @@ export default function App() {
           </div>
         )}
 
-        {/* ── TWO COLUMN GRID ── */}
         {!loading && data && (
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 520px), 1fr))',
-            gap: '28px',
-            alignItems: 'start',
+            gap: '28px', alignItems: 'start',
           }}>
-
-            {/* CAD Column */}
             <section>
               <div className="market-section-header">
                 <span style={{ fontSize: '1rem' }}>🍁</span>
-                <span style={{
-                  fontFamily: 'var(--font-display)',
-                  fontWeight: 400, fontSize: '1rem',
-                  color: 'var(--color-text)', letterSpacing: '-0.01em',
-                }}>Canadian Markets</span>
-                <span className="stat-pill" style={{
-                  background: 'color-mix(in oklch,var(--color-primary) 10%,transparent)',
-                  border: '1px solid color-mix(in oklch,var(--color-primary) 22%,transparent)',
-                  color: 'var(--color-primary)',
-                }}>TSX · TSXV</span>
-                <span className="stat-pill" style={{
-                  marginLeft: 'auto',
-                  background: 'var(--color-surface-offset)',
-                  border: '1px solid var(--color-border)',
-                  color: 'var(--color-text-muted)',
-                }}>
-                  Top {Math.min(TOP_N, cad.length)} of {cadTotal}
-                </span>
+                <span style={{ fontFamily: 'var(--font-display)', fontWeight: 400, fontSize: '1rem', color: 'var(--color-text)', letterSpacing: '-0.01em' }}>Canadian Markets</span>
+                <span className="stat-pill" style={{ background: 'color-mix(in oklch,var(--color-primary) 10%,transparent)', border: '1px solid color-mix(in oklch,var(--color-primary) 22%,transparent)', color: 'var(--color-primary)' }}>TSX · TSXV</span>
+                <span className="stat-pill" style={{ marginLeft: 'auto', background: 'var(--color-surface-offset)', border: '1px solid var(--color-border)', color: 'var(--color-text-muted)' }}>Top {Math.min(TOP_N, cad.length)} of {cadTotal}</span>
               </div>
               <div className="market-section-body">
                 <div key={`cad-${fadeKey}`} style={{ display: 'flex', flexDirection: 'column', gap: '8px', animation: 'fadeIn 0.35s ease' }}>
@@ -407,28 +353,12 @@ export default function App() {
               </div>
             </section>
 
-            {/* USD Column */}
             <section>
               <div className="market-section-header">
                 <span style={{ fontSize: '1rem' }}>🦅</span>
-                <span style={{
-                  fontFamily: 'var(--font-display)',
-                  fontWeight: 400, fontSize: '1rem',
-                  color: 'var(--color-text)', letterSpacing: '-0.01em',
-                }}>U.S. Markets</span>
-                <span className="stat-pill" style={{
-                  background: 'color-mix(in oklch,var(--color-navy) 10%,transparent)',
-                  border: '1px solid color-mix(in oklch,var(--color-navy) 22%,transparent)',
-                  color: 'var(--color-navy)',
-                }}>NYSE · NASDAQ</span>
-                <span className="stat-pill" style={{
-                  marginLeft: 'auto',
-                  background: 'var(--color-surface-offset)',
-                  border: '1px solid var(--color-border)',
-                  color: 'var(--color-text-muted)',
-                }}>
-                  Top {Math.min(TOP_N, usd.length)} of {usdTotal}
-                </span>
+                <span style={{ fontFamily: 'var(--font-display)', fontWeight: 400, fontSize: '1rem', color: 'var(--color-text)', letterSpacing: '-0.01em' }}>U.S. Markets</span>
+                <span className="stat-pill" style={{ background: 'color-mix(in oklch,var(--color-navy) 10%,transparent)', border: '1px solid color-mix(in oklch,var(--color-navy) 22%,transparent)', color: 'var(--color-navy)' }}>NYSE · NASDAQ</span>
+                <span className="stat-pill" style={{ marginLeft: 'auto', background: 'var(--color-surface-offset)', border: '1px solid var(--color-border)', color: 'var(--color-text-muted)' }}>Top {Math.min(TOP_N, usd.length)} of {usdTotal}</span>
               </div>
               <div className="market-section-body">
                 <div key={`usd-${fadeKey}`} style={{ display: 'flex', flexDirection: 'column', gap: '8px', animation: 'fadeIn 0.35s ease' }}>
@@ -438,7 +368,6 @@ export default function App() {
                 </div>
               </div>
             </section>
-
           </div>
         )}
       </main>
@@ -449,26 +378,13 @@ export default function App() {
           <div className="site-footer-top">
             <div className="site-footer-logo">
               <LogoMark />
-              <span style={{
-                fontFamily: 'var(--font-display)',
-                fontSize: '0.95rem',
-                color: 'var(--color-text)',
-              }}>Equity Strategist</span>
+              <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.95rem', color: 'var(--color-text)' }}>Equity Strategist</span>
             </div>
-            <nav className="site-footer-links" aria-label="Footer navigation">
-              <a href="#">TSX Markets</a>
-              <a href="#">US Markets</a>
-              <a href="#">Methodology</a>
-              <a href="https://github.com/sujaysoni/equity-strategist-dashboard" target="_blank" rel="noopener noreferrer">
-                GitHub
-              </a>
-            </nav>
           </div>
           <div className="site-footer-bottom">
             <span>For informational purposes only. Not financial advice. Always do your own research.</span>
             <span>Data via yFinance · Refreshed 06:00 ET weekdays · © {new Date().getFullYear()} Equity Strategist</span>
           </div>
-          {/* Managed by line */}
           <div style={{
             paddingTop: '10px',
             textAlign: 'center',
