@@ -1,16 +1,17 @@
-name: Refresh TSX Ticker Seed
+name: Refresh Ticker Caches (TSX + NYSE)
 
-# Runs on the 1st of every month at 8:00 AM UTC
-# Also triggerable manually from the Actions tab
+# Runs on the 1st of every month at 8:00 AM UTC so both caches are
+# fresh before the daily analysis workflow runs that morning.
+# Also manually triggerable from the Actions tab.
 on:
   schedule:
     - cron: '0 8 1 * *'
   workflow_dispatch:
 
 jobs:
-  refresh-seed:
-    runs-on:         ubuntu-latest
-    timeout-minutes: 30
+  refresh-caches:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
     permissions:
       contents: write
 
@@ -26,13 +27,32 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Fetch full TSX listing from TMX API
+      # ------------------------------------------------------------------ #
+      # CAD: TSX + TSXV native equities via TMX API
+      # ------------------------------------------------------------------ #
+      - name: Refresh TSX / TSXV ticker cache
         run: python backend/fetch_tsx_tickers.py
+        continue-on-error: true   # don't block NYSE step if TMX is down
 
-      - name: Commit refreshed _cad_seed() and ticker cache
+      # ------------------------------------------------------------------ #
+      # USD: NYSE common stocks via Nasdaq Trader file (SEC EDGAR fallback)
+      # ------------------------------------------------------------------ #
+      - name: Refresh NYSE ticker cache
+        run: python backend/fetch_nyse_tickers.py
+        continue-on-error: true   # don't fail the whole job if unreachable
+
+      # ------------------------------------------------------------------ #
+      # Commit all updated cache files in one push
+      # ------------------------------------------------------------------ #
+      - name: Commit refreshed ticker caches
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name  "github-actions[bot]"
-          git add backend/analyze_stocks.py backend/tsx_tickers_cache.txt
-          git diff --staged --quiet || git commit -m "chore: refresh TSX ticker seed $(date -u +'%Y-%m-%d')"
+          git add \
+            backend/tsx_tickers_cache.txt \
+            backend/tsx_tickers_cache.json \
+            backend/nyse_tickers_cache.txt \
+            backend/nyse_tickers_cache.json || true
+          git diff --staged --quiet || \
+            git commit -m "chore: refresh ticker caches TSX+NYSE $(date -u +'%Y-%m-%d')"
           git push

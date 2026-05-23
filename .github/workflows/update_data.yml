@@ -36,21 +36,40 @@ jobs:
           python -c "import yfinance; print('yfinance', yfinance.__version__)"
           python -c "import pandas; print('pandas', pandas.__version__)"
 
-      - name: Refresh TSX ticker cache
+      # ------------------------------------------------------------------ #
+      # Refresh ticker caches before analysis so the universe is current.
+      # Both steps use continue-on-error so a source outage never blocks
+      # the analysis run – stale caches are better than no analysis at all.
+      # ------------------------------------------------------------------ #
+      - name: Refresh TSX / TSXV ticker cache
         run: python backend/fetch_tsx_tickers.py
         continue-on-error: true
 
+      - name: Refresh NYSE ticker cache
+        run: python backend/fetch_nyse_tickers.py
+        continue-on-error: true
+
+      # ------------------------------------------------------------------ #
+      # Core analysis
+      # ------------------------------------------------------------------ #
       - name: Run analysis
         env:
           POLYGON_API_KEY:   ${{ secrets.POLYGON_API_KEY }}
           ALPHA_VANTAGE_KEY: ${{ secrets.ALPHA_VANTAGE_KEY }}
         run: python backend/analyze_stocks.py
 
+      # ------------------------------------------------------------------ #
+      # Commit all outputs in one push
+      # ------------------------------------------------------------------ #
       - name: Commit results
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name  "github-actions[bot]"
           git add public/recommendations.json
-          git add backend/tsx_tickers_cache.txt || true
-          git diff --staged --quiet || git commit -m "chore: update recommendations $(date -u +'%Y-%m-%d %H:%M UTC')"
+          git add backend/tsx_tickers_cache.txt  || true
+          git add backend/tsx_tickers_cache.json || true
+          git add backend/nyse_tickers_cache.txt  || true
+          git add backend/nyse_tickers_cache.json || true
+          git diff --staged --quiet || \
+            git commit -m "chore: update recommendations $(date -u +'%Y-%m-%d %H:%M UTC')"
           git push
