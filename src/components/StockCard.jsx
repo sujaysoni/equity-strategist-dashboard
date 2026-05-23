@@ -27,6 +27,26 @@ function fmtCap(n) {
   return `$${n.toFixed(0)}`
 }
 
+/**
+ * Build a Yahoo Finance quote URL from a raw ticker.
+ * Examples:
+ *   RY.TO   → https://finance.yahoo.com/quote/RY.TO
+ *   CNQ.TO  → https://finance.yahoo.com/quote/CNQ.TO
+ *   BRK-B   → https://finance.yahoo.com/quote/BRK-B
+ *   SHOP.V  → https://finance.yahoo.com/quote/SHOP.V
+ *   AAPL    → https://finance.yahoo.com/quote/AAPL
+ */
+function yahooUrl(ticker) {
+  if (!ticker) return 'https://finance.yahoo.com'
+  return `https://finance.yahoo.com/quote/${encodeURIComponent(ticker)}`
+}
+
+/** Display label: strip exchange suffixes for the visible ticker text */
+function displayTicker(ticker) {
+  if (!ticker) return ''
+  return ticker.replace(/\.TO$/, '').replace(/\.V$/, '')
+}
+
 export default function StockCard({ stock, horizon, rank }) {
   const [expanded, setExpanded] = useState(false)
 
@@ -34,6 +54,8 @@ export default function StockCard({ stock, horizon, rank }) {
   const rc   = RATING_COLORS[hz.rating] || RATING_COLORS.HOLD
   const tier = stock.cap_tier || 'unknown'
   const cc   = CAP_COLORS[tier] || CAP_COLORS.unknown
+
+  const yhUrl = yahooUrl(stock.ticker)
 
   return (
     <div
@@ -75,10 +97,34 @@ export default function StockCard({ stock, horizon, rank }) {
           {cc.label}
         </span>
 
-        {/* Ticker */}
-        <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--color-text)', letterSpacing: '0.01em' }}>
-          {stock.ticker?.replace('.TO','').replace('.V','')}
-        </span>
+        {/* ── Ticker as Yahoo Finance link ── */}
+        <a
+          href={yhUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={e => e.stopPropagation()}  /* prevent card toggle on link click */
+          title={`View ${displayTicker(stock.ticker)} on Yahoo Finance`}
+          style={{
+            fontWeight:     700,
+            fontSize:       '0.9rem',
+            color:          'var(--color-text)',
+            letterSpacing:  '0.01em',
+            textDecoration: 'none',
+            borderBottom:   '1px dotted var(--color-text-faint)',
+            lineHeight:     1.2,
+            transition:     'color 150ms ease, border-color 150ms ease',
+          }}
+          onMouseEnter={e => {
+            e.currentTarget.style.color       = 'var(--color-primary)'
+            e.currentTarget.style.borderColor = 'var(--color-primary)'
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.color       = 'var(--color-text)'
+            e.currentTarget.style.borderColor = 'var(--color-text-faint)'
+          }}
+        >
+          {displayTicker(stock.ticker)}
+        </a>
 
         {/* Name */}
         <span style={{
@@ -105,6 +151,46 @@ export default function StockCard({ stock, horizon, rank }) {
       {/* ── Expanded detail ── */}
       {expanded && (
         <div style={{ marginTop: '12px', borderTop: '1px solid var(--color-divider)', paddingTop: '12px' }}>
+
+          {/* Yahoo Finance link — prominent in expanded view */}
+          <div style={{ marginBottom: '12px' }}>
+            <a
+              href={yhUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={e => e.stopPropagation()}
+              style={{
+                display:        'inline-flex',
+                alignItems:     'center',
+                gap:            '4px',
+                fontSize:       '0.68rem',
+                fontWeight:     600,
+                color:          'var(--color-primary)',
+                textDecoration: 'none',
+                padding:        '3px 8px',
+                borderRadius:   'var(--radius-sm)',
+                border:         '1px solid color-mix(in oklch,var(--color-primary) 30%,transparent)',
+                background:     'color-mix(in oklch,var(--color-primary) 8%,transparent)',
+                transition:     'background 150ms ease, border-color 150ms ease',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background   = 'color-mix(in oklch,var(--color-primary) 15%,transparent)'
+                e.currentTarget.style.borderColor  = 'color-mix(in oklch,var(--color-primary) 50%,transparent)'
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background   = 'color-mix(in oklch,var(--color-primary) 8%,transparent)'
+                e.currentTarget.style.borderColor  = 'color-mix(in oklch,var(--color-primary) 30%,transparent)'
+              }}
+            >
+              {/* Yahoo Finance "Y" logo-ish icon */}
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                <polyline points="15 3 21 3 21 9" />
+                <line x1="10" y1="14" x2="21" y2="3" />
+              </svg>
+              View {displayTicker(stock.ticker)} on Yahoo Finance
+            </a>
+          </div>
 
           {/* Key metrics row */}
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginBottom: '10px' }}>
