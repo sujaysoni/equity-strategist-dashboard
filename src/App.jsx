@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import HorizonToggle from './components/HorizonToggle'
 import StockCard from './components/StockCard'
 import RefreshButton from './components/RefreshButton'
+import MarketNewsTile from './components/MarketNewsTile'
 
 const HORIZONS = [
   { key: 'ultra_short', label: 'Ultra Short', sub: '0–3m'   },
@@ -419,6 +420,9 @@ export default function App() {
           </div>
         </div>
       </footer>
+
+      {/* ── FLOATING MARKET NEWS TILE ── */}
+      <MarketNewsTile darkMode={darkMode} />
 
     </div>
   )
