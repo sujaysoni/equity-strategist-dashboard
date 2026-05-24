@@ -1,13 +1,18 @@
 #!/usr/bin/env python3
 """
-Equity Strategist Dashboard - Analysis Engine v6
+Equity Strategist Dashboard - Analysis Engine v7
 
-Key change vs v5:
-  Yahoo Finance blocks .info requests from GitHub Actions IPs (bot detection).
-  Solution: Use ONLY yf.download() for price/RSI/MA signals (this still works),
-  and seed fundamentals (ROE, FCF yield, gross margin, market cap) from a static
-  dict that is updated manually or via a separate enrichment job.
-  This guarantees non-zero output every run.
+Fundamentals sourcing priority (per ticker):
+  1. yf.Ticker fast_info   -> market_cap, current_price, shares_outstanding
+  2. yf.Ticker financials  -> ROE (net_income / total_equity), gross_margin
+  3. yf.Ticker cashflow    -> FCF yield  (operatingCashflow - capex) / mkt_cap
+  4. yf.Ticker info        -> div_yield, pe_fwd, debt/equity (attempted; may be blocked)
+  5. Static seed dict      -> fallback for any field that failed live fetch
+
+A 'data_source' field is written per ticker:
+  'live_yahoo'    = all key fields fetched live
+  'partial_yahoo' = some fields live, some from static seed
+  'static_seed'   = live fetch failed entirely; all values from seed dict
 """
 
 import os, json, math, time, traceback, sys
@@ -16,7 +21,6 @@ import pandas as pd
 from datetime import datetime, timezone
 
 OUT_PATH  = os.path.join(os.path.dirname(__file__), "..", "public", "recommendations.json")
-CAD_CACHE = os.path.join(os.path.dirname(__file__), "tsx_tickers_cache.txt")
 
 MEGA_CAP  = 200e9
 LARGE_CAP = 10e9
@@ -35,12 +39,11 @@ HORIZON_WEIGHTS = {
     "ultra_long":  dict(roe=0.20,fcf=0.15,debt=0.10,rsi=0.00,ma50=0.00,ma200=0.05,insider=0.05,shenanigan=-0.05,moat=0.45),
 }
 
-BATCH_SIZE = 20
-SLEEP_S    = 2
+BATCH_SIZE = 10   # smaller batches to avoid rate-limiting
+SLEEP_S    = 3
 
 # ---------------------------------------------------------------------------
-# STATIC FUNDAMENTALS SEED
-# These values are updated manually or via enrichment job.
+# STATIC FUNDAMENTALS SEED  (fallback only — used when live fetch fails)
 # Format: ticker -> (name, exchange, sector, industry, market_cap_usd,
 #                    roe, fcf_yield, div_yield, debt_eq, gross_margin,
 #                    pe_fwd, net_inc_pos, op_cf_pos, insider_pct)
@@ -175,6 +178,9 @@ FUNDAMENTALS = {
     "TLT":     ("iShares 20+ Year Treasury","NYSE","ETF","Long-Term Bonds",48e9,0.000,0.042,0.042,0,1.000,0,True,True,0.0),
 }
 
+# ETF tickers — skip fundamental live-fetch for these (no financials available)
+ETF_TICKERS = {"SPY","QQQ","IWM","GLD","TLT"}
+
 
 def safe(val, default=None):
     try:
@@ -204,14 +210,13 @@ def calc_rsi(closes, period=14):
 
 
 def get_price_data(sym):
-    """Download OHLCV via yf.download (more reliable than .info in CI)."""
+    """Download OHLCV via yf.download — reliable even from CI."""
     for period in ("1y", "6mo", "3mo"):
         try:
             h = yf.download(sym, period=period, auto_adjust=True,
                             progress=False, show_errors=False)
             if h is None or h.empty:
                 continue
-            # Flatten multi-index if present
             if isinstance(h.columns, pd.MultiIndex):
                 h.columns = [c[0] if isinstance(c, tuple) else c for c in h.columns]
             h.columns = [str(c).strip().title() for c in h.columns]
@@ -222,15 +227,194 @@ def get_price_data(sym):
     return None
 
 
-def score_ticker(sym, fund, hist):
-    (name, exchange, sector, industry, mkt_cap,
-     roe_raw, fcf_yield, div_yield, debt_eq, gross_mg,
-     pe_fwd, net_inc_pos, op_cf_pos, insider_pct) = fund
+def _series_latest(df, *row_keys):
+    """Pull the most-recent non-null value from a financials DataFrame row."""
+    if df is None or df.empty:
+        return None
+    for key in row_keys:
+        for idx in df.index:
+            if str(idx).lower().replace(" ", "").replace("_", "") == key.lower().replace(" ", "").replace("_", ""):
+                row = df.loc[idx].dropna()
+                if not row.empty:
+                    return safe(row.iloc[0])
+    return None
 
-    # -- Technical signals from live price data --
+
+def fetch_live_fundamentals(sym, seed):
+    """
+    Attempt to fetch live fundamentals from Yahoo Finance.
+    Returns a dict of live values + 'data_source' indicator.
+    Falls back to seed values for any field that cannot be fetched.
+    """
+    (name, exchange, sector, industry, seed_mcap,
+     seed_roe, seed_fcf, seed_div, seed_debt,
+     seed_gm, seed_pe, seed_ni_pos, seed_ocf_pos, seed_ins) = seed
+
+    # ETFs: skip live fundamental fetch entirely
+    if sym in ETF_TICKERS:
+        return dict(
+            market_cap_usd = seed_mcap,
+            roe            = seed_roe,
+            fcf_yield      = seed_fcf,
+            div_yield      = seed_div,
+            debt_eq        = seed_debt,
+            gross_margin   = seed_gm,
+            pe_fwd         = seed_pe,
+            net_inc_pos    = seed_ni_pos,
+            op_cf_pos      = seed_ocf_pos,
+            insider_pct    = seed_ins,
+            data_source    = "static_seed",
+        )
+
+    live = {}
+    live_fields = 0
+    total_fields = 6  # mcap, roe, fcf, div, gm, pe
+
+    try:
+        ticker = yf.Ticker(sym)
+
+        # ── 1. Market Cap via fast_info (very reliable) ──────────────────────
+        try:
+            fi = ticker.fast_info
+            mcap = safe(getattr(fi, "market_cap", None))
+            if mcap and mcap > 1e6:
+                live["market_cap_usd"] = mcap
+                live_fields += 1
+                print(f"    mcap live: ${mcap/1e9:.1f}B")
+        except Exception as e:
+            print(f"    fast_info error: {e}")
+
+        # ── 2. Dividend yield via fast_info ──────────────────────────────────
+        try:
+            fi = ticker.fast_info
+            dy = safe(getattr(fi, "three_month_average_volume", None))  # placeholder probe
+            # fast_info doesn't expose div yield directly; try info dict lightly
+            info = {}
+            try:
+                info = ticker.info or {}
+            except Exception:
+                pass
+            raw_div = safe(info.get("dividendYield") or info.get("trailingAnnualDividendYield"))
+            if raw_div is not None and raw_div >= 0:
+                live["div_yield"] = raw_div
+                live_fields += 1
+                print(f"    div_yield live: {raw_div*100:.2f}%")
+            raw_pe = safe(info.get("forwardPE") or info.get("trailingPE"))
+            if raw_pe is not None and 0 < raw_pe < 1000:
+                live["pe_fwd"] = raw_pe
+                live_fields += 1
+                print(f"    pe_fwd live: {raw_pe:.1f}x")
+        except Exception as e:
+            print(f"    info fetch note: {e}")
+
+        # ── 3. Income statement → ROE & Gross Margin ─────────────────────────
+        try:
+            fin   = ticker.financials          # annual income statement (cols = dates)
+            bs    = ticker.balance_sheet       # annual balance sheet
+            cf    = ticker.cashflow            # annual cash flow
+
+            # Gross Margin = gross_profit / total_revenue
+            gp  = _series_latest(fin, "GrossProfit", "Gross Profit")
+            rev = _series_latest(fin, "TotalRevenue", "Total Revenue")
+            if gp is not None and rev and rev != 0:
+                gm = gp / rev
+                if 0 < gm < 1:
+                    live["gross_margin"] = gm
+                    live_fields += 1
+                    print(f"    gross_margin live: {gm*100:.1f}%")
+
+            # ROE = net_income / stockholders_equity
+            ni  = _series_latest(fin, "NetIncome", "Net Income")
+            eq  = _series_latest(bs,  "StockholdersEquity", "Stockholders Equity",
+                                       "CommonStockEquity", "Total Stockholders Equity")
+            if ni is not None and eq and eq != 0:
+                roe = ni / eq
+                if -2 < roe < 10:   # sanity bounds
+                    live["roe"] = roe
+                    live_fields += 1
+                    print(f"    roe live: {roe*100:.1f}%")
+
+            # Net income and OCF direction flags (for shenanigan check)
+            ocf = _series_latest(cf, "OperatingCashFlow", "Operating Cash Flow",
+                                       "CashFlowFromContinuingOperatingActivities")
+            if ni is not None:
+                live["net_inc_pos"] = ni > 0
+            if ocf is not None:
+                live["op_cf_pos"] = ocf > 0
+
+            # FCF yield = (OCF - CapEx) / market_cap
+            capex = _series_latest(cf, "CapitalExpenditures", "Capital Expenditures",
+                                        "CapitalExpenditure")
+            mcap_for_fcf = live.get("market_cap_usd") or seed_mcap
+            if ocf is not None and capex is not None and mcap_for_fcf:
+                fcf = ocf - abs(capex)   # capex stored as negative in some versions
+                fcf_yield = fcf / mcap_for_fcf
+                if -0.5 < fcf_yield < 0.5:
+                    live["fcf_yield"] = fcf_yield
+                    live_fields += 1
+                    print(f"    fcf_yield live: {fcf_yield*100:.2f}%")
+
+        except Exception as e:
+            print(f"    financials fetch note: {e}")
+
+        # ── 4. Debt/Equity via balance sheet ─────────────────────────────────
+        try:
+            bs  = ticker.balance_sheet
+            tde = _series_latest(bs, "TotalDebt", "Total Debt", "LongTermDebt")
+            eq2 = _series_latest(bs, "StockholdersEquity", "Stockholders Equity",
+                                       "CommonStockEquity", "Total Stockholders Equity")
+            if tde is not None and eq2 and eq2 != 0:
+                de = (tde / eq2) * 100
+                if 0 <= de < 2000:
+                    live["debt_eq"] = de
+                    print(f"    debt/equity live: {de:.0f}%")
+        except Exception as e:
+            print(f"    debt fetch note: {e}")
+
+    except Exception as e:
+        print(f"    yf.Ticker init error for {sym}: {e}")
+
+    # ── Merge live values over seed, determine data_source ───────────────────
+    result = dict(
+        market_cap_usd = live.get("market_cap_usd", seed_mcap),
+        roe            = live.get("roe",             seed_roe),
+        fcf_yield      = live.get("fcf_yield",       seed_fcf),
+        div_yield      = live.get("div_yield",        seed_div),
+        debt_eq        = live.get("debt_eq",          seed_debt),
+        gross_margin   = live.get("gross_margin",     seed_gm),
+        pe_fwd         = live.get("pe_fwd",           seed_pe),
+        net_inc_pos    = live.get("net_inc_pos",      seed_ni_pos),
+        op_cf_pos      = live.get("op_cf_pos",        seed_ocf_pos),
+        insider_pct    = seed_ins,   # SEDI/Form4 not available via yfinance
+    )
+
+    if live_fields >= total_fields - 1:
+        result["data_source"] = "live_yahoo"
+    elif live_fields >= 2:
+        result["data_source"] = "partial_yahoo"
+    else:
+        result["data_source"] = "static_seed"
+
+    result["last_updated_utc"] = datetime.now(timezone.utc).isoformat()
+    return result
+
+
+def score_ticker(sym, fund, hist, live_fund):
+    (name, exchange, sector, industry, *_) = fund
+
+    roe_raw    = live_fund["roe"]
+    fcf_yield  = live_fund["fcf_yield"]
+    div_yield  = live_fund["div_yield"]
+    debt_eq    = live_fund["debt_eq"]
+    gross_mg   = live_fund["gross_margin"]
+    pe_fwd     = live_fund["pe_fwd"]
+    net_inc_pos= live_fund["net_inc_pos"]
+    op_cf_pos  = live_fund["op_cf_pos"]
+    insider_pct= live_fund["insider_pct"]
+
     closes     = hist["Close"].dropna() if hist is not None else None
     rsi_val    = calc_rsi(closes)
-    above_50   = above_200 = None
+    above_50 = above_200 = None
     if closes is not None and len(closes) > 0:
         lp = float(closes.iloc[-1])
         if len(closes) >= 50:
@@ -239,23 +423,22 @@ def score_ticker(sym, fund, hist):
             above_200 = lp > float(closes.rolling(200).mean().dropna().iloc[-1])
 
     ins_buy = insider_pct > 1.0
-    shenan  = net_inc_pos and not op_cf_pos  # net income up, OCF negative
+    shenan  = net_inc_pos and not op_cf_pos
 
-    # Default RSI/MA if no price data
     rsi_score = 0.5
     if rsi_val is not None:
         rsi_score = 0.3 if rsi_val < 30 else (0.4 if rsi_val > 70 else min(1.0, (rsi_val - 30) / 40))
 
     n = dict(
-        roe       = min(1.0, max(0.0, (roe_raw or 0) / 0.20)),
-        fcf       = min(1.0, max(0.0, (fcf_yield or 0) / 0.08)),
-        debt      = min(1.0, max(0.0, 1 - ((debt_eq or 100) / 200))),
-        rsi       = rsi_score,
-        ma50      = (1.0 if above_50  else 0.0) if above_50  is not None else 0.5,
-        ma200     = (1.0 if above_200 else 0.0) if above_200 is not None else 0.5,
-        insider   = 1.0 if ins_buy else 0.0,
-        shenanigan= 1.0 if shenan  else 0.0,
-        moat      = min(1.0, max(0.0, gross_mg or 0)),
+        roe        = min(1.0, max(0.0, (roe_raw    or 0) / 0.20)),
+        fcf        = min(1.0, max(0.0, (fcf_yield  or 0) / 0.08)),
+        debt       = min(1.0, max(0.0, 1 - ((debt_eq or 100) / 200))),
+        rsi        = rsi_score,
+        ma50       = (1.0 if above_50  else 0.0) if above_50  is not None else 0.5,
+        ma200      = (1.0 if above_200 else 0.0) if above_200 is not None else 0.5,
+        insider    = 1.0 if ins_buy else 0.0,
+        shenanigan = 1.0 if shenan  else 0.0,
+        moat       = min(1.0, max(0.0, gross_mg or 0)),
     )
 
     horizons = {}
@@ -266,29 +449,29 @@ def score_ticker(sym, fund, hist):
         rating = "BUY" if score >= 58 else ("HOLD" if score >= 40 else "SELL")
 
         tp, rp = [], []
-        if roe_raw and roe_raw > 0.12:     tp.append(f"ROE {roe_raw*100:.0f}%")
+        if roe_raw   and roe_raw   > 0.12: tp.append(f"ROE {roe_raw*100:.0f}%")
         if fcf_yield and fcf_yield > 0.03: tp.append(f"FCF yield {fcf_yield*100:.1f}%")
         if above_50:                       tp.append("above 50-DMA")
         if above_200:                      tp.append("above 200-DMA")
         if ins_buy:                        tp.append("insider buying")
-        if gross_mg and gross_mg > 0.50:   tp.append(f"wide margins ({gross_mg*100:.0f}%)")
-        if rsi_val and rsi_val < 35:       tp.append(f"oversold RSI {rsi_val:.0f}")
+        if gross_mg  and gross_mg  > 0.50: tp.append(f"wide margins ({gross_mg*100:.0f}%)")
+        if rsi_val   and rsi_val   < 35:   tp.append(f"oversold RSI {rsi_val:.0f}")
 
         if shenan:                         rp.append("earnings-OCF divergence")
-        if debt_eq and debt_eq > 150:      rp.append("high leverage")
-        if rsi_val and rsi_val > 70:       rp.append("overbought RSI")
+        if debt_eq   and debt_eq   > 150:  rp.append("high leverage")
+        if rsi_val   and rsi_val   > 70:   rp.append("overbought RSI")
         if above_200 is False:             rp.append("below 200-DMA")
-        if pe_fwd and pe_fwd > 50:         rp.append(f"stretched P/E {pe_fwd:.0f}x")
+        if pe_fwd    and pe_fwd    > 50:   rp.append(f"stretched P/E {pe_fwd:.0f}x")
 
         horizons[hz] = dict(
             rating=rating, score=score, label=HORIZON_LABELS[hz],
-            thesis="; ".join(tp) or "No strong signals",
-            risk  ="; ".join(rp) or "Monitor macro conditions",
+            thesis=";\u00a0".join(tp) or "No strong signals",
+            risk  =";\u00a0".join(rp) or "Monitor macro conditions",
         )
 
     return horizons, dict(
-        market_cap_usd     = mkt_cap,
-        cap_tier           = cap_tier(mkt_cap),
+        market_cap_usd     = live_fund["market_cap_usd"],
+        cap_tier           = cap_tier(live_fund["market_cap_usd"]),
         roe                = roe_raw,
         fcf_yield          = fcf_yield,
         div_yield          = div_yield,
@@ -300,6 +483,8 @@ def score_ticker(sym, fund, hist):
         shenanigan_flag    = shenan,
         gross_margin       = gross_mg,
         pe_fwd             = pe_fwd,
+        data_source        = live_fund["data_source"],
+        last_updated_utc   = live_fund["last_updated_utc"],
     )
 
 
@@ -307,18 +492,20 @@ def process_universe(tickers, label):
     results = []
     for i, sym in enumerate(tickers):
         if sym not in FUNDAMENTALS:
-            print(f"  [{label}] {i+1}/{len(tickers)} {sym} -> SKIP (not in fundamentals seed)", flush=True)
+            print(f"  [{label}] {i+1}/{len(tickers)} {sym} -> SKIP (not in seed)", flush=True)
             continue
         print(f"  [{label}] {i+1}/{len(tickers)} {sym}", flush=True)
         try:
-            hist = get_price_data(sym)
+            hist     = get_price_data(sym)
+            live_fund= fetch_live_fundamentals(sym, FUNDAMENTALS[sym])
+            fund     = FUNDAMENTALS[sym]
+
             if hist is not None:
                 print(f"    price rows: {len(hist)}", flush=True)
             else:
-                print(f"    no price data (will use static signals)", flush=True)
+                print(f"    no price data — using static signals", flush=True)
 
-            horizons, metrics = score_ticker(sym, FUNDAMENTALS[sym], hist)
-            fund = FUNDAMENTALS[sym]
+            horizons, metrics = score_ticker(sym, fund, hist, live_fund)
 
             results.append(dict(
                 ticker   = sym,
@@ -329,8 +516,8 @@ def process_universe(tickers, label):
                 **metrics,
                 horizons = horizons,
             ))
-            print(f"    -> OK  score={horizons['short']['score']}  cap={metrics['cap_tier']}",
-                  flush=True)
+            print(f"    -> OK  score={horizons['short']['score']}  "
+                  f"source={metrics['data_source']}  cap={metrics['cap_tier']}", flush=True)
         except Exception:
             print(f"    -> ERROR:\n{traceback.format_exc()}", flush=True)
 
@@ -349,7 +536,7 @@ def sort_key(s):
 
 def main():
     print("=" * 60, flush=True)
-    print("Equity Strategist Dashboard - Analysis Engine v6", flush=True)
+    print("Equity Strategist Dashboard - Analysis Engine v7", flush=True)
     print(f"Python  {sys.version}", flush=True)
     print(f"yfinance {yf.__version__}", flush=True)
     print(f"pandas   {pd.__version__}", flush=True)
@@ -372,6 +559,10 @@ def main():
         print("ERROR: Zero results produced.", file=sys.stderr)
         sys.exit(1)
 
+    live_count = sum(1 for s in cad+usd if s.get("data_source") == "live_yahoo")
+    partial_count = sum(1 for s in cad+usd if s.get("data_source") == "partial_yahoo")
+    print(f"  live_yahoo: {live_count}  partial: {partial_count}", flush=True)
+
     payload = dict(
         generated_at = datetime.now(timezone.utc).isoformat(),
         cad  = cad,
@@ -390,8 +581,8 @@ def main():
         json.dump(payload, f, indent=2, default=str)
 
     print(f"\nWrote {out}", flush=True)
-    print(f"  CAD BUYs: {sum(1 for s in cad if s['horizons']['short']['rating']=='BUY')}",flush=True)
-    print(f"  USD BUYs: {sum(1 for s in usd if s['horizons']['short']['rating']=='BUY')}",flush=True)
+    print(f"  CAD BUYs: {sum(1 for s in cad if s['horizons']['short']['rating']=='BUY')}", flush=True)
+    print(f"  USD BUYs: {sum(1 for s in usd if s['horizons']['short']['rating']=='BUY')}", flush=True)
 
 
 if __name__ == "__main__":
