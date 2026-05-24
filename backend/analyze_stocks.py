@@ -1,6 +1,14 @@
 #!/usr/bin/env python3
 """
-Equity Strategist Dashboard - Analysis Engine v7
+Equity Strategist Dashboard - Analysis Engine v8
+
+Universe sourcing:
+  - Primary: tsx_tickers_cache.txt  (CAD)  + nyse_tickers_cache.txt  (USD)
+  - These cache files are refreshed by fetch_tsx_tickers.py / fetch_nyse_tickers.py
+    each run, so the tracked count changes day-to-day as tickers enter/leave the exchanges.
+  - FUNDAMENTALS dict below is a *seed fallback only* — used when live yfinance
+    fetch returns nothing for a field.  Any ticker in the cache is analyzed even
+    if it has no seed entry.
 
 Fundamentals sourcing priority (per ticker):
   1. yf.Ticker fast_info   -> market_cap, current_price, shares_outstanding
@@ -20,7 +28,12 @@ import yfinance as yf
 import pandas as pd
 from datetime import datetime, timezone
 
-OUT_PATH  = os.path.join(os.path.dirname(__file__), "..", "public", "recommendations.json")
+BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
+OUT_PATH    = os.path.join(BACKEND_DIR, "..", "public", "recommendations.json")
+
+# Cache file paths (written by fetch_tsx_tickers.py / fetch_nyse_tickers.py)
+TSX_CACHE_TXT  = os.path.join(BACKEND_DIR, "tsx_tickers_cache.txt")
+NYSE_CACHE_TXT = os.path.join(BACKEND_DIR, "nyse_tickers_cache.txt")
 
 MEGA_CAP  = 200e9
 LARGE_CAP = 10e9
@@ -181,6 +194,34 @@ FUNDAMENTALS = {
 # ETF tickers — skip fundamental live-fetch for these (no financials available)
 ETF_TICKERS = {"SPY","QQQ","IWM","GLD","TLT"}
 
+# ---------------------------------------------------------------------------
+# NULL SEED — used for tickers that exist in the cache but not in FUNDAMENTALS
+# All fields are zero/False so the live yfinance fetch is the sole data source
+# ---------------------------------------------------------------------------
+NULL_SEED = ("Unknown","Unknown","Unknown","Unknown",0,
+             0.0, 0.0, 0.0, 0.0, 0.0, 0.0, False, False, 0.0)
+
+
+def load_ticker_cache(path):
+    """Read a one-ticker-per-line cache file; return a deduplicated list."""
+    if not os.path.exists(path):
+        print(f"  WARNING: cache file not found: {path}", flush=True)
+        return []
+    tickers = []
+    with open(path) as f:
+        for line in f:
+            t = line.strip()
+            if t and not t.startswith("#"):
+                tickers.append(t)
+    # deduplicate while preserving order
+    seen = set()
+    result = []
+    for t in tickers:
+        if t not in seen:
+            seen.add(t)
+            result.append(t)
+    return result
+
 
 def safe(val, default=None):
     try:
@@ -243,9 +284,13 @@ def _series_latest(df, *row_keys):
 def fetch_live_fundamentals(sym, seed):
     """
     Attempt to fetch live fundamentals from Yahoo Finance.
+    seed may be None (for tickers not in the static FUNDAMENTALS dict),
+    in which case NULL_SEED is used so the live fetch is the only data source.
     Returns a dict of live values + 'data_source' indicator.
-    Falls back to seed values for any field that cannot be fetched.
     """
+    if seed is None:
+        seed = NULL_SEED
+
     (name, exchange, sector, industry, seed_mcap,
      seed_roe, seed_fcf, seed_div, seed_debt,
      seed_gm, seed_pe, seed_ni_pos, seed_ocf_pos, seed_ins) = seed
@@ -284,11 +329,8 @@ def fetch_live_fundamentals(sym, seed):
         except Exception as e:
             print(f"    fast_info error: {e}")
 
-        # ── 2. Dividend yield via fast_info ──────────────────────────────────
+        # ── 2. Dividend yield + PE via info dict ──────────────────────────────
         try:
-            fi = ticker.fast_info
-            dy = safe(getattr(fi, "three_month_average_volume", None))  # placeholder probe
-            # fast_info doesn't expose div yield directly; try info dict lightly
             info = {}
             try:
                 info = ticker.info or {}
@@ -304,16 +346,26 @@ def fetch_live_fundamentals(sym, seed):
                 live["pe_fwd"] = raw_pe
                 live_fields += 1
                 print(f"    pe_fwd live: {raw_pe:.1f}x")
+            # Also pick up sector/industry/name for non-seed tickers
+            if not info.get("shortName") and info.get("longName"):
+                live["_name"]     = info.get("longName", sym)
+            elif info.get("shortName"):
+                live["_name"]     = info["shortName"]
+            if info.get("sector"):
+                live["_sector"]   = info["sector"]
+            if info.get("industry"):
+                live["_industry"] = info["industry"]
+            if info.get("exchange"):
+                live["_exchange"] = info["exchange"]
         except Exception as e:
             print(f"    info fetch note: {e}")
 
         # ── 3. Income statement → ROE & Gross Margin ─────────────────────────
         try:
-            fin   = ticker.financials          # annual income statement (cols = dates)
-            bs    = ticker.balance_sheet       # annual balance sheet
-            cf    = ticker.cashflow            # annual cash flow
+            fin   = ticker.financials
+            bs    = ticker.balance_sheet
+            cf    = ticker.cashflow
 
-            # Gross Margin = gross_profit / total_revenue
             gp  = _series_latest(fin, "GrossProfit", "Gross Profit")
             rev = _series_latest(fin, "TotalRevenue", "Total Revenue")
             if gp is not None and rev and rev != 0:
@@ -323,18 +375,16 @@ def fetch_live_fundamentals(sym, seed):
                     live_fields += 1
                     print(f"    gross_margin live: {gm*100:.1f}%")
 
-            # ROE = net_income / stockholders_equity
             ni  = _series_latest(fin, "NetIncome", "Net Income")
             eq  = _series_latest(bs,  "StockholdersEquity", "Stockholders Equity",
                                        "CommonStockEquity", "Total Stockholders Equity")
             if ni is not None and eq and eq != 0:
                 roe = ni / eq
-                if -2 < roe < 10:   # sanity bounds
+                if -2 < roe < 10:
                     live["roe"] = roe
                     live_fields += 1
                     print(f"    roe live: {roe*100:.1f}%")
 
-            # Net income and OCF direction flags (for shenanigan check)
             ocf = _series_latest(cf, "OperatingCashFlow", "Operating Cash Flow",
                                        "CashFlowFromContinuingOperatingActivities")
             if ni is not None:
@@ -342,12 +392,11 @@ def fetch_live_fundamentals(sym, seed):
             if ocf is not None:
                 live["op_cf_pos"] = ocf > 0
 
-            # FCF yield = (OCF - CapEx) / market_cap
             capex = _series_latest(cf, "CapitalExpenditures", "Capital Expenditures",
                                         "CapitalExpenditure")
             mcap_for_fcf = live.get("market_cap_usd") or seed_mcap
             if ocf is not None and capex is not None and mcap_for_fcf:
-                fcf = ocf - abs(capex)   # capex stored as negative in some versions
+                fcf = ocf - abs(capex)
                 fcf_yield = fcf / mcap_for_fcf
                 if -0.5 < fcf_yield < 0.5:
                     live["fcf_yield"] = fcf_yield
@@ -386,6 +435,11 @@ def fetch_live_fundamentals(sym, seed):
         net_inc_pos    = live.get("net_inc_pos",      seed_ni_pos),
         op_cf_pos      = live.get("op_cf_pos",        seed_ocf_pos),
         insider_pct    = seed_ins,   # SEDI/Form4 not available via yfinance
+        # carry enriched name/sector/industry from live info if seed was null
+        _name          = live.get("_name",     name),
+        _exchange      = live.get("_exchange", exchange),
+        _sector        = live.get("_sector",   sector),
+        _industry      = live.get("_industry", industry),
     )
 
     if live_fields >= total_fields - 1:
@@ -399,8 +453,19 @@ def fetch_live_fundamentals(sym, seed):
     return result
 
 
-def score_ticker(sym, fund, hist, live_fund):
-    (name, exchange, sector, industry, *_) = fund
+def score_ticker(sym, seed, hist, live_fund):
+    """
+    seed may be None for tickers not in the static FUNDAMENTALS dict.
+    All metadata (name, exchange, sector, industry) is resolved via live_fund
+    in that case.
+    """
+    if seed is not None:
+        name, exchange, sector, industry = seed[0], seed[1], seed[2], seed[3]
+    else:
+        name     = live_fund.get("_name",     sym)
+        exchange = live_fund.get("_exchange", "Unknown")
+        sector   = live_fund.get("_sector",   "Unknown")
+        industry = live_fund.get("_industry", "Unknown")
 
     roe_raw    = live_fund["roe"]
     fcf_yield  = live_fund["fcf_yield"]
@@ -470,6 +535,10 @@ def score_ticker(sym, fund, hist, live_fund):
         )
 
     return horizons, dict(
+        name               = name,
+        exchange           = exchange,
+        sector             = sector,
+        industry           = industry,
         market_cap_usd     = live_fund["market_cap_usd"],
         cap_tier           = cap_tier(live_fund["market_cap_usd"]),
         roe                = roe_raw,
@@ -489,30 +558,33 @@ def score_ticker(sym, fund, hist, live_fund):
 
 
 def process_universe(tickers, label):
+    """
+    Process a list of tickers.  Any ticker is accepted — seed from FUNDAMENTALS
+    if available, otherwise use NULL_SEED so live yfinance is the sole source.
+    No ticker is silently skipped just because it lacks a seed entry.
+    """
     results = []
     for i, sym in enumerate(tickers):
-        if sym not in FUNDAMENTALS:
-            print(f"  [{label}] {i+1}/{len(tickers)} {sym} -> SKIP (not in seed)", flush=True)
-            continue
-        print(f"  [{label}] {i+1}/{len(tickers)} {sym}", flush=True)
+        seed = FUNDAMENTALS.get(sym)   # None if not in static dict — that's OK
+        print(f"  [{label}] {i+1}/{len(tickers)} {sym}"
+              f"{'  (seed)' if seed else '  (live-only)'}", flush=True)
         try:
-            hist     = get_price_data(sym)
-            live_fund= fetch_live_fundamentals(sym, FUNDAMENTALS[sym])
-            fund     = FUNDAMENTALS[sym]
+            hist      = get_price_data(sym)
+            live_fund = fetch_live_fundamentals(sym, seed)
 
             if hist is not None:
                 print(f"    price rows: {len(hist)}", flush=True)
             else:
                 print(f"    no price data — using static signals", flush=True)
 
-            horizons, metrics = score_ticker(sym, fund, hist, live_fund)
+            horizons, metrics = score_ticker(sym, seed, hist, live_fund)
 
             results.append(dict(
                 ticker   = sym,
-                name     = fund[0],
-                exchange = fund[1],
-                sector   = fund[2],
-                industry = fund[3],
+                name     = metrics.pop("name"),
+                exchange = metrics.pop("exchange"),
+                sector   = metrics.pop("sector"),
+                industry = metrics.pop("industry"),
                 **metrics,
                 horizons = horizons,
             ))
@@ -536,19 +608,32 @@ def sort_key(s):
 
 def main():
     print("=" * 60, flush=True)
-    print("Equity Strategist Dashboard - Analysis Engine v7", flush=True)
+    print("Equity Strategist Dashboard - Analysis Engine v8", flush=True)
     print(f"Python  {sys.version}", flush=True)
     print(f"yfinance {yf.__version__}", flush=True)
     print(f"pandas   {pd.__version__}", flush=True)
     print("=" * 60, flush=True)
 
-    cad_tickers = [s for s in FUNDAMENTALS if s.endswith(".TO") or s.endswith(".V")]
-    usd_tickers = [s for s in FUNDAMENTALS if not s.endswith(".TO") and not s.endswith(".V")]
+    # ── Build dynamic universe from refreshed cache files ────────────────────
+    # The cache files are updated by fetch_tsx_tickers.py / fetch_nyse_tickers.py
+    # before analyze_stocks.py runs, so the count changes day-to-day.
+    cad_from_cache = load_ticker_cache(TSX_CACHE_TXT)
+    usd_from_cache = load_ticker_cache(NYSE_CACHE_TXT)
 
-    print(f"Universe: {len(cad_tickers)} CAD + {len(usd_tickers)} USD", flush=True)
+    # Fall back to FUNDAMENTALS keys if cache files are missing/empty
+    if not cad_from_cache:
+        print("  WARNING: tsx cache empty — falling back to FUNDAMENTALS CAD keys", flush=True)
+        cad_from_cache = [s for s in FUNDAMENTALS if s.endswith(".TO") or s.endswith(".V")]
+    if not usd_from_cache:
+        print("  WARNING: nyse cache empty — falling back to FUNDAMENTALS USD keys", flush=True)
+        usd_from_cache = [s for s in FUNDAMENTALS
+                          if not s.endswith(".TO") and not s.endswith(".V")]
 
-    cad = process_universe(cad_tickers, "CAD")
-    usd = process_universe(usd_tickers, "USD")
+    print(f"Universe: {len(cad_from_cache)} CAD + {len(usd_from_cache)} USD "
+          f"= {len(cad_from_cache)+len(usd_from_cache)} total", flush=True)
+
+    cad = process_universe(cad_from_cache, "CAD")
+    usd = process_universe(usd_from_cache, "USD")
 
     cad.sort(key=sort_key)
     usd.sort(key=sort_key)
@@ -559,7 +644,7 @@ def main():
         print("ERROR: Zero results produced.", file=sys.stderr)
         sys.exit(1)
 
-    live_count = sum(1 for s in cad+usd if s.get("data_source") == "live_yahoo")
+    live_count    = sum(1 for s in cad+usd if s.get("data_source") == "live_yahoo")
     partial_count = sum(1 for s in cad+usd if s.get("data_source") == "partial_yahoo")
     print(f"  live_yahoo: {live_count}  partial: {partial_count}", flush=True)
 
