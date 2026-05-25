@@ -12,13 +12,12 @@ const HORIZONS = [
   { key: 'ultra_long',  label: 'Ultra Long',  sub: '0–360m' },
 ]
 
-// Cap-tier filter options — 'all' is a synthetic catch-all
 const CAP_TIERS = [
-  { key: 'all',   label: 'All',       hint: '' },
-  { key: 'mega',  label: 'Mega',      hint: '≥ $200B' },
-  { key: 'large', label: 'Large',     hint: '$10B–$200B' },
-  { key: 'mid',   label: 'Mid',       hint: '$2B–$10B' },
-  { key: 'small', label: 'Small',     hint: '< $2B' },
+  { key: 'all',   label: 'All',   hint: '' },
+  { key: 'mega',  label: 'Mega',  hint: '≥ $200B' },
+  { key: 'large', label: 'Large', hint: '$10B–$200B' },
+  { key: 'mid',   label: 'Mid',   hint: '$2B–$10B' },
+  { key: 'small', label: 'Small', hint: '< $2B' },
 ]
 
 const TOP_N = 30
@@ -36,24 +35,33 @@ const TICKER_ITEMS = [
   { label: 'TSX Energy', tag: 'TTEN' },
 ]
 
+/**
+ * Sort order:
+ *  1. Rating tier: BUY → HOLD → SELL
+ *  2. Within tier: highest score first (strict DESC)
+ *  3. Ultra-long tiebreak: economic moat proxy (market_cap × roe)
+ */
 function sortStocks(stocks, horizon) {
+  const ratingOrder = { BUY: 0, HOLD: 1, SELL: 2 }
   return [...stocks].sort((a, b) => {
-    const ratingOrder = { BUY: 0, HOLD: 1, SELL: 2 }
     const ra = ratingOrder[a.horizons?.[horizon]?.rating] ?? 1
     const rb = ratingOrder[b.horizons?.[horizon]?.rating] ?? 1
     if (ra !== rb) return ra - rb
+    // Within the same rating tier, always sort by score DESC
+    const sa = a.horizons?.[horizon]?.score ?? 0
+    const sb = b.horizons?.[horizon]?.score ?? 0
+    if (sb !== sa) return sb - sa
+    // Tiebreak for ultra_long: economic moat proxy
     if (horizon === 'ultra_long') {
       const moatA = (a.market_cap_usd || 0) * (a.roe || 0)
       const moatB = (b.market_cap_usd || 0) * (b.roe || 0)
       return moatB - moatA
     }
-    return (b.horizons?.[horizon]?.score || 0) - (a.horizons?.[horizon]?.score || 0)
+    return 0
   })
 }
 
-// ── Cap-tier filter pill row ──────────────────────────────────────────────
 function CapTierFilter({ active, onChange, stocks, horizon }) {
-  // Count per tier so the user can see how many are in each bucket
   const counts = useMemo(() => {
     const c = { all: stocks.length, mega: 0, large: 0, mid: 0, small: 0 }
     for (const s of stocks) {
@@ -65,54 +73,40 @@ function CapTierFilter({ active, onChange, stocks, horizon }) {
 
   return (
     <div style={{
-      display: 'flex',
-      flexWrap: 'wrap',
-      gap: '6px',
+      display: 'flex', flexWrap: 'wrap', gap: '6px',
       padding: '10px 14px',
       borderBottom: '1px solid var(--color-divider)',
       background: 'color-mix(in oklch, var(--color-surface-offset) 60%, transparent)',
     }}>
       {CAP_TIERS.map(({ key, label, hint }) => {
         const isActive = active === key
-        const count    = counts[key] ?? 0
+        const count = counts[key] ?? 0
         return (
-          <button
-            key={key}
-            onClick={() => onChange(key)}
+          <button key={key} onClick={() => onChange(key)}
             title={hint || 'Show all market caps'}
             style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '5px',
+              display: 'inline-flex', alignItems: 'center', gap: '5px',
               padding: '3px 10px',
               borderRadius: 'var(--radius-full)',
-              border: isActive
-                ? '1px solid var(--color-primary)'
-                : '1px solid var(--color-border)',
+              border: isActive ? '1px solid var(--color-primary)' : '1px solid var(--color-border)',
               background: isActive
                 ? 'color-mix(in oklch, var(--color-primary) 14%, transparent)'
                 : 'var(--color-surface)',
               color: isActive ? 'var(--color-primary)' : 'var(--color-text-muted)',
-              fontSize: '0.72rem',
-              fontWeight: isActive ? 700 : 500,
-              letterSpacing: '0.02em',
-              cursor: 'pointer',
+              fontSize: '0.72rem', fontWeight: isActive ? 700 : 500,
+              letterSpacing: '0.02em', cursor: 'pointer',
               transition: 'all 160ms cubic-bezier(0.16,1,0.3,1)',
               whiteSpace: 'nowrap',
-            }}
-          >
+            }}>
             {label}
             <span style={{
-              fontSize: '0.65rem',
-              fontWeight: 600,
-              padding: '0 4px',
-              borderRadius: 'var(--radius-sm)',
+              fontSize: '0.65rem', fontWeight: 600,
+              padding: '0 4px', borderRadius: 'var(--radius-sm)',
               background: isActive
                 ? 'color-mix(in oklch, var(--color-primary) 20%, transparent)'
                 : 'var(--color-surface-offset)',
               color: isActive ? 'var(--color-primary)' : 'var(--color-text-faint)',
-              minWidth: '16px',
-              textAlign: 'center',
+              minWidth: '16px', textAlign: 'center',
             }}>{count}</span>
           </button>
         )
@@ -170,10 +164,8 @@ function TickerBand() {
             <span style={{
               color: 'var(--color-primary)',
               background: 'color-mix(in oklch, var(--color-primary) 10%, transparent)',
-              padding: '1px 6px',
-              borderRadius: 'var(--radius-sm)',
-              fontSize: '0.65rem',
-              letterSpacing: '0.06em',
+              padding: '1px 6px', borderRadius: 'var(--radius-sm)',
+              fontSize: '0.65rem', letterSpacing: '0.06em',
             }}>{item.tag}</span>
           </span>
         ))}
@@ -187,12 +179,12 @@ export default function App() {
   const [loading,     setLoading]     = useState(true)
   const [error,       setError]       = useState(null)
   const [horizon,     setHorizon]     = useState('short')
+  // lastUpdated is set ONLY from json.generated_at — never from browser clock
   const [lastUpdated, setLastUpdated] = useState(null)
   const [refreshing,  setRefreshing]  = useState(false)
   const [scanning,    setScanning]    = useState(false)
   const [fadeKey,     setFadeKey]     = useState(0)
 
-  // Independent cap-tier filter per market tile
   const [cadCapTier, setCadCapTier] = useState('all')
   const [usdCapTier, setUsdCapTier] = useState('all')
 
@@ -217,7 +209,13 @@ export default function App() {
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const json = await res.json()
       setData(json)
-      setLastUpdated(new Date(json.generated_at))
+      // ── TIMESTAMP FIX ──────────────────────────────────────────────────
+      // Use ONLY the generated_at field written by analyze_stocks.py when
+      // the GitHub Actions workflow completes successfully. Never use
+      // new Date() so the timestamp only changes on a real data refresh.
+      if (json.generated_at) {
+        setLastUpdated(new Date(json.generated_at))
+      }
     } catch (e) { setError(e.message) }
     finally     { setLoading(false) }
   }, [])
@@ -245,7 +243,7 @@ export default function App() {
     setTimeout(() => { fetchData(); setRefreshing(false); setScanning(false) }, 4000)
   }
 
-  // Full sorted lists (before cap-tier filter)
+  // Full sorted lists — strictly score-ranked within each rating tier
   const cadAll = useMemo(() => sortStocks(data?.cad || [], horizon), [data, horizon])
   const usdAll = useMemo(() => sortStocks(data?.usd || [], horizon), [data, horizon])
 
@@ -266,10 +264,12 @@ export default function App() {
   const usdTotal = data?.usd?.length || 0
   const isUltraLong = horizon === 'ultra_long'
 
-  const now = new Date()
-  const dateStr = now.toLocaleDateString('en-CA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+  // Date string derives from lastUpdated (the generated_at value) so it
+  // matches the actual analysis run date, not today's browser date.
+  const dateStr = lastUpdated
+    ? lastUpdated.toLocaleDateString('en-CA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+    : ''
 
-  // Reset cap filters when horizon changes so user sees full picture
   const handleCapTierChangeCad = (tier) => { setFadeKey(k => k + 1); setCadCapTier(tier) }
   const handleCapTierChangeUsd = (tier) => { setFadeKey(k => k + 1); setUsdCapTier(tier) }
 
@@ -379,7 +379,10 @@ export default function App() {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px', marginBottom: '24px' }}>
             <div style={{ fontSize: '0.72rem', color: 'var(--color-text-faint)' }}>
               <span style={{ marginRight: '4px' }}>📅</span>
-              {dateStr} · Last refreshed: <strong style={{ color: 'var(--color-text-muted)' }}>{lastUpdated.toLocaleTimeString()}</strong>
+              {/* dateStr and time both come from generated_at — set by GitHub Actions */}
+              {dateStr} · Last refreshed: <strong style={{ color: 'var(--color-text-muted)' }}>
+                {lastUpdated.toLocaleTimeString('en-CA', { hour: '2-digit', minute: '2-digit', timeZoneName: 'short' })}
+              </strong>
             </div>
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
               {[
@@ -446,16 +449,11 @@ export default function App() {
                 <span className="stat-pill" style={{ background: 'color-mix(in oklch,var(--color-primary) 10%,transparent)', border: '1px solid color-mix(in oklch,var(--color-primary) 22%,transparent)', color: 'var(--color-primary)' }}>TSX · TSXV</span>
                 <span className="stat-pill" style={{ marginLeft: 'auto', background: 'var(--color-surface-offset)', border: '1px solid var(--color-border)', color: 'var(--color-text-muted)' }}>
                   {cadCapTier === 'all'
-                    ? `Top ${Math.min(TOP_N, cad.length)} of ${cadTotal}`
-                    : `${cad.length} ${cadCapTier}-cap`}
+                    ? `Top ${Math.min(TOP_N, cad.length)} · Ranked by Score`
+                    : `Top ${cad.length} ${cadCapTier}-cap · Ranked by Score`}
                 </span>
               </div>
-              <CapTierFilter
-                active={cadCapTier}
-                onChange={handleCapTierChangeCad}
-                stocks={cadAll}
-                horizon={horizon}
-              />
+              <CapTierFilter active={cadCapTier} onChange={handleCapTierChangeCad} stocks={cadAll} horizon={horizon} />
               <div className="market-section-body">
                 <div key={`cad-${fadeKey}-${cadCapTier}`} style={{ display: 'flex', flexDirection: 'column', gap: '8px', animation: 'fadeIn 0.35s ease' }}>
                   {cad.length === 0
@@ -475,16 +473,11 @@ export default function App() {
                 <span className="stat-pill" style={{ background: 'color-mix(in oklch,var(--color-navy) 10%,transparent)', border: '1px solid color-mix(in oklch,var(--color-navy) 22%,transparent)', color: 'var(--color-navy)' }}>NYSE · NASDAQ</span>
                 <span className="stat-pill" style={{ marginLeft: 'auto', background: 'var(--color-surface-offset)', border: '1px solid var(--color-border)', color: 'var(--color-text-muted)' }}>
                   {usdCapTier === 'all'
-                    ? `Top ${Math.min(TOP_N, usd.length)} of ${usdTotal}`
-                    : `${usd.length} ${usdCapTier}-cap`}
+                    ? `Top ${Math.min(TOP_N, usd.length)} · Ranked by Score`
+                    : `Top ${usd.length} ${usdCapTier}-cap · Ranked by Score`}
                 </span>
               </div>
-              <CapTierFilter
-                active={usdCapTier}
-                onChange={handleCapTierChangeUsd}
-                stocks={usdAll}
-                horizon={horizon}
-              />
+              <CapTierFilter active={usdCapTier} onChange={handleCapTierChangeUsd} stocks={usdAll} horizon={horizon} />
               <div className="market-section-body">
                 <div key={`usd-${fadeKey}-${usdCapTier}`} style={{ display: 'flex', flexDirection: 'column', gap: '8px', animation: 'fadeIn 0.35s ease' }}>
                   {usd.length === 0
@@ -511,27 +504,18 @@ export default function App() {
           </div>
           <div className="site-footer-bottom">
             <span>For informational purposes only. Not financial advice. Always do your own research.</span>
-            <span>Data via yFinance · Refreshed 06:00 ET weekdays · © {new Date().getFullYear()} Equity Strategist</span>
+            <span>Data via yFinance · Refreshed 09:00 & 10:00 ET weekdays · © {new Date().getFullYear()} Equity Strategist</span>
           </div>
           <div style={{
-            paddingTop: '10px',
-            textAlign: 'center',
-            fontSize: '0.7rem',
-            color: 'var(--color-text-faint)',
-            letterSpacing: '0.03em',
+            paddingTop: '10px', textAlign: 'center',
+            fontSize: '0.7rem', color: 'var(--color-text-faint)', letterSpacing: '0.03em',
           }}>
             Managed by{' '}
-            <a
-              href="https://sujaysoni.github.io/Career-Journey-/"
-              target="_blank"
-              rel="noopener noreferrer"
+            <a href="https://sujaysoni.github.io/Career-Journey-/" target="_blank" rel="noopener noreferrer"
               style={{
-                color: 'var(--color-primary)',
-                textDecoration: 'none',
-                fontWeight: 600,
+                color: 'var(--color-primary)', textDecoration: 'none', fontWeight: 600,
                 borderBottom: '1px solid color-mix(in oklch, var(--color-primary) 40%, transparent)',
-                paddingBottom: '1px',
-                transition: 'color 180ms ease, border-color 180ms ease',
+                paddingBottom: '1px', transition: 'color 180ms ease, border-color 180ms ease',
               }}
               onMouseEnter={e => {
                 e.currentTarget.style.color = 'var(--color-primary-hover)'
@@ -541,14 +525,11 @@ export default function App() {
                 e.currentTarget.style.color = 'var(--color-primary)'
                 e.currentTarget.style.borderBottomColor = 'color-mix(in oklch, var(--color-primary) 40%, transparent)'
               }}
-            >
-              Sujay Soni
-            </a>
+            >Sujay Soni</a>
           </div>
         </div>
       </footer>
 
-      {/* ── FLOATING MARKET NEWS TILE ── */}
       <MarketNewsTile darkMode={darkMode} />
 
     </div>
