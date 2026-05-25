@@ -3,6 +3,7 @@ import HorizonToggle from './components/HorizonToggle'
 import StockCard from './components/StockCard'
 import RefreshButton from './components/RefreshButton'
 import MarketNewsTile from './components/MarketNewsTile'
+import TickerSearchBox from './components/TickerSearchBox'
 
 const HORIZONS = [
   { key: 'ultra_short', label: 'Ultra Short', sub: '0–3m'   },
@@ -35,11 +36,6 @@ const TICKER_ITEMS = [
   { label: 'TSX Energy', tag: 'TTEN' },
 ]
 
-/**
- * Sort stocks by rating tier then score.
- * direction: 'desc' → Top 30 (highest score first, BUY→HOLD→SELL)
- *            'asc'  → Bottom 30 (lowest score first, SELL→HOLD→BUY)
- */
 function sortStocks(stocks, horizon, direction = 'desc') {
   const ratingOrder = direction === 'desc'
     ? { BUY: 0, HOLD: 1, SELL: 2 }
@@ -58,7 +54,6 @@ function sortStocks(stocks, horizon, direction = 'desc') {
       if (sa !== sb) return sa - sb
     }
 
-    // Tiebreak for ultra_long: economic moat proxy
     if (horizon === 'ultra_long') {
       const moatA = (a.market_cap_usd || 0) * (a.roe || 0)
       const moatB = (b.market_cap_usd || 0) * (b.roe || 0)
@@ -68,9 +63,7 @@ function sortStocks(stocks, horizon, direction = 'desc') {
   })
 }
 
-/* ── Sort Direction Toggle ─────────────────────────────────────────── */
 function SortToggle({ direction, onChange }) {
-  const isDesc = direction === 'desc'
   return (
     <div style={{
       display: 'inline-flex',
@@ -114,7 +107,6 @@ function SortToggle({ direction, onChange }) {
   )
 }
 
-/* ── Cap Tier Filter ───────────────────────────────────────────────── */
 function CapTierFilter({ active, onChange, stocks, horizon }) {
   const counts = useMemo(() => {
     const c = { all: stocks.length, mega: 0, large: 0, mid: 0, small: 0 }
@@ -128,9 +120,6 @@ function CapTierFilter({ active, onChange, stocks, horizon }) {
   return (
     <div style={{
       display: 'flex', flexWrap: 'wrap', gap: '6px',
-      padding: '10px 14px',
-      borderBottom: '1px solid var(--color-divider)',
-      background: 'color-mix(in oklch, var(--color-surface-offset) 60%, transparent)',
     }}>
       {CAP_TIERS.map(({ key, label, hint }) => {
         const isActive = active === key
@@ -240,7 +229,6 @@ export default function App() {
 
   const [cadCapTier,   setCadCapTier]   = useState('all')
   const [usdCapTier,   setUsdCapTier]   = useState('all')
-  // 'desc' = Top 30 (default) | 'asc' = Bottom 30
   const [cadSortDir,   setCadSortDir]   = useState('desc')
   const [usdSortDir,   setUsdSortDir]   = useState('desc')
 
@@ -295,11 +283,11 @@ export default function App() {
     setTimeout(() => { fetchData(); setRefreshing(false); setScanning(false) }, 4000)
   }
 
-  // Sort full lists independently per tile (direction-aware)
+  // Full sorted lists — no slice yet (needed by TickerSearchBox for rank lookup)
   const cadAll = useMemo(() => sortStocks(data?.cad || [], horizon, cadSortDir), [data, horizon, cadSortDir])
   const usdAll = useMemo(() => sortStocks(data?.usd || [], horizon, usdSortDir), [data, horizon, usdSortDir])
 
-  // Apply cap-tier filter then slice to TOP_N
+  // Apply cap-tier filter then slice to TOP_N (these are what the tiles show)
   const cad = useMemo(() => {
     const filtered = cadCapTier === 'all' ? cadAll : cadAll.filter(s => s.cap_tier === cadCapTier)
     return filtered.slice(0, TOP_N)
@@ -325,7 +313,6 @@ export default function App() {
   const handleSortDirChangeCad = (dir)  => { setFadeKey(k => k + 1); setCadSortDir(dir) }
   const handleSortDirChangeUsd = (dir)  => { setFadeKey(k => k + 1); setUsdSortDir(dir) }
 
-  // Human-readable tile label
   const tileLabel = (dir, capTier, count) => {
     const rank  = dir === 'desc' ? 'Top' : 'Bottom'
     const cap   = capTier !== 'all' ? ` ${capTier}-cap` : ''
@@ -457,6 +444,24 @@ export default function App() {
           </div>
         )}
 
+        {/* ── TICKER SEARCH ── */}
+        {!loading && data && (
+          <div className="fade-in" style={{ marginBottom: '8px' }}>
+            <div style={{
+              fontSize: '0.65rem', fontWeight: 600, letterSpacing: '0.1em',
+              textTransform: 'uppercase', color: 'var(--color-text-faint)',
+              textAlign: 'center', marginBottom: '10px',
+            }}>🔍 Ticker Lookup — Search any CAD or USD stock</div>
+            <TickerSearchBox
+              cadAll={cadAll}
+              usdAll={usdAll}
+              cadSorted={cad}
+              usdSorted={usd}
+              horizon={horizon}
+            />
+          </div>
+        )}
+
         {error && !loading && (
           <div className="info-banner info-banner-error fade-in" style={{ marginBottom: '20px' }}>
             <span>⚠</span>
@@ -509,7 +514,6 @@ export default function App() {
                   {tileLabel(cadSortDir, cadCapTier, cad.length)}
                 </span>
               </div>
-              {/* Cap filter + sort toggle in one row */}
               <div style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                 flexWrap: 'wrap', gap: '8px',
@@ -541,7 +545,6 @@ export default function App() {
                   {tileLabel(usdSortDir, usdCapTier, usd.length)}
                 </span>
               </div>
-              {/* Cap filter + sort toggle in one row */}
               <div style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                 flexWrap: 'wrap', gap: '8px',
