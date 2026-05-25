@@ -5,49 +5,52 @@
 @tailwind utilities;
 
 /* ══════════════════════════════════════════════════════════════
-   EQUITY STRATEGIST — Deep Space Premium Design System v3
-   Dark  : deep space black  + electric cyan-violet aurora
-   Light : warm ivory cream  + deep indigo-gold accent
+   EQUITY STRATEGIST — Premium Institutional Design System v4
+   Dark  : Institutional Bloomberg  — Deep Slate Obsidian + Intelligence Teal
+   Light : Wall Street Journal Modernized — Tailored Chalk + Royal Sapphire
+   60-30-10 rule applied throughout.
 ══════════════════════════════════════════════════════════════ */
 
 :root {
-  /* ── Light: warm ivory + deep indigo ── */
-  --color-bg:               #F7F5EF;
-  --color-surface:          #FDFCF8;
-  --color-surface-2:        #F1EEE5;
-  --color-surface-offset:   #E9E5D8;
-  --color-surface-dynamic:  #DED9CA;
-  --color-divider:          #D5CFBE;
-  --color-border:           #C8C1AE;
+  /* ── Light: WSJ Modernized ── */
+  /* 60% — Background canvas */
+  --color-bg:               #F8FAFC;
+  --color-surface:          #FFFFFF;
+  --color-surface-2:        #F4F5F7;
+  --color-surface-offset:   #EDF0F3;
+  --color-surface-dynamic:  #E2E8F0;
+  --color-divider:          #E2E8F0;
+  --color-border:           #E2E8F0;
 
-  --color-text:             #14110A;
-  --color-text-muted:       #5C5440;
-  --color-text-faint:       #9E9480;
-  --color-text-inverse:     #F7F5EF;
+  /* 30% — Typography & structure */
+  --color-text:             #0F172A;
+  --color-text-muted:       #64748B;
+  --color-text-faint:       #94A3B8;
+  --color-text-inverse:     #FFFFFF;
 
-  /* Deep indigo-gold primary */
-  --color-primary:          #5B3FE8;
-  --color-primary-hover:    #4530C8;
-  --color-primary-active:   #3220A8;
-  --color-primary-highlight:#EAE6FF;
-  --color-primary-glow:     rgba(91,63,232,0.18);
+  /* 10% — Royal Sapphire accent */
+  --color-primary:          #2563EB;
+  --color-primary-hover:    #1D4ED8;
+  --color-primary-active:   #1E40AF;
+  --color-primary-highlight:#EFF6FF;
+  --color-primary-glow:     rgba(37,99,235,0.15);
 
-  /* US accent: warm amber-gold */
-  --color-navy:             #C8820A;
-  --color-navy-muted:       #A8660A;
+  /* US tile secondary accent — warm institutional navy */
+  --color-navy:             #1D4ED8;
+  --color-navy-muted:       #1E40AF;
 
-  /* Signal */
-  --color-buy:              #0D7A4E;
-  --color-buy-glow:         rgba(13,122,78,0.20);
-  --color-hold:             #7A6A30;
-  --color-sell:             #C42B1C;
-  --color-sell-glow:        rgba(196,43,28,0.18);
-  --color-warn:             #9A6010;
+  /* Signal — Forest Glass & Deep Burgundy */
+  --color-buy:              #059669;
+  --color-buy-glow:         rgba(5,150,105,0.18);
+  --color-hold:             #D97706;
+  --color-sell:             #DC2626;
+  --color-sell-glow:        rgba(220,38,38,0.16);
+  --color-warn:             #B45309;
 
-  /* Aurora orbs (light) */
-  --orb-1: rgba(91,63,232,0.07);
-  --orb-2: rgba(200,130,10,0.06);
-  --orb-3: rgba(13,122,78,0.05);
+  /* Aurora orbs (light — very subtle) */
+  --orb-1: rgba(37,99,235,0.04);
+  --orb-2: rgba(29,78,216,0.03);
+  --orb-3: rgba(5,150,105,0.03);
 
   --font-display: 'Instrument Serif', Georgia, serif;
   --font-body:    'DM Sans', 'Helvetica Neue', Arial, sans-serif;
@@ -60,66 +63,70 @@
   --radius-2xl:  1.5rem;
   --radius-full: 9999px;
 
-  --shadow-xs: 0 1px 2px rgba(20,17,10,0.05);
-  --shadow-sm: 0 1px 4px rgba(20,17,10,0.07), 0 2px 8px rgba(20,17,10,0.04);
-  --shadow-md: 0 4px 16px rgba(20,17,10,0.09), 0 1px 4px rgba(20,17,10,0.05);
-  --shadow-lg: 0 12px 40px rgba(20,17,10,0.13), 0 4px 12px rgba(20,17,10,0.06);
+  /* Shadows — warm, editorial */
+  --shadow-xs: 0 1px 2px rgba(15,23,42,0.04);
+  --shadow-sm: 0 1px 3px rgba(15,23,42,0.06), 0 1px 6px rgba(15,23,42,0.04);
+  --shadow-md: 0 4px 16px rgba(15,23,42,0.08), 0 2px 6px rgba(15,23,42,0.04);
+  --shadow-lg: 0 12px 40px rgba(15,23,42,0.12), 0 4px 12px rgba(15,23,42,0.06);
 
-  --glow-primary:  0 0 24px rgba(91,63,232,0.25), 0 0 6px rgba(91,63,232,0.12);
-  --glow-buy:      0 0 20px rgba(13,122,78,0.22);
-  --glow-sell:     0 0 20px rgba(196,43,28,0.20);
+  --glow-primary:  0 0 20px rgba(37,99,235,0.18), 0 0 6px rgba(37,99,235,0.10);
+  --glow-buy:      0 0 18px rgba(5,150,105,0.20);
+  --glow-sell:     0 0 18px rgba(220,38,38,0.18);
 
-  --transition: 200ms cubic-bezier(0.16, 1, 0.3, 1);
+  --transition:      200ms cubic-bezier(0.16, 1, 0.3, 1);
   --transition-slow: 400ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* ── DARK MODE — deep space + electric aurora ── */
+/* ── DARK MODE — Institutional Bloomberg ── */
 [data-theme="dark"] {
-  --color-bg:               #080810;
-  --color-surface:          #0D0D1A;
-  --color-surface-2:        #111122;
-  --color-surface-offset:   #131325;
-  --color-surface-dynamic:  #1A1A2E;
-  --color-divider:          #1E1E35;
-  --color-border:           #252540;
+  /* 60% — Deep Slate Obsidian canvas */
+  --color-bg:               #0F141C;
+  --color-surface:          #161F2B;
+  --color-surface-2:        #1A2535;
+  --color-surface-offset:   #1E2A3A;
+  --color-surface-dynamic:  #243242;
+  --color-divider:          #243242;
+  --color-border:           #243242;
 
-  --color-text:             #E8E6F8;
-  --color-text-muted:       #8888AA;
-  --color-text-faint:       #44445A;
-  --color-text-inverse:     #080810;
+  /* 30% — Crisp Alabaster typography */
+  --color-text:             #F1F5F9;
+  --color-text-muted:       #94A3B8;
+  --color-text-faint:       #475569;
+  --color-text-inverse:     #0F141C;
 
-  /* Electric cyan primary */
-  --color-primary:          #00D4FF;
-  --color-primary-hover:    #33DEFF;
-  --color-primary-active:   #66E8FF;
-  --color-primary-highlight:#001A22;
-  --color-primary-glow:     rgba(0,212,255,0.20);
+  /* 10% — Intelligence Teal accent */
+  --color-primary:          #0EA5E9;
+  --color-primary-hover:    #38BDF8;
+  --color-primary-active:   #7DD3FC;
+  --color-primary-highlight:#0C1A26;
+  --color-primary-glow:     rgba(14,165,233,0.20);
 
-  /* Warm violet secondary accent */
-  --color-navy:             #B87FFF;
-  --color-navy-muted:       #9966DD;
+  /* US tile secondary accent */
+  --color-navy:             #06B6D4;
+  --color-navy-muted:       #0891B2;
 
-  /* Signal — neon */
-  --color-buy:              #00FF88;
-  --color-buy-glow:         rgba(0,255,136,0.22);
-  --color-hold:             #FFD060;
-  --color-sell:             #FF4466;
-  --color-sell-glow:        rgba(255,68,102,0.22);
-  --color-warn:             #FFB020;
+  /* Signal — Emerald Mint & Crimson Coral */
+  --color-buy:              #10B981;
+  --color-buy-glow:         rgba(16,185,129,0.22);
+  --color-hold:             #F59E0B;
+  --color-sell:             #EF4444;
+  --color-sell-glow:        rgba(239,68,68,0.22);
+  --color-warn:             #F97316;
 
-  /* Aurora orbs */
-  --orb-1: rgba(0,212,255,0.07);
-  --orb-2: rgba(184,127,255,0.06);
-  --orb-3: rgba(0,255,136,0.04);
+  /* Aurora orbs — teal-dominant */
+  --orb-1: rgba(14,165,233,0.07);
+  --orb-2: rgba(6,182,212,0.05);
+  --orb-3: rgba(16,185,129,0.04);
 
-  --shadow-xs: 0 1px 2px rgba(0,0,0,0.50);
-  --shadow-sm: 0 1px 4px rgba(0,0,0,0.55), 0 2px 8px rgba(0,0,0,0.35);
-  --shadow-md: 0 4px 16px rgba(0,0,0,0.65), 0 1px 4px rgba(0,0,0,0.40);
-  --shadow-lg: 0 12px 48px rgba(0,0,0,0.80), 0 4px 16px rgba(0,0,0,0.50);
+  /* Shadows — deep, layered */
+  --shadow-xs: 0 1px 2px rgba(0,0,0,0.45);
+  --shadow-sm: 0 1px 4px rgba(0,0,0,0.50), 0 2px 8px rgba(0,0,0,0.30);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.60), 0 1px 4px rgba(0,0,0,0.38);
+  --shadow-lg: 0 12px 48px rgba(0,0,0,0.75), 0 4px 16px rgba(0,0,0,0.45);
 
-  --glow-primary:  0 0 30px rgba(0,212,255,0.30), 0 0 8px rgba(0,212,255,0.15);
-  --glow-buy:      0 0 24px rgba(0,255,136,0.28), 0 0 6px rgba(0,255,136,0.14);
-  --glow-sell:     0 0 24px rgba(255,68,102,0.28), 0 0 6px rgba(255,68,102,0.14);
+  --glow-primary:  0 0 28px rgba(14,165,233,0.28), 0 0 8px rgba(14,165,233,0.14);
+  --glow-buy:      0 0 22px rgba(16,185,129,0.26), 0 0 6px rgba(16,185,129,0.13);
+  --glow-sell:     0 0 22px rgba(239,68,68,0.26),  0 0 6px rgba(239,68,68,0.13);
 }
 
 /* ── RESET ── */
@@ -151,7 +158,7 @@ h1,h2,h3,h4,h5,h6 { text-wrap: balance; line-height: 1.15; }
 p, li { text-wrap: pretty; max-width: 72ch; }
 
 ::selection {
-  background: color-mix(in oklch, var(--color-primary) 28%, transparent);
+  background: color-mix(in oklch, var(--color-primary) 22%, transparent);
   color: var(--color-text);
 }
 :focus-visible {
@@ -173,7 +180,7 @@ p, li { text-wrap: pretty; max-width: 72ch; }
 }
 
 /* ══════════════════════════════════════════════════════════════
-   AURORA BACKGROUND — floating glowing orbs
+   AURORA BACKGROUND — very subtle floating orbs (60% rule)
 ══════════════════════════════════════════════════════════════ */
 .bg-ambient {
   position: relative;
@@ -188,7 +195,6 @@ p, li { text-wrap: pretty; max-width: 72ch; }
   background-attachment: fixed;
 }
 
-/* Animated aurora orbs via pseudo-elements */
 .bg-ambient::before,
 .bg-ambient::after {
   content: '';
@@ -224,24 +230,24 @@ p, li { text-wrap: pretty; max-width: 72ch; }
 }
 
 /* ══════════════════════════════════════════════════════════════
-   GLASSMORPHISM — premium multi-layer blur
+   GLASSMORPHISM — refined, less saturated for institutional feel
 ══════════════════════════════════════════════════════════════ */
 .glassmorphism {
-  background:              color-mix(in oklch, var(--color-surface) 80%, transparent);
-  backdrop-filter:         blur(32px) saturate(200%) brightness(1.04);
-  -webkit-backdrop-filter: blur(32px) saturate(200%) brightness(1.04);
-  border-bottom:           1px solid color-mix(in oklch, var(--color-primary) 15%, var(--color-divider));
+  background:              color-mix(in oklch, var(--color-surface) 88%, transparent);
+  backdrop-filter:         blur(24px) saturate(160%) brightness(1.02);
+  -webkit-backdrop-filter: blur(24px) saturate(160%) brightness(1.02);
+  border-bottom:           1px solid var(--color-border);
 }
 
 /* ══════════════════════════════════════════════════════════════
-   TICKER BAND — with neon scan glow
+   TICKER BAND
 ══════════════════════════════════════════════════════════════ */
 .ticker-band {
   overflow:      hidden;
   white-space:   nowrap;
-  border-top:    1px solid var(--color-divider);
-  border-bottom: 1px solid var(--color-divider);
-  background:    color-mix(in oklch, var(--color-surface-2) 85%, transparent);
+  border-top:    1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  background:    color-mix(in oklch, var(--color-surface) 92%, transparent);
   backdrop-filter: blur(12px);
   padding:       9px 0;
   font-family:   var(--font-mono);
@@ -251,7 +257,6 @@ p, li { text-wrap: pretty; max-width: 72ch; }
   color:         var(--color-text-muted);
   position:      relative;
 }
-/* Fade edges */
 .ticker-band::before,
 .ticker-band::after {
   content:  '';
@@ -280,7 +285,7 @@ p, li { text-wrap: pretty; max-width: 72ch; }
   align-items: center;
   gap:         7px;
   padding:     0 26px;
-  border-right:1px solid var(--color-divider);
+  border-right:1px solid var(--color-border);
 }
 .ticker-item-up   { color: var(--color-buy); }
 .ticker-item-down { color: var(--color-sell); }
@@ -291,7 +296,7 @@ p, li { text-wrap: pretty; max-width: 72ch; }
 }
 
 /* ══════════════════════════════════════════════════════════════
-   HERO SECTION — with animated scan line
+   HERO SECTION
 ══════════════════════════════════════════════════════════════ */
 .hero-section {
   position:   relative;
@@ -299,7 +304,6 @@ p, li { text-wrap: pretty; max-width: 72ch; }
   padding:    64px 24px 52px;
   text-align: center;
 }
-/* Radial glow behind title */
 .hero-section::before {
   content:  '';
   position: absolute;
@@ -307,12 +311,11 @@ p, li { text-wrap: pretty; max-width: 72ch; }
   transform: translateX(-50%);
   width: 800px; height: 500px;
   background: radial-gradient(ellipse at center,
-    color-mix(in oklch, var(--color-primary) 12%, transparent),
+    color-mix(in oklch, var(--color-primary) 8%, transparent),
     transparent 70%);
   pointer-events: none;
   animation: heroPulse 6s ease-in-out infinite;
 }
-/* Horizontal scan line */
 .hero-section::after {
   content:   '';
   position:  absolute;
@@ -324,19 +327,19 @@ p, li { text-wrap: pretty; max-width: 72ch; }
     color-mix(in oklch, var(--color-primary) 60%, transparent) 50%,
     var(--color-primary) 70%,
     transparent 100%);
-  opacity: 0.35;
+  opacity: 0.25;
   animation: scanLine 5s linear infinite;
   pointer-events: none;
 }
 
 @keyframes heroPulse {
-  0%, 100% { opacity: 0.6; transform: translateX(-50%) scale(1); }
-  50%       { opacity: 1.0; transform: translateX(-50%) scale(1.06); }
+  0%, 100% { opacity: 0.5; transform: translateX(-50%) scale(1); }
+  50%       { opacity: 0.9; transform: translateX(-50%) scale(1.05); }
 }
 @keyframes scanLine {
   0%   { top: 0%;   opacity: 0; }
-  10%  { opacity: 0.35; }
-  90%  { opacity: 0.35; }
+  10%  { opacity: 0.25; }
+  90%  { opacity: 0.25; }
   100% { top: 100%; opacity: 0; }
 }
 
@@ -350,17 +353,16 @@ p, li { text-wrap: pretty; max-width: 72ch; }
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color:       var(--color-primary);
-  background:  color-mix(in oklch, var(--color-primary) 10%, transparent);
-  border:      1px solid color-mix(in oklch, var(--color-primary) 30%, transparent);
+  background:  color-mix(in oklch, var(--color-primary) 8%, transparent);
+  border:      1px solid color-mix(in oklch, var(--color-primary) 25%, transparent);
   padding:     5px 16px;
   border-radius: var(--radius-full);
   margin-bottom: 22px;
-  box-shadow:  var(--glow-primary);
-  animation:   eyebrowPulse 3s ease-in-out infinite;
+  animation:   eyebrowPulse 4s ease-in-out infinite;
 }
 @keyframes eyebrowPulse {
-  0%, 100% { box-shadow: var(--glow-primary); }
-  50%       { box-shadow: 0 0 40px var(--color-primary-glow), 0 0 12px var(--color-primary-glow); }
+  0%, 100% { box-shadow: 0 0 12px color-mix(in oklch, var(--color-primary) 15%, transparent); }
+  50%       { box-shadow: 0 0 24px color-mix(in oklch, var(--color-primary) 25%, transparent); }
 }
 
 .hero-title {
@@ -378,7 +380,7 @@ p, li { text-wrap: pretty; max-width: 72ch; }
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  filter: drop-shadow(0 0 20px var(--color-primary-glow));
+  filter: drop-shadow(0 0 16px var(--color-primary-glow));
 }
 .hero-subtitle {
   font-size:    0.975rem;
@@ -412,7 +414,6 @@ p, li { text-wrap: pretty; max-width: 72ch; }
 }
 .hero-stat:hover .hero-stat-value {
   color: var(--color-primary);
-  text-shadow: 0 0 20px var(--color-primary-glow);
 }
 .hero-stat-label {
   font-size:      0.66rem;
@@ -425,12 +426,12 @@ p, li { text-wrap: pretty; max-width: 72ch; }
 .hero-stat-divider {
   width: 1px; height: 36px;
   background: linear-gradient(to bottom,
-    transparent, var(--color-primary), transparent);
-  opacity: 0.4;
+    transparent, var(--color-border), transparent);
+  opacity: 0.8;
 }
 
 /* ══════════════════════════════════════════════════════════════
-   MARKET SECTION — animated gradient border
+   MARKET SECTION — clean, editorial card structure (30%)
 ══════════════════════════════════════════════════════════════ */
 .market-section-header {
   display:       flex;
@@ -445,7 +446,7 @@ p, li { text-wrap: pretty; max-width: 72ch; }
   position:      relative;
   overflow:      hidden;
 }
-/* Shimmer sweep on header */
+/* Very restrained shimmer — keeps it professional */
 .market-section-header::after {
   content:   '';
   position:  absolute;
@@ -453,9 +454,9 @@ p, li { text-wrap: pretty; max-width: 72ch; }
   width: 60%; height: 100%;
   background: linear-gradient(90deg,
     transparent,
-    color-mix(in oklch, var(--color-primary) 6%, transparent),
+    color-mix(in oklch, var(--color-primary) 4%, transparent),
     transparent);
-  animation: headerSweep 5s ease-in-out infinite;
+  animation: headerSweep 6s ease-in-out infinite;
   pointer-events: none;
 }
 @keyframes headerSweep {
@@ -478,7 +479,7 @@ p, li { text-wrap: pretty; max-width: 72ch; }
 }
 
 /* ══════════════════════════════════════════════════════════════
-   STOCK CARD — magnetic hover + rating glow
+   STOCK CARD — precise, data-forward hover states
 ══════════════════════════════════════════════════════════════ */
 .stock-card {
   border-radius: var(--radius-xl);
@@ -491,7 +492,7 @@ p, li { text-wrap: pretty; max-width: 72ch; }
   overflow:      hidden;
   cursor:        pointer;
 }
-/* Animated shimmer line at top of card */
+/* Restrained top-edge shimmer — only visible on hover */
 .stock-card::before {
   content:   '';
   position:  absolute;
@@ -504,31 +505,31 @@ p, li { text-wrap: pretty; max-width: 72ch; }
   transform:  scaleX(0);
   transform-origin: left;
   transition: transform 0.4s cubic-bezier(0.16,1,0.3,1);
-  opacity:    0.7;
+  opacity:    0.6;
 }
 .stock-card:hover::before { transform: scaleX(1); }
 .stock-card:hover {
-  box-shadow:   var(--shadow-md), var(--glow-primary);
-  transform:    translateY(-2px) scale(1.005);
-  border-color: color-mix(in oklch, var(--color-primary) 50%, var(--color-border));
-  background:   color-mix(in oklch, var(--color-primary) 3%, var(--color-surface));
+  box-shadow:   var(--shadow-md);
+  transform:    translateY(-1px);
+  border-color: color-mix(in oklch, var(--color-primary) 40%, var(--color-border));
+  background:   color-mix(in oklch, var(--color-primary) 2%, var(--color-surface));
 }
 
-/* BUY card — green glow pulse */
+/* BUY card */
 .stock-card[data-rating="BUY"] {
-  border-color: color-mix(in oklch, var(--color-buy) 35%, var(--color-border));
+  border-color: color-mix(in oklch, var(--color-buy) 30%, var(--color-border));
 }
 .stock-card[data-rating="BUY"]:hover {
   box-shadow:   var(--shadow-md), var(--glow-buy);
-  border-color: color-mix(in oklch, var(--color-buy) 60%, var(--color-border));
+  border-color: color-mix(in oklch, var(--color-buy) 55%, var(--color-border));
 }
-/* SELL card — red glow */
+/* SELL card */
 .stock-card[data-rating="SELL"] {
-  border-color: color-mix(in oklch, var(--color-sell) 25%, var(--color-border));
+  border-color: color-mix(in oklch, var(--color-sell) 22%, var(--color-border));
 }
 .stock-card[data-rating="SELL"]:hover {
   box-shadow:   var(--shadow-md), var(--glow-sell);
-  border-color: color-mix(in oklch, var(--color-sell) 50%, var(--color-border));
+  border-color: color-mix(in oklch, var(--color-sell) 45%, var(--color-border));
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -547,9 +548,7 @@ p, li { text-wrap: pretty; max-width: 72ch; }
   white-space:   nowrap;
   transition:    box-shadow var(--transition), transform var(--transition);
 }
-.stat-pill:hover {
-  transform: scale(1.04);
-}
+.stat-pill:hover { transform: scale(1.03); }
 
 /* ══════════════════════════════════════════════════════════════
    BUTTONS
@@ -558,7 +557,7 @@ p, li { text-wrap: pretty; max-width: 72ch; }
   width:          36px; height: 36px;
   border-radius:  var(--radius-full);
   display:        flex; align-items: center; justify-content: center;
-  background:     var(--color-surface-offset);
+  background:     var(--color-surface);
   border:         1px solid var(--color-border);
   color:          var(--color-text-muted);
   cursor:         pointer;
@@ -568,13 +567,13 @@ p, li { text-wrap: pretty; max-width: 72ch; }
   flex-shrink:    0;
 }
 .btn-theme:hover {
-  background:    color-mix(in oklch, var(--color-primary) 14%, transparent);
+  background:    color-mix(in oklch, var(--color-primary) 10%, transparent);
   color:         var(--color-primary);
   border-color:  var(--color-primary);
   box-shadow:    var(--glow-primary);
-  transform:     rotate(15deg) scale(1.08);
+  transform:     rotate(12deg) scale(1.06);
 }
-.btn-theme:active { transform: rotate(15deg) scale(0.96); }
+.btn-theme:active { transform: rotate(12deg) scale(0.95); }
 
 /* ══════════════════════════════════════════════════════════════
    INFO BANNER
@@ -595,16 +594,14 @@ p, li { text-wrap: pretty; max-width: 72ch; }
   to   { opacity: 1; transform: translateY(0); }
 }
 .info-banner-primary {
-  background:  color-mix(in oklch, var(--color-primary) 8%, transparent);
-  border:      1px solid color-mix(in oklch, var(--color-primary) 28%, transparent);
+  background:  color-mix(in oklch, var(--color-primary) 6%, transparent);
+  border:      1px solid color-mix(in oklch, var(--color-primary) 22%, transparent);
   color:       var(--color-text-muted);
-  box-shadow:  0 0 20px color-mix(in oklch, var(--color-primary) 10%, transparent);
 }
 .info-banner-error {
-  background:  color-mix(in oklch, var(--color-sell) 8%, transparent);
-  border:      1px solid color-mix(in oklch, var(--color-sell) 28%, transparent);
+  background:  color-mix(in oklch, var(--color-sell) 6%, transparent);
+  border:      1px solid color-mix(in oklch, var(--color-sell) 22%, transparent);
   color:       var(--color-sell);
-  box-shadow:  0 0 20px var(--color-sell-glow);
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -613,14 +610,13 @@ p, li { text-wrap: pretty; max-width: 72ch; }
 .divider {
   border: none;
   height: 1px;
-  background: linear-gradient(90deg,
-    transparent, var(--color-primary), transparent);
-  opacity: 0.25;
+  background: var(--color-border);
+  opacity: 0.7;
   margin: 0;
 }
 
 /* ══════════════════════════════════════════════════════════════
-   PULSE DOT — neon beacon
+   PULSE DOT — refined beacon
 ══════════════════════════════════════════════════════════════ */
 .tabular { font-variant-numeric: tabular-nums; }
 
@@ -628,13 +624,13 @@ p, li { text-wrap: pretty; max-width: 72ch; }
   display:       inline-block;
   width: 7px; height: 7px;
   border-radius: 50%;
-  background:    var(--color-primary);
-  box-shadow:    0 0 6px var(--color-primary), 0 0 12px var(--color-primary-glow);
-  animation:     pulseDot 1.6s ease-in-out infinite;
+  background:    var(--color-buy);
+  box-shadow:    0 0 4px var(--color-buy);
+  animation:     pulseDot 2s ease-in-out infinite;
 }
 @keyframes pulseDot {
-  0%, 100% { transform: scale(1);   opacity: 1;   box-shadow: 0 0 6px var(--color-primary), 0 0 12px var(--color-primary-glow); }
-  50%       { transform: scale(1.8); opacity: 0.4; box-shadow: 0 0 16px var(--color-primary), 0 0 32px var(--color-primary-glow); }
+  0%, 100% { transform: scale(1);   opacity: 1; }
+  50%       { transform: scale(1.6); opacity: 0.5; }
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -661,10 +657,9 @@ p, li { text-wrap: pretty; max-width: 72ch; }
   0%   { background-position: -200% 0; }
   100% { background-position:  200% 0; }
 }
-/* Counter count-up flicker */
 @keyframes countFlicker {
   0%, 100% { opacity: 1; }
-  50%       { opacity: 0.6; text-shadow: 0 0 10px var(--color-primary); }
+  50%       { opacity: 0.7; }
 }
 
 .fade-in      { animation: fadeIn      0.4s ease both; }
@@ -674,15 +669,15 @@ p, li { text-wrap: pretty; max-width: 72ch; }
 .animate-spin { animation: spin 0.9s linear infinite; }
 
 /* ══════════════════════════════════════════════════════════════
-   SKELETON LOADER — neon shimmer
+   SKELETON LOADER — restrained, on-brand shimmer
 ══════════════════════════════════════════════════════════════ */
 .skeleton {
   background: linear-gradient(90deg,
     var(--color-surface-offset)  25%,
-    color-mix(in oklch, var(--color-primary) 8%, var(--color-surface-dynamic)) 50%,
+    color-mix(in oklch, var(--color-primary) 5%, var(--color-surface-dynamic)) 50%,
     var(--color-surface-offset)  75%);
   background-size: 200% 100%;
-  animation: shimmer 1.8s ease-in-out infinite;
+  animation: shimmer 2s ease-in-out infinite;
   border-radius: var(--radius-md);
 }
 
@@ -691,7 +686,7 @@ p, li { text-wrap: pretty; max-width: 72ch; }
 ══════════════════════════════════════════════════════════════ */
 .site-footer {
   margin-top:  72px;
-  border-top:  1px solid var(--color-divider);
+  border-top:  1px solid var(--color-border);
   background:  var(--color-surface);
   padding:     36px 24px;
   position:    relative;
@@ -705,7 +700,7 @@ p, li { text-wrap: pretty; max-width: 72ch; }
   background: linear-gradient(90deg,
     transparent 0%, var(--color-primary) 30%,
     var(--color-navy) 70%, transparent 100%);
-  opacity: 0.5;
+  opacity: 0.35;
 }
 .site-footer-inner {
   max-width: 1200px;
@@ -736,11 +731,10 @@ p, li { text-wrap: pretty; max-width: 72ch; }
 .site-footer-links a {
   color: var(--color-text-muted);
   text-decoration: none;
-  transition: color var(--transition), text-shadow var(--transition);
+  transition: color var(--transition);
 }
 .site-footer-links a:hover {
   color: var(--color-primary);
-  text-shadow: 0 0 10px var(--color-primary-glow);
 }
 .site-footer-bottom {
   display: flex;
@@ -749,7 +743,7 @@ p, li { text-wrap: pretty; max-width: 72ch; }
   flex-wrap: wrap;
   gap: 8px;
   padding-top: 16px;
-  border-top: 1px solid var(--color-divider);
+  border-top: 1px solid var(--color-border);
   font-size: 0.70rem;
   color: var(--color-text-faint);
   font-family: var(--font-mono);
@@ -768,14 +762,14 @@ p, li { text-wrap: pretty; max-width: 72ch; }
 }
 
 /* ══════════════════════════════════════════════════════════════
-   EXTRA: glowing number counters in hero
+   EXTRA: hero counter subtle flicker
 ══════════════════════════════════════════════════════════════ */
 .hero-stat-value.glow-count {
-  animation: countFlicker 3s ease-in-out infinite;
+  animation: countFlicker 4s ease-in-out infinite;
 }
 
 /* ══════════════════════════════════════════════════════════════
-   EXTRA: animated gradient border for BUY signal cards
+   EXTRA: BUY card spinning border — on hover only, accent-teal
 ══════════════════════════════════════════════════════════════ */
 @property --border-angle {
   syntax: '<angle>';
@@ -799,7 +793,7 @@ p, li { text-wrap: pretty; max-width: 72ch; }
   animation: borderSpin 3s linear infinite paused;
 }
 .stock-card[data-rating="BUY"]:hover::after {
-  opacity: 0.5;
+  opacity: 0.35;
   animation-play-state: running;
 }
 @keyframes borderSpin {
