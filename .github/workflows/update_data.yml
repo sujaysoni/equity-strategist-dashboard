@@ -2,10 +2,14 @@ name: Update Stock Recommendations
 
 on:
   schedule:
-    - cron: '0 14 * * 1-5'      # 10:00 AM ET weekdays
+    # Two cron slots so GitHub scheduler throttling can't miss both.
+    # GitHub runs crons in UTC; ET = UTC-4 in summer (EDT).
+    - cron: '0 13 * * 1-5'   # 09:00 AM EDT  — early buffer run
+    - cron: '0 14 * * 1-5'   # 10:00 AM EDT  — primary target
   repository_dispatch:
     types: [refresh-analysis]
-  workflow_dispatch:
+  workflow_dispatch:           # manual trigger from GitHub UI or API
+  workflow_call:               # allows deploy.yml to call this as a sub-workflow
 
 jobs:
   analyze:
@@ -17,6 +21,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          # Fetch full history so the push step has a clean base
+          fetch-depth: 0
 
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
@@ -34,12 +41,11 @@ jobs:
           pip install --upgrade pip wheel setuptools
           pip install -r requirements.txt
           python -c "import yfinance; print('yfinance', yfinance.__version__)"
-          python -c "import pandas; print('pandas', pandas.__version__)"
+          python -c "import pandas;   print('pandas',   pandas.__version__)"
 
       # ------------------------------------------------------------------ #
-      # Refresh ticker caches before analysis so the universe is current.
-      # Both steps use continue-on-error so a source outage never blocks
-      # the analysis run – stale caches are better than no analysis at all.
+      # Refresh ticker caches BEFORE analysis so the universe is current.
+      # continue-on-error: stale cache > no analysis.
       # ------------------------------------------------------------------ #
       - name: Refresh TSX / TSXV ticker cache
         run: python backend/fetch_tsx_tickers.py
@@ -59,9 +65,9 @@ jobs:
         run: python backend/analyze_stocks.py
 
       # ------------------------------------------------------------------ #
-      # Commit all outputs in one push
+      # Commit all outputs — push triggers deploy.yml automatically
       # ------------------------------------------------------------------ #
-      - name: Commit results
+      - name: Commit & push results
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name  "github-actions[bot]"
@@ -70,6 +76,11 @@ jobs:
           git add backend/tsx_tickers_cache.json || true
           git add backend/nyse_tickers_cache.txt  || true
           git add backend/nyse_tickers_cache.json || true
-          git diff --staged --quiet || \
+          # Only commit if there are staged changes
+          if git diff --staged --quiet; then
+            echo "No changes to commit — data unchanged since last run."
+          else
             git commit -m "chore: update recommendations $(date -u +'%Y-%m-%d %H:%M UTC')"
-          git push
+            git push
+            echo "Pushed — deploy.yml will rebuild the site automatically."
+          fi
