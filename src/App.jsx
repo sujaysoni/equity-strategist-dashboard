@@ -12,6 +12,15 @@ const HORIZONS = [
   { key: 'ultra_long',  label: 'Ultra Long',  sub: '0–360m' },
 ]
 
+// Cap-tier filter options — 'all' is a synthetic catch-all
+const CAP_TIERS = [
+  { key: 'all',   label: 'All',       hint: '' },
+  { key: 'mega',  label: 'Mega',      hint: '≥ $200B' },
+  { key: 'large', label: 'Large',     hint: '$10B–$200B' },
+  { key: 'mid',   label: 'Mid',       hint: '$2B–$10B' },
+  { key: 'small', label: 'Small',     hint: '< $2B' },
+]
+
 const TOP_N = 30
 
 const TICKER_ITEMS = [
@@ -40,6 +49,76 @@ function sortStocks(stocks, horizon) {
     }
     return (b.horizons?.[horizon]?.score || 0) - (a.horizons?.[horizon]?.score || 0)
   })
+}
+
+// ── Cap-tier filter pill row ──────────────────────────────────────────────
+function CapTierFilter({ active, onChange, stocks, horizon }) {
+  // Count per tier so the user can see how many are in each bucket
+  const counts = useMemo(() => {
+    const c = { all: stocks.length, mega: 0, large: 0, mid: 0, small: 0 }
+    for (const s of stocks) {
+      const tier = s.cap_tier || 'small'
+      if (tier in c) c[tier]++
+    }
+    return c
+  }, [stocks])
+
+  return (
+    <div style={{
+      display: 'flex',
+      flexWrap: 'wrap',
+      gap: '6px',
+      padding: '10px 14px',
+      borderBottom: '1px solid var(--color-divider)',
+      background: 'color-mix(in oklch, var(--color-surface-offset) 60%, transparent)',
+    }}>
+      {CAP_TIERS.map(({ key, label, hint }) => {
+        const isActive = active === key
+        const count    = counts[key] ?? 0
+        return (
+          <button
+            key={key}
+            onClick={() => onChange(key)}
+            title={hint || 'Show all market caps'}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '5px',
+              padding: '3px 10px',
+              borderRadius: 'var(--radius-full)',
+              border: isActive
+                ? '1px solid var(--color-primary)'
+                : '1px solid var(--color-border)',
+              background: isActive
+                ? 'color-mix(in oklch, var(--color-primary) 14%, transparent)'
+                : 'var(--color-surface)',
+              color: isActive ? 'var(--color-primary)' : 'var(--color-text-muted)',
+              fontSize: '0.72rem',
+              fontWeight: isActive ? 700 : 500,
+              letterSpacing: '0.02em',
+              cursor: 'pointer',
+              transition: 'all 160ms cubic-bezier(0.16,1,0.3,1)',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {label}
+            <span style={{
+              fontSize: '0.65rem',
+              fontWeight: 600,
+              padding: '0 4px',
+              borderRadius: 'var(--radius-sm)',
+              background: isActive
+                ? 'color-mix(in oklch, var(--color-primary) 20%, transparent)'
+                : 'var(--color-surface-offset)',
+              color: isActive ? 'var(--color-primary)' : 'var(--color-text-faint)',
+              minWidth: '16px',
+              textAlign: 'center',
+            }}>{count}</span>
+          </button>
+        )
+      })}
+    </div>
+  )
 }
 
 function SunIcon() {
@@ -113,6 +192,10 @@ export default function App() {
   const [scanning,    setScanning]    = useState(false)
   const [fadeKey,     setFadeKey]     = useState(0)
 
+  // Independent cap-tier filter per market tile
+  const [cadCapTier, setCadCapTier] = useState('all')
+  const [usdCapTier, setUsdCapTier] = useState('all')
+
   const [darkMode, setDarkMode] = useState(() => {
     try {
       const saved = localStorage.getItem('theme')
@@ -162,8 +245,20 @@ export default function App() {
     setTimeout(() => { fetchData(); setRefreshing(false); setScanning(false) }, 4000)
   }
 
-  const cad = useMemo(() => sortStocks(data?.cad || [], horizon).slice(0, TOP_N), [data, horizon])
-  const usd = useMemo(() => sortStocks(data?.usd || [], horizon).slice(0, TOP_N), [data, horizon])
+  // Full sorted lists (before cap-tier filter)
+  const cadAll = useMemo(() => sortStocks(data?.cad || [], horizon), [data, horizon])
+  const usdAll = useMemo(() => sortStocks(data?.usd || [], horizon), [data, horizon])
+
+  // Apply cap-tier filter then slice to TOP_N
+  const cad = useMemo(() => {
+    const filtered = cadCapTier === 'all' ? cadAll : cadAll.filter(s => s.cap_tier === cadCapTier)
+    return filtered.slice(0, TOP_N)
+  }, [cadAll, cadCapTier])
+
+  const usd = useMemo(() => {
+    const filtered = usdCapTier === 'all' ? usdAll : usdAll.filter(s => s.cap_tier === usdCapTier)
+    return filtered.slice(0, TOP_N)
+  }, [usdAll, usdCapTier])
 
   const cadBuys  = cad.filter(s => s.horizons?.[horizon]?.rating === 'BUY').length
   const usdBuys  = usd.filter(s => s.horizons?.[horizon]?.rating === 'BUY').length
@@ -173,6 +268,10 @@ export default function App() {
 
   const now = new Date()
   const dateStr = now.toLocaleDateString('en-CA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+
+  // Reset cap filters when horizon changes so user sees full picture
+  const handleCapTierChangeCad = (tier) => { setFadeKey(k => k + 1); setCadCapTier(tier) }
+  const handleCapTierChangeUsd = (tier) => { setFadeKey(k => k + 1); setUsdCapTier(tier) }
 
   return (
     <div className="bg-ambient" style={{ minHeight: '100vh', fontFamily: 'var(--font-body)' }}>
@@ -338,37 +437,65 @@ export default function App() {
             gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 520px), 1fr))',
             gap: '28px', alignItems: 'start',
           }}>
+
+            {/* ── CAD TILE ── */}
             <section>
               <div className="market-section-header">
                 <span style={{ fontSize: '1rem' }}>🍁</span>
                 <span style={{ fontFamily: 'var(--font-display)', fontWeight: 400, fontSize: '1rem', color: 'var(--color-text)', letterSpacing: '-0.01em' }}>Canadian Markets</span>
                 <span className="stat-pill" style={{ background: 'color-mix(in oklch,var(--color-primary) 10%,transparent)', border: '1px solid color-mix(in oklch,var(--color-primary) 22%,transparent)', color: 'var(--color-primary)' }}>TSX · TSXV</span>
-                <span className="stat-pill" style={{ marginLeft: 'auto', background: 'var(--color-surface-offset)', border: '1px solid var(--color-border)', color: 'var(--color-text-muted)' }}>Top {Math.min(TOP_N, cad.length)} of {cadTotal}</span>
+                <span className="stat-pill" style={{ marginLeft: 'auto', background: 'var(--color-surface-offset)', border: '1px solid var(--color-border)', color: 'var(--color-text-muted)' }}>
+                  {cadCapTier === 'all'
+                    ? `Top ${Math.min(TOP_N, cad.length)} of ${cadTotal}`
+                    : `${cad.length} ${cadCapTier}-cap`}
+                </span>
               </div>
+              <CapTierFilter
+                active={cadCapTier}
+                onChange={handleCapTierChangeCad}
+                stocks={cadAll}
+                horizon={horizon}
+              />
               <div className="market-section-body">
-                <div key={`cad-${fadeKey}`} style={{ display: 'flex', flexDirection: 'column', gap: '8px', animation: 'fadeIn 0.35s ease' }}>
-                  {cad.length === 0 ? <EmptyState /> : cad.map((s, i) => (
-                    <StockCard key={s.ticker} stock={s} horizon={horizon} darkMode={darkMode} rank={i + 1} />
-                  ))}
+                <div key={`cad-${fadeKey}-${cadCapTier}`} style={{ display: 'flex', flexDirection: 'column', gap: '8px', animation: 'fadeIn 0.35s ease' }}>
+                  {cad.length === 0
+                    ? <EmptyState tier={cadCapTier} />
+                    : cad.map((s, i) => (
+                        <StockCard key={s.ticker} stock={s} horizon={horizon} darkMode={darkMode} rank={i + 1} />
+                      ))}
                 </div>
               </div>
             </section>
 
+            {/* ── USD TILE ── */}
             <section>
               <div className="market-section-header">
                 <span style={{ fontSize: '1rem' }}>🦅</span>
                 <span style={{ fontFamily: 'var(--font-display)', fontWeight: 400, fontSize: '1rem', color: 'var(--color-text)', letterSpacing: '-0.01em' }}>U.S. Markets</span>
                 <span className="stat-pill" style={{ background: 'color-mix(in oklch,var(--color-navy) 10%,transparent)', border: '1px solid color-mix(in oklch,var(--color-navy) 22%,transparent)', color: 'var(--color-navy)' }}>NYSE · NASDAQ</span>
-                <span className="stat-pill" style={{ marginLeft: 'auto', background: 'var(--color-surface-offset)', border: '1px solid var(--color-border)', color: 'var(--color-text-muted)' }}>Top {Math.min(TOP_N, usd.length)} of {usdTotal}</span>
+                <span className="stat-pill" style={{ marginLeft: 'auto', background: 'var(--color-surface-offset)', border: '1px solid var(--color-border)', color: 'var(--color-text-muted)' }}>
+                  {usdCapTier === 'all'
+                    ? `Top ${Math.min(TOP_N, usd.length)} of ${usdTotal}`
+                    : `${usd.length} ${usdCapTier}-cap`}
+                </span>
               </div>
+              <CapTierFilter
+                active={usdCapTier}
+                onChange={handleCapTierChangeUsd}
+                stocks={usdAll}
+                horizon={horizon}
+              />
               <div className="market-section-body">
-                <div key={`usd-${fadeKey}`} style={{ display: 'flex', flexDirection: 'column', gap: '8px', animation: 'fadeIn 0.35s ease' }}>
-                  {usd.length === 0 ? <EmptyState /> : usd.map((s, i) => (
-                    <StockCard key={s.ticker} stock={s} horizon={horizon} darkMode={darkMode} rank={i + 1} />
-                  ))}
+                <div key={`usd-${fadeKey}-${usdCapTier}`} style={{ display: 'flex', flexDirection: 'column', gap: '8px', animation: 'fadeIn 0.35s ease' }}>
+                  {usd.length === 0
+                    ? <EmptyState tier={usdCapTier} />
+                    : usd.map((s, i) => (
+                        <StockCard key={s.ticker} stock={s} horizon={horizon} darkMode={darkMode} rank={i + 1} />
+                      ))}
                 </div>
               </div>
             </section>
+
           </div>
         )}
       </main>
@@ -428,7 +555,10 @@ export default function App() {
   )
 }
 
-function EmptyState() {
+function EmptyState({ tier }) {
+  const msg = tier && tier !== 'all'
+    ? `No ${tier}-cap stocks in the current dataset — try a different cap tier or trigger a refresh.`
+    : 'No data available — trigger a refresh to run the analysis.'
   return (
     <div style={{
       padding: '48px 24px', textAlign: 'center',
@@ -437,7 +567,7 @@ function EmptyState() {
       color: 'var(--color-text-faint)', fontSize: '0.85rem',
     }}>
       <div style={{ fontSize: '1.5rem', marginBottom: '8px', opacity: 0.5 }}>📊</div>
-      No data available — trigger a refresh to run the analysis.
+      {msg}
     </div>
   )
 }
