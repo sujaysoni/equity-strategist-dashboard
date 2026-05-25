@@ -36,31 +36,85 @@ const TICKER_ITEMS = [
 ]
 
 /**
- * Sort order:
- *  1. Rating tier: BUY → HOLD → SELL
- *  2. Within tier: highest score first (strict DESC)
- *  3. Ultra-long tiebreak: economic moat proxy (market_cap × roe)
+ * Sort stocks by rating tier then score.
+ * direction: 'desc' → Top 30 (highest score first, BUY→HOLD→SELL)
+ *            'asc'  → Bottom 30 (lowest score first, SELL→HOLD→BUY)
  */
-function sortStocks(stocks, horizon) {
-  const ratingOrder = { BUY: 0, HOLD: 1, SELL: 2 }
+function sortStocks(stocks, horizon, direction = 'desc') {
+  const ratingOrder = direction === 'desc'
+    ? { BUY: 0, HOLD: 1, SELL: 2 }
+    : { SELL: 0, HOLD: 1, BUY: 2 }
+
   return [...stocks].sort((a, b) => {
     const ra = ratingOrder[a.horizons?.[horizon]?.rating] ?? 1
     const rb = ratingOrder[b.horizons?.[horizon]?.rating] ?? 1
     if (ra !== rb) return ra - rb
-    // Within the same rating tier, always sort by score DESC
+
     const sa = a.horizons?.[horizon]?.score ?? 0
     const sb = b.horizons?.[horizon]?.score ?? 0
-    if (sb !== sa) return sb - sa
+    if (direction === 'desc') {
+      if (sb !== sa) return sb - sa
+    } else {
+      if (sa !== sb) return sa - sb
+    }
+
     // Tiebreak for ultra_long: economic moat proxy
     if (horizon === 'ultra_long') {
       const moatA = (a.market_cap_usd || 0) * (a.roe || 0)
       const moatB = (b.market_cap_usd || 0) * (b.roe || 0)
-      return moatB - moatA
+      return direction === 'desc' ? moatB - moatA : moatA - moatB
     }
     return 0
   })
 }
 
+/* ── Sort Direction Toggle ─────────────────────────────────────────── */
+function SortToggle({ direction, onChange }) {
+  const isDesc = direction === 'desc'
+  return (
+    <div style={{
+      display: 'inline-flex',
+      borderRadius: 'var(--radius-full)',
+      border: '1px solid var(--color-border)',
+      overflow: 'hidden',
+      fontSize: '0.70rem',
+      fontWeight: 600,
+      letterSpacing: '0.03em',
+    }}>
+      {[
+        { val: 'desc', icon: '↓', label: 'Top 30'    },
+        { val: 'asc',  icon: '↑', label: 'Bottom 30' },
+      ].map(({ val, icon, label }) => {
+        const active = direction === val
+        return (
+          <button
+            key={val}
+            onClick={() => onChange(val)}
+            title={label}
+            style={{
+              padding: '3px 10px',
+              display: 'inline-flex', alignItems: 'center', gap: '3px',
+              border: 'none',
+              background: active
+                ? 'color-mix(in oklch, var(--color-primary) 16%, transparent)'
+                : 'var(--color-surface)',
+              color: active ? 'var(--color-primary)' : 'var(--color-text-muted)',
+              cursor: 'pointer',
+              transition: 'all 160ms cubic-bezier(0.16,1,0.3,1)',
+              fontWeight: active ? 700 : 500,
+              whiteSpace: 'nowrap',
+            }}
+          >
+            <span style={{ fontSize: '0.8rem', lineHeight: 1 }}>{icon}</span>
+            {label}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+/* ── Cap Tier Filter ───────────────────────────────────────────────── */
 function CapTierFilter({ active, onChange, stocks, horizon }) {
   const counts = useMemo(() => {
     const c = { all: stocks.length, mega: 0, large: 0, mid: 0, small: 0 }
@@ -179,14 +233,16 @@ export default function App() {
   const [loading,     setLoading]     = useState(true)
   const [error,       setError]       = useState(null)
   const [horizon,     setHorizon]     = useState('short')
-  // lastUpdated is set ONLY from json.generated_at — never from browser clock
   const [lastUpdated, setLastUpdated] = useState(null)
   const [refreshing,  setRefreshing]  = useState(false)
   const [scanning,    setScanning]    = useState(false)
   const [fadeKey,     setFadeKey]     = useState(0)
 
-  const [cadCapTier, setCadCapTier] = useState('all')
-  const [usdCapTier, setUsdCapTier] = useState('all')
+  const [cadCapTier,   setCadCapTier]   = useState('all')
+  const [usdCapTier,   setUsdCapTier]   = useState('all')
+  // 'desc' = Top 30 (default) | 'asc' = Bottom 30
+  const [cadSortDir,   setCadSortDir]   = useState('desc')
+  const [usdSortDir,   setUsdSortDir]   = useState('desc')
 
   const [darkMode, setDarkMode] = useState(() => {
     try {
@@ -209,10 +265,6 @@ export default function App() {
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const json = await res.json()
       setData(json)
-      // ── TIMESTAMP FIX ──────────────────────────────────────────────────
-      // Use ONLY the generated_at field written by analyze_stocks.py when
-      // the GitHub Actions workflow completes successfully. Never use
-      // new Date() so the timestamp only changes on a real data refresh.
       if (json.generated_at) {
         setLastUpdated(new Date(json.generated_at))
       }
@@ -243,9 +295,9 @@ export default function App() {
     setTimeout(() => { fetchData(); setRefreshing(false); setScanning(false) }, 4000)
   }
 
-  // Full sorted lists — strictly score-ranked within each rating tier
-  const cadAll = useMemo(() => sortStocks(data?.cad || [], horizon), [data, horizon])
-  const usdAll = useMemo(() => sortStocks(data?.usd || [], horizon), [data, horizon])
+  // Sort full lists independently per tile (direction-aware)
+  const cadAll = useMemo(() => sortStocks(data?.cad || [], horizon, cadSortDir), [data, horizon, cadSortDir])
+  const usdAll = useMemo(() => sortStocks(data?.usd || [], horizon, usdSortDir), [data, horizon, usdSortDir])
 
   // Apply cap-tier filter then slice to TOP_N
   const cad = useMemo(() => {
@@ -264,14 +316,21 @@ export default function App() {
   const usdTotal = data?.usd?.length || 0
   const isUltraLong = horizon === 'ultra_long'
 
-  // Date string derives from lastUpdated (the generated_at value) so it
-  // matches the actual analysis run date, not today's browser date.
   const dateStr = lastUpdated
     ? lastUpdated.toLocaleDateString('en-CA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
     : ''
 
   const handleCapTierChangeCad = (tier) => { setFadeKey(k => k + 1); setCadCapTier(tier) }
   const handleCapTierChangeUsd = (tier) => { setFadeKey(k => k + 1); setUsdCapTier(tier) }
+  const handleSortDirChangeCad = (dir)  => { setFadeKey(k => k + 1); setCadSortDir(dir) }
+  const handleSortDirChangeUsd = (dir)  => { setFadeKey(k => k + 1); setUsdSortDir(dir) }
+
+  // Human-readable tile label
+  const tileLabel = (dir, capTier, count) => {
+    const rank  = dir === 'desc' ? 'Top' : 'Bottom'
+    const cap   = capTier !== 'all' ? ` ${capTier}-cap` : ''
+    return `${rank} ${count}${cap} · Ranked by Score`
+  }
 
   return (
     <div className="bg-ambient" style={{ minHeight: '100vh', fontFamily: 'var(--font-body)' }}>
@@ -379,7 +438,6 @@ export default function App() {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px', marginBottom: '24px' }}>
             <div style={{ fontSize: '0.72rem', color: 'var(--color-text-faint)' }}>
               <span style={{ marginRight: '4px' }}>📅</span>
-              {/* dateStr and time both come from generated_at — set by GitHub Actions */}
               {dateStr} · Last refreshed: <strong style={{ color: 'var(--color-text-muted)' }}>
                 {lastUpdated.toLocaleTimeString('en-CA', { hour: '2-digit', minute: '2-digit', timeZoneName: 'short' })}
               </strong>
@@ -448,14 +506,22 @@ export default function App() {
                 <span style={{ fontFamily: 'var(--font-display)', fontWeight: 400, fontSize: '1rem', color: 'var(--color-text)', letterSpacing: '-0.01em' }}>Canadian Markets</span>
                 <span className="stat-pill" style={{ background: 'color-mix(in oklch,var(--color-primary) 10%,transparent)', border: '1px solid color-mix(in oklch,var(--color-primary) 22%,transparent)', color: 'var(--color-primary)' }}>TSX · TSXV</span>
                 <span className="stat-pill" style={{ marginLeft: 'auto', background: 'var(--color-surface-offset)', border: '1px solid var(--color-border)', color: 'var(--color-text-muted)' }}>
-                  {cadCapTier === 'all'
-                    ? `Top ${Math.min(TOP_N, cad.length)} · Ranked by Score`
-                    : `Top ${cad.length} ${cadCapTier}-cap · Ranked by Score`}
+                  {tileLabel(cadSortDir, cadCapTier, cad.length)}
                 </span>
               </div>
-              <CapTierFilter active={cadCapTier} onChange={handleCapTierChangeCad} stocks={cadAll} horizon={horizon} />
+              {/* Cap filter + sort toggle in one row */}
+              <div style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                flexWrap: 'wrap', gap: '8px',
+                padding: '10px 14px',
+                borderBottom: '1px solid var(--color-divider)',
+                background: 'color-mix(in oklch, var(--color-surface-offset) 60%, transparent)',
+              }}>
+                <CapTierFilter active={cadCapTier} onChange={handleCapTierChangeCad} stocks={cadAll} horizon={horizon} />
+                <SortToggle direction={cadSortDir} onChange={handleSortDirChangeCad} />
+              </div>
               <div className="market-section-body">
-                <div key={`cad-${fadeKey}-${cadCapTier}`} style={{ display: 'flex', flexDirection: 'column', gap: '8px', animation: 'fadeIn 0.35s ease' }}>
+                <div key={`cad-${fadeKey}-${cadCapTier}-${cadSortDir}`} style={{ display: 'flex', flexDirection: 'column', gap: '8px', animation: 'fadeIn 0.35s ease' }}>
                   {cad.length === 0
                     ? <EmptyState tier={cadCapTier} />
                     : cad.map((s, i) => (
@@ -472,14 +538,22 @@ export default function App() {
                 <span style={{ fontFamily: 'var(--font-display)', fontWeight: 400, fontSize: '1rem', color: 'var(--color-text)', letterSpacing: '-0.01em' }}>U.S. Markets</span>
                 <span className="stat-pill" style={{ background: 'color-mix(in oklch,var(--color-navy) 10%,transparent)', border: '1px solid color-mix(in oklch,var(--color-navy) 22%,transparent)', color: 'var(--color-navy)' }}>NYSE · NASDAQ</span>
                 <span className="stat-pill" style={{ marginLeft: 'auto', background: 'var(--color-surface-offset)', border: '1px solid var(--color-border)', color: 'var(--color-text-muted)' }}>
-                  {usdCapTier === 'all'
-                    ? `Top ${Math.min(TOP_N, usd.length)} · Ranked by Score`
-                    : `Top ${usd.length} ${usdCapTier}-cap · Ranked by Score`}
+                  {tileLabel(usdSortDir, usdCapTier, usd.length)}
                 </span>
               </div>
-              <CapTierFilter active={usdCapTier} onChange={handleCapTierChangeUsd} stocks={usdAll} horizon={horizon} />
+              {/* Cap filter + sort toggle in one row */}
+              <div style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                flexWrap: 'wrap', gap: '8px',
+                padding: '10px 14px',
+                borderBottom: '1px solid var(--color-divider)',
+                background: 'color-mix(in oklch, var(--color-surface-offset) 60%, transparent)',
+              }}>
+                <CapTierFilter active={usdCapTier} onChange={handleCapTierChangeUsd} stocks={usdAll} horizon={horizon} />
+                <SortToggle direction={usdSortDir} onChange={handleSortDirChangeUsd} />
+              </div>
               <div className="market-section-body">
-                <div key={`usd-${fadeKey}-${usdCapTier}`} style={{ display: 'flex', flexDirection: 'column', gap: '8px', animation: 'fadeIn 0.35s ease' }}>
+                <div key={`usd-${fadeKey}-${usdCapTier}-${usdSortDir}`} style={{ display: 'flex', flexDirection: 'column', gap: '8px', animation: 'fadeIn 0.35s ease' }}>
                   {usd.length === 0
                     ? <EmptyState tier={usdCapTier} />
                     : usd.map((s, i) => (
