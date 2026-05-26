@@ -45,13 +45,15 @@ jobs:
 
       # ------------------------------------------------------------------ #
       # Refresh ticker caches BEFORE analysis so the universe is current.
+      # fetch_nyse_tickers.py fetches BOTH NYSE and NASDAQ tickers into
+      # nyse_tickers_cache.txt/json — so analyze_stocks.py sees all US stocks.
       # continue-on-error: stale cache > no analysis.
       # ------------------------------------------------------------------ #
       - name: Refresh TSX / TSXV ticker cache
         run: python backend/fetch_tsx_tickers.py
         continue-on-error: true
 
-      - name: Refresh NYSE ticker cache
+      - name: Refresh NYSE + NASDAQ ticker cache
         run: python backend/fetch_nyse_tickers.py
         continue-on-error: true
 
@@ -72,10 +74,11 @@ jobs:
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name  "github-actions[bot]"
           git add public/recommendations.json
-          git add backend/tsx_tickers_cache.txt  || true
-          git add backend/tsx_tickers_cache.json || true
-          git add backend/nyse_tickers_cache.txt  || true
-          git add backend/nyse_tickers_cache.json || true
+          git add backend/tsx_tickers_cache.txt    || true
+          git add backend/tsx_tickers_cache.json   || true
+          git add backend/nyse_tickers_cache.txt    || true
+          git add backend/nyse_tickers_cache.json   || true
+          git add backend/nasdaq_tickers_cache.json || true
           # Only commit if there are staged changes
           if git diff --staged --quiet; then
             echo "No changes to commit — data unchanged since last run."

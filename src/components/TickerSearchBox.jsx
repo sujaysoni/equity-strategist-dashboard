@@ -15,6 +15,16 @@ const HORIZON_LABELS = {
   ultra_long:  'Ultra Long (0–360m)',
 }
 
+// Exchange → display label + colour hint
+const EXCHANGE_META = {
+  TSX:     { label: 'TSX',     color: 'var(--color-primary)' },
+  TSXV:    { label: 'TSXV',   color: 'var(--color-primary)' },
+  NYSE:    { label: 'NYSE',   color: 'var(--color-navy)'   },
+  NASDAQ:  { label: 'NASDAQ', color: 'var(--color-navy)'   },
+  'NYSE-MKT':  { label: 'NYSE-MKT',  color: 'var(--color-navy)' },
+  'NYSE-ARCA': { label: 'NYSE-ARCA', color: 'var(--color-navy)' },
+}
+
 function sortByScore(stocks, horizon) {
   return [...stocks].sort((a, b) => {
     const ratingOrder = { BUY: 0, HOLD: 1, SELL: 2 }
@@ -91,6 +101,22 @@ function buildReasoning(stock, horizon) {
   return reasons
 }
 
+/* ── Exchange pill ── */
+function ExchangeBadge({ exchange }) {
+  const meta = EXCHANGE_META[exchange] || { label: exchange || '—', color: 'var(--color-text-faint)' }
+  return (
+    <span style={{
+      padding: '1px 7px',
+      borderRadius: 'var(--radius-full)',
+      fontSize: '0.60rem', fontWeight: 700, letterSpacing: '0.06em',
+      background: `color-mix(in oklch, ${meta.color} 12%, transparent)`,
+      border: `1px solid color-mix(in oklch, ${meta.color} 28%, transparent)`,
+      color: meta.color,
+      whiteSpace: 'nowrap',
+    }}>{meta.label}</span>
+  )
+}
+
 /* ── Portal dropdown ── */
 function SuggestionsPortal({ anchorRef, suggestions, horizon, onSelect }) {
   const [rect, setRect] = useState(null)
@@ -120,11 +146,12 @@ function SuggestionsPortal({ anchorRef, suggestions, horizon, onSelect }) {
       overflow: 'hidden',
       animation: 'fadeIn 0.15s ease',
     }}>
-      {suggestions.map(s => {
+      {suggestions.map((s, idx) => {
         const sh = s.horizons?.[horizon]
         const rc = sh?.rating ? RATING_COLORS[sh.rating] : null
+        const exch = s.exchange || s._exchange || s._market
         return (
-          <button key={s.ticker} onMouseDown={() => onSelect(s.ticker)}
+          <button key={`${s.ticker}-${idx}`} onMouseDown={() => onSelect(s.ticker)}
             style={{
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
               width: '100%', padding: '10px 14px',
@@ -139,7 +166,7 @@ function SuggestionsPortal({ anchorRef, suggestions, horizon, onSelect }) {
               <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>{s.name || ''}</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ fontSize: '0.65rem', color: 'var(--color-text-faint)' }}>{s._market}</span>
+              {exch && <ExchangeBadge exchange={exch} />}
               {rc && <span style={{ padding: '2px 8px', borderRadius: 'var(--radius-full)', fontSize: '0.65rem', fontWeight: 700, background: rc.bg, border: `1px solid ${rc.border}`, color: rc.text }}>{sh.rating}</span>}
             </div>
           </button>
@@ -196,6 +223,7 @@ function ResultModal({ result, h, ratingStyle, reasons, horizon, onClose }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
             <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 800, fontSize: '1.2rem', color: 'var(--color-primary)', letterSpacing: '0.06em' }}>{result.stock.ticker}</span>
             {result.stock.name && <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', fontWeight: 500 }}>{result.stock.name}</span>}
+            {result.stock.exchange && <ExchangeBadge exchange={result.stock.exchange} />}
             <span style={{ fontSize: '0.68rem', color: 'var(--color-text-faint)', padding: '2px 8px', background: 'var(--color-surface-offset)', borderRadius: 'var(--radius-full)', border: '1px solid var(--color-border)' }}>{result.market}</span>
           </div>
           {ratingStyle && (
@@ -267,37 +295,94 @@ function ResultModal({ result, h, ratingStyle, reasons, horizon, onClose }) {
   )
 }
 
-// TickerSearchBox now accepts cadRaw/usdRaw (full unsorted universe)
+// ── Load supplemental ticker universe from cache JSON files ────────────────
+// These cover ALL tickers on TSX/TSXV/NYSE/NASDAQ — not just those already
+// analysed in recommendations.json.  We fetch at mount and merge in.
+async function loadSupplementalUniverse(base) {
+  const files = [
+    { url: `${base}../backend/tsx_tickers_cache.json`,    isCad: true  },
+    { url: `${base}../backend/nyse_tickers_cache.json`,   isCad: false },
+    { url: `${base}../backend/nasdaq_tickers_cache.json`, isCad: false },
+  ]
+  const all = []
+  for (const { url, isCad } of files) {
+    try {
+      const res = await fetch(url)
+      if (!res.ok) continue
+      const json = await res.json()
+      const rows = json.tickers || []
+      for (const row of rows) {
+        if (row.ticker) {
+          all.push({
+            ticker:    row.ticker,
+            name:      row.name || '',
+            exchange:  row.exchange || (isCad ? 'TSX' : 'NYSE'),
+            _isCadSup: isCad,
+            _supplemental: true,
+          })
+        }
+      }
+    } catch {}
+  }
+  return all
+}
+
+// TickerSearchBox now accepts cadRaw/usdRaw (full unsorted universe from reco.json)
 export default function TickerSearchBox({ cadRaw, usdRaw, cadSorted, usdSorted, horizon }) {
   const [query,     setQuery]     = useState('')
   const [result,    setResult]    = useState(null)
   const [focused,   setFocused]   = useState(false)
   const [notFound,  setNotFound]  = useState(false)
   const [modalOpen, setModalOpen] = useState(false)
+  // Supplemental universe from cache JSON files (TSX/TSXV/NYSE/NASDAQ)
+  const [supUniverse, setSupUniverse] = useState([])
   const inputRef   = useRef(null)
   const wrapperRef = useRef(null)
+
+  // Load supplemental universe once on mount
+  useEffect(() => {
+    const base = (typeof import.meta !== 'undefined' && import.meta.env?.BASE_URL) || '/'
+    loadSupplementalUniverse(base).then(rows => setSupUniverse(rows))
+  }, [])
 
   // Full universe sorted by score for rank lookup — independent of tile sort direction
   const cadAllSorted = useMemo(() => sortByScore(cadRaw, horizon), [cadRaw, horizon])
   const usdAllSorted = useMemo(() => sortByScore(usdRaw, horizon), [usdRaw, horizon])
 
-  // Flat combined list for autocomplete — searches entire universe
-  const combined = useMemo(() => [
-    ...cadRaw.map(s => ({ ...s, _market: 'CAD' })),
-    ...usdRaw.map(s => ({ ...s, _market: 'USD' })),
+  // Analysed stocks (from recommendations.json) tagged with _market
+  const analysedCombined = useMemo(() => [
+    ...cadRaw.map(s => ({ ...s, _market: s.exchange || 'CAD' })),
+    ...usdRaw.map(s => ({ ...s, _market: s.exchange || 'USD' })),
   ], [cadRaw, usdRaw])
+
+  // Build a Set of tickers already in recommendations so we don't duplicate in suggestions
+  const analysedTickers = useMemo(() => new Set(analysedCombined.map(s => s.ticker?.toUpperCase())), [analysedCombined])
+
+  // Supplemental rows not yet in recommendations (pure lookup / not-yet-analysed)
+  const supOnly = useMemo(() =>
+    supUniverse.filter(s => !analysedTickers.has(s.ticker?.toUpperCase())),
+  [supUniverse, analysedTickers])
+
+  // Full search pool: analysed first, then supplemental (catalogue-only)
+  const searchPool = useMemo(() => [...analysedCombined, ...supOnly], [analysedCombined, supOnly])
+
+  const totalCount = useMemo(() => {
+    // Unique ticker count across analysed + supplemental
+    const seen = new Set()
+    for (const s of searchPool) if (s.ticker) seen.add(s.ticker.toUpperCase())
+    return seen.size
+  }, [searchPool])
 
   const suggestions = useMemo(() => {
     const q = query.trim().toUpperCase()
     if (!q) return []
-    // Match ticker starts-with first, then name contains, dedupe
-    const startsWith = combined.filter(s => s.ticker?.toUpperCase().startsWith(q))
-    const nameMatch  = combined.filter(s =>
+    const startsWith = searchPool.filter(s => s.ticker?.toUpperCase().startsWith(q))
+    const nameMatch  = searchPool.filter(s =>
       !s.ticker?.toUpperCase().startsWith(q) &&
       s.name?.toUpperCase().includes(q)
     )
-    return [...startsWith, ...nameMatch].slice(0, 10)
-  }, [query, combined])
+    return [...startsWith, ...nameMatch].slice(0, 12)
+  }, [query, searchPool])
 
   const handleSearch = useCallback((ticker) => {
     const q = (ticker || query).trim().toUpperCase()
@@ -307,6 +392,14 @@ export default function TickerSearchBox({ cadRaw, usdRaw, cadSorted, usdSorted, 
     const usdIdx = usdAllSorted.findIndex(s => s.ticker?.toUpperCase() === q)
 
     if (cadIdx === -1 && usdIdx === -1) {
+      // Check supplemental — show catalogue entry (no analysis data yet)
+      const supMatch = supUniverse.find(s => s.ticker?.toUpperCase() === q)
+      if (supMatch) {
+        setResult(null); setNotFound(false); setModalOpen(false)
+        // Show not-found with helpful message about exchange
+        setNotFound(true)
+        return
+      }
       setResult(null); setNotFound(true); setModalOpen(false)
       return
     }
@@ -327,7 +420,7 @@ export default function TickerSearchBox({ cadRaw, usdRaw, cadSorted, usdSorted, 
 
     setResult({ stock, market, globalRank, tierRank, inTop30, isCad })
     setModalOpen(true)
-  }, [query, cadAllSorted, usdAllSorted, cadSorted, usdSorted])
+  }, [query, cadAllSorted, usdAllSorted, cadSorted, usdSorted, supUniverse])
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter')  handleSearch()
@@ -347,6 +440,12 @@ export default function TickerSearchBox({ cadRaw, usdRaw, cadSorted, usdSorted, 
   const reasons     = result ? buildReasoning(result.stock, horizon) : []
   const showSuggestions = focused && suggestions.length > 0 && !result
 
+  // Counts for hint line
+  const cadAnalysed = cadRaw.length
+  const usdAnalysed = usdRaw.length
+  const supCadCount = supOnly.filter(s => s._isCadSup).length
+  const supUsdCount = supOnly.filter(s => !s._isCadSup).length
+
   return (
     <div ref={wrapperRef} style={{ maxWidth: '720px', margin: '0 auto 32px', position: 'relative' }}>
 
@@ -363,7 +462,7 @@ export default function TickerSearchBox({ cadRaw, usdRaw, cadSorted, usdSorted, 
         <input
           ref={inputRef}
           type="text"
-          placeholder="Search any ticker or company… e.g. NVDA, AAPL, RY.TO, Shopify"
+          placeholder="Search TSX, TSXV, NYSE or NASDAQ… e.g. NVDA, AAPL, RY.TO, Shopify"
           value={query}
           onChange={e => { setQuery(e.target.value.toUpperCase()); setResult(null); setNotFound(false); setModalOpen(false) }}
           onKeyDown={handleKeyDown}
@@ -396,8 +495,17 @@ export default function TickerSearchBox({ cadRaw, usdRaw, cadSorted, usdSorted, 
 
       {/* Universe count hint */}
       {!query && (
-        <div style={{ textAlign: 'center', marginTop: '6px', fontSize: '0.68rem', color: 'var(--color-text-faint)' }}>
-          Searching across <strong style={{ color: 'var(--color-text-muted)' }}>{cadRaw.length + usdRaw.length}</strong> stocks — {cadRaw.length} CAD · {usdRaw.length} USD
+        <div style={{ textAlign: 'center', marginTop: '6px', fontSize: '0.68rem', color: 'var(--color-text-faint)', display: 'flex', justifyContent: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          <span>🔎 Searching across <strong style={{ color: 'var(--color-text-muted)' }}>{totalCount.toLocaleString()}</strong> tickers —</span>
+          <span style={{ color: 'var(--color-primary)' }}>TSX · TSXV</span>
+          <span style={{ color: 'var(--color-text-faint)' }}>·</span>
+          <span style={{ color: 'var(--color-navy)' }}>NYSE · NASDAQ</span>
+          {(cadAnalysed + usdAnalysed) > 0 && (
+            <span style={{ color: 'var(--color-text-faint)', fontSize: '0.64rem' }}>
+              ({cadAnalysed} CAD + {usdAnalysed} USD analysed
+              {(supCadCount + supUsdCount) > 0 ? ` · ${supCadCount + supUsdCount} catalogue-only` : ''})
+            </span>
+          )}
         </div>
       )}
 
@@ -415,7 +523,7 @@ export default function TickerSearchBox({ cadRaw, usdRaw, cadSorted, usdSorted, 
           display: 'flex', alignItems: 'center', gap: '8px',
         }}>
           <span>🔎</span>
-          <span><strong style={{ color: 'var(--color-text)', fontFamily: 'var(--font-mono)' }}>{query}</strong> was not found in the current dataset ({cadRaw.length + usdRaw.length} stocks tracked). It may not be in the universe yet — try triggering a refresh.</span>
+          <span><strong style={{ color: 'var(--color-text)', fontFamily: 'var(--font-mono)' }}>{query}</strong> was not found across TSX, TSXV, NYSE, or NASDAQ ({totalCount.toLocaleString()} tickers tracked). It may not be listed — try a different symbol or trigger a refresh.</span>
         </div>
       )}
 
