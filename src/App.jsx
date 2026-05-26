@@ -118,9 +118,7 @@ function CapTierFilter({ active, onChange, stocks, horizon }) {
   }, [stocks])
 
   return (
-    <div style={{
-      display: 'flex', flexWrap: 'wrap', gap: '6px',
-    }}>
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
       {CAP_TIERS.map(({ key, label, hint }) => {
         const isActive = active === key
         const count = counts[key] ?? 0
@@ -283,11 +281,15 @@ export default function App() {
     setTimeout(() => { fetchData(); setRefreshing(false); setScanning(false) }, 4000)
   }
 
-  // Full sorted lists — no slice yet (needed by TickerSearchBox for rank lookup)
-  const cadAll = useMemo(() => sortStocks(data?.cad || [], horizon, cadSortDir), [data, horizon, cadSortDir])
-  const usdAll = useMemo(() => sortStocks(data?.usd || [], horizon, usdSortDir), [data, horizon, usdSortDir])
+  // ── RAW arrays (full universe, no sort, no slice) — used exclusively by TickerSearchBox
+  const cadRaw = useMemo(() => data?.cad || [], [data])
+  const usdRaw = useMemo(() => data?.usd || [], [data])
 
-  // Apply cap-tier filter then slice to TOP_N (these are what the tiles show)
+  // ── TILE arrays: sorted by tile direction (used for display + rank context)
+  const cadAll = useMemo(() => sortStocks(cadRaw, horizon, cadSortDir), [cadRaw, horizon, cadSortDir])
+  const usdAll = useMemo(() => sortStocks(usdRaw, horizon, usdSortDir), [usdRaw, horizon, usdSortDir])
+
+  // ── Apply cap-tier filter then slice to TOP_N (tile display)
   const cad = useMemo(() => {
     const filtered = cadCapTier === 'all' ? cadAll : cadAll.filter(s => s.cap_tier === cadCapTier)
     return filtered.slice(0, TOP_N)
@@ -300,8 +302,8 @@ export default function App() {
 
   const cadBuys  = cad.filter(s => s.horizons?.[horizon]?.rating === 'BUY').length
   const usdBuys  = usd.filter(s => s.horizons?.[horizon]?.rating === 'BUY').length
-  const cadTotal = data?.cad?.length || 0
-  const usdTotal = data?.usd?.length || 0
+  const cadTotal = cadRaw.length
+  const usdTotal = usdRaw.length
   const isUltraLong = horizon === 'ultra_long'
 
   const dateStr = lastUpdated
@@ -453,8 +455,8 @@ export default function App() {
               textAlign: 'center', marginBottom: '10px',
             }}>🔍 Ticker Lookup — Search any CAD or USD stock</div>
             <TickerSearchBox
-              cadAll={cadAll}
-              usdAll={usdAll}
+              cadRaw={cadRaw}
+              usdRaw={usdRaw}
               cadSorted={cad}
               usdSorted={usd}
               horizon={horizon}
