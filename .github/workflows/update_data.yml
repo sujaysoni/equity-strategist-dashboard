@@ -22,20 +22,29 @@ on:
   repository_dispatch:
     types: [refresh-analysis]
   workflow_dispatch:          # manual trigger from GitHub UI or API
-  workflow_call:              # allows deploy.yml to call this as a sub-workflow
+  # NOTE: workflow_call intentionally removed.
+  # When workflow_call is listed alongside a schedule trigger, GitHub
+  # classifies the file as a reusable workflow and SILENTLY SUPPRESSES
+  # the cron scheduler entirely. Removing it restores normal scheduling.
+
+# -----------------------------------------------------------------------
+# Top-level permissions — MUST be at workflow level (not job level) for
+# the GITHUB_TOKEN to have contents:write so the push step works.
+# -----------------------------------------------------------------------
+permissions:
+  contents: write
 
 jobs:
   analyze:
     runs-on: ubuntu-22.04
     timeout-minutes: 360
-    permissions:
-      contents: write
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       # ------------------------------------------------------------------ #
       # DST dedup guard — skip if recommendations.json was already written
@@ -48,7 +57,6 @@ jobs:
         if: github.event_name == 'schedule'
         run: |
           if [ -f public/recommendations.json ]; then
-            # Extract generated_at from JSON (first 512 bytes is enough)
             GEN=$(head -c 512 public/recommendations.json | grep -oP '"generated_at"\s*:\s*"\K[^"]+' | head -1)
             if [ -n "$GEN" ]; then
               GEN_EPOCH=$(date -d "$GEN" +%s 2>/dev/null || echo 0)
@@ -91,7 +99,7 @@ jobs:
 
       # ------------------------------------------------------------------ #
       # Refresh ticker caches BEFORE analysis so the universe is current.
-      # fetch_nyse_tickers.py fetches BOTH NYSE and NASDAQ.
+      # continue-on-error: scraping failure must not abort the whole run.
       # ------------------------------------------------------------------ #
       - name: Refresh TSX / TSXV ticker cache
         if: steps.dedup.outputs.skip != 'true'
@@ -103,7 +111,6 @@ jobs:
         run: python backend/fetch_nyse_tickers.py
         continue-on-error: true
 
-      # Copy caches into public/tickers/ so the frontend can fetch them
       - name: Copy ticker caches to public/tickers/
         if: steps.dedup.outputs.skip != 'true'
         run: |
@@ -135,6 +142,7 @@ jobs:
           git add backend/tsx_tickers_cache.json || true
           git add backend/nyse_tickers_cache.txt  || true
           git add backend/nyse_tickers_cache.json || true
+          git add backend/nasdaq_tickers_cache.json || true
           if git diff --staged --quiet; then
             echo "No changes to commit."
           else
