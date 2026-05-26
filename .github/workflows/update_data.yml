@@ -2,14 +2,12 @@ name: Update Stock Recommendations
 
 on:
   schedule:
-    # Two cron slots so GitHub scheduler throttling can't miss both.
-    # GitHub runs crons in UTC; ET = UTC-4 in summer (EDT).
-    - cron: '0 13 * * 1-5'   # 09:00 AM EDT  — early buffer run
-    - cron: '0 14 * * 1-5'   # 10:00 AM EDT  — primary target
+    - cron: '0 13 * * 1-5'   # 09:00 AM EDT
+    - cron: '0 14 * * 1-5'   # 10:00 AM EDT
   repository_dispatch:
     types: [refresh-analysis]
-  workflow_dispatch:           # manual trigger from GitHub UI or API
-  workflow_call:               # allows deploy.yml to call this as a sub-workflow
+  workflow_dispatch:
+  workflow_call:
 
 jobs:
   analyze:
@@ -22,7 +20,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          # Fetch full history so the push step has a clean base
           fetch-depth: 0
 
       - name: Set up Python 3.11
@@ -44,10 +41,7 @@ jobs:
           python -c "import pandas;   print('pandas',   pandas.__version__)"
 
       # ------------------------------------------------------------------ #
-      # Refresh ticker caches BEFORE analysis so the universe is current.
-      # fetch_nyse_tickers.py fetches BOTH NYSE and NASDAQ tickers into
-      # nyse_tickers_cache.txt/json — so analyze_stocks.py sees all US stocks.
-      # continue-on-error: stale cache > no analysis.
+      # Refresh ticker caches (NYSE+NASDAQ together, TSX/TSXV separately)
       # ------------------------------------------------------------------ #
       - name: Refresh TSX / TSXV ticker cache
         run: python backend/fetch_tsx_tickers.py
@@ -56,6 +50,13 @@ jobs:
       - name: Refresh NYSE + NASDAQ ticker cache
         run: python backend/fetch_nyse_tickers.py
         continue-on-error: true
+
+      # Copy caches into public/tickers/ so the frontend can fetch them
+      - name: Copy ticker caches to public/tickers/
+        run: |
+          mkdir -p public/tickers
+          [ -f backend/tsx_tickers_cache.json ]  && cp backend/tsx_tickers_cache.json  public/tickers/tsx.json         || true
+          [ -f backend/nyse_tickers_cache.json ] && cp backend/nyse_tickers_cache.json public/tickers/nyse_nasdaq.json  || true
 
       # ------------------------------------------------------------------ #
       # Core analysis
@@ -67,23 +68,22 @@ jobs:
         run: python backend/analyze_stocks.py
 
       # ------------------------------------------------------------------ #
-      # Commit all outputs — push triggers deploy.yml automatically
+      # Commit all outputs
       # ------------------------------------------------------------------ #
       - name: Commit & push results
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name  "github-actions[bot]"
           git add public/recommendations.json
+          git add public/tickers/          || true
           git add backend/tsx_tickers_cache.txt    || true
           git add backend/tsx_tickers_cache.json   || true
           git add backend/nyse_tickers_cache.txt    || true
           git add backend/nyse_tickers_cache.json   || true
-          git add backend/nasdaq_tickers_cache.json || true
-          # Only commit if there are staged changes
           if git diff --staged --quiet; then
-            echo "No changes to commit — data unchanged since last run."
+            echo "No changes to commit."
           else
             git commit -m "chore: update recommendations $(date -u +'%Y-%m-%d %H:%M UTC')"
             git push
-            echo "Pushed — deploy.yml will rebuild the site automatically."
+            echo "Pushed — deploy.yml will rebuild the site."
           fi

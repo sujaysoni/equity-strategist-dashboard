@@ -15,15 +15,153 @@ const HORIZON_LABELS = {
   ultra_long:  'Ultra Long (0–360m)',
 }
 
-// Exchange → display label + colour hint
 const EXCHANGE_META = {
-  TSX:     { label: 'TSX',     color: 'var(--color-primary)' },
-  TSXV:    { label: 'TSXV',   color: 'var(--color-primary)' },
-  NYSE:    { label: 'NYSE',   color: 'var(--color-navy)'   },
-  NASDAQ:  { label: 'NASDAQ', color: 'var(--color-navy)'   },
-  'NYSE-MKT':  { label: 'NYSE-MKT',  color: 'var(--color-navy)' },
-  'NYSE-ARCA': { label: 'NYSE-ARCA', color: 'var(--color-navy)' },
+  TSX:         { label: 'TSX',      color: '#22c55e' },
+  TSXV:        { label: 'TSXV',     color: '#22c55e' },
+  NYSE:        { label: 'NYSE',     color: '#3b82f6' },
+  NASDAQ:      { label: 'NASDAQ',   color: '#3b82f6' },
+  'NYSE-MKT':  { label: 'NYSE-MKT', color: '#3b82f6' },
+  'NYSE-ARCA': { label: 'NYSE-ARCA',color: '#3b82f6' },
 }
+
+// ---------------------------------------------------------------------------
+// SEED_UNIVERSE — inline fallback so all known tickers are always searchable
+// even before any network fetch completes. Mirrors FUNDAMENTALS in analyze_stocks.py
+// Format: [ticker, name, exchange]
+// ---------------------------------------------------------------------------
+const SEED_UNIVERSE = [
+  // CAD — TSX
+  ['CNQ.TO','Canadian Natural Resources','TSX'],
+  ['SU.TO','Suncor Energy','TSX'],
+  ['CVE.TO','Cenovus Energy','TSX'],
+  ['ENB.TO','Enbridge Inc.','TSX'],
+  ['TRP.TO','TC Energy','TSX'],
+  ['PPL.TO','Pembina Pipeline','TSX'],
+  ['AEM.TO','Agnico Eagle Mines','TSX'],
+  ['ABX.TO','Barrick Gold','TSX'],
+  ['FNV.TO','Franco-Nevada','TSX'],
+  ['WPM.TO','Wheaton Precious Metals','TSX'],
+  ['BMO.TO','Bank of Montreal','TSX'],
+  ['BNS.TO','Bank of Nova Scotia','TSX'],
+  ['CM.TO','CIBC','TSX'],
+  ['NA.TO','National Bank','TSX'],
+  ['RY.TO','Royal Bank of Canada','TSX'],
+  ['TD.TO','Toronto-Dominion Bank','TSX'],
+  ['MFC.TO','Manulife Financial','TSX'],
+  ['SLF.TO','Sun Life Financial','TSX'],
+  ['FFH.TO','Fairfax Financial','TSX'],
+  ['GWO.TO','Great-West Lifeco','TSX'],
+  ['SHOP.TO','Shopify Inc.','TSX'],
+  ['CSU.TO','Constellation Software','TSX'],
+  ['CAE.TO','CAE Inc.','TSX'],
+  ['CGI.TO','CGI Inc.','TSX'],
+  ['OTEX.TO','Open Text','TSX'],
+  ['CP.TO','Canadian Pacific Kansas City','TSX'],
+  ['CNR.TO','Canadian National Railway','TSX'],
+  ['FTS.TO','Fortis Inc.','TSX'],
+  ['EMA.TO','Emera Inc.','TSX'],
+  ['CU.TO','Canadian Utilities','TSX'],
+  ['L.TO','Loblaw Companies','TSX'],
+  ['DOL.TO','Dollarama','TSX'],
+  ['ATD.TO','Alimentation Couche-Tard','TSX'],
+  ['MRU.TO','Metro Inc.','TSX'],
+  ['QSR.TO','Restaurant Brands Intl.','TSX'],
+  ['GFL.TO','GFL Environmental','TSX'],
+  ['WCN.TO','Waste Connections','TSX'],
+  ['STN.TO','Stantec','TSX'],
+  ['BAM.TO','Brookfield Asset Mgmt.','TSX'],
+  ['BN.TO','Brookfield Corp.','TSX'],
+  ['IFC.TO','Intact Financial','TSX'],
+  ['POW.TO','Power Corporation','TSX'],
+  ['NTR.TO','Nutrien Ltd.','TSX'],
+  ['AG.TO','First Majestic Silver','TSX'],
+  ['LUN.TO','Lundin Mining','TSX'],
+  ['X.TO','TMX Group','TSX'],
+  ['EQB.TO','EQB Inc.','TSX'],
+  ['IAG.TO','iA Financial','TSX'],
+  // USD — NASDAQ
+  ['AAPL','Apple Inc.','NASDAQ'],
+  ['MSFT','Microsoft Corp.','NASDAQ'],
+  ['NVDA','NVIDIA Corp.','NASDAQ'],
+  ['GOOGL','Alphabet Inc.','NASDAQ'],
+  ['AMZN','Amazon.com Inc.','NASDAQ'],
+  ['META','Meta Platforms','NASDAQ'],
+  ['TSLA','Tesla Inc.','NASDAQ'],
+  ['AVGO','Broadcom Inc.','NASDAQ'],
+  ['ISRG','Intuitive Surgical','NASDAQ'],
+  ['REGN','Regeneron','NASDAQ'],
+  ['VRTX','Vertex Pharma','NASDAQ'],
+  ['HON','Honeywell Intl.','NASDAQ'],
+  ['COST','Costco Wholesale','NASDAQ'],
+  ['PEP','PepsiCo Inc.','NASDAQ'],
+  ['BKNG','Booking Holdings','NASDAQ'],
+  ['DDOG','Datadog Inc.','NASDAQ'],
+  ['CRWD','CrowdStrike','NASDAQ'],
+  ['PANW','Palo Alto Networks','NASDAQ'],
+  ['ZS','Zscaler Inc.','NASDAQ'],
+  ['TEAM','Atlassian Corp.','NASDAQ'],
+  ['WDAY','Workday Inc.','NASDAQ'],
+  ['PLTR','Palantir Technologies','NASDAQ'],
+  ['MDB','MongoDB Inc.','NASDAQ'],
+  ['GTLB','GitLab Inc.','NASDAQ'],
+  ['AMD','Advanced Micro Devices','NASDAQ'],
+  ['QCOM','Qualcomm Inc.','NASDAQ'],
+  ['TXN','Texas Instruments','NASDAQ'],
+  ['AMAT','Applied Materials','NASDAQ'],
+  ['LRCX','Lam Research','NASDAQ'],
+  ['KLAC','KLA Corp.','NASDAQ'],
+  ['MU','Micron Technology','NASDAQ'],
+  ['MRVL','Marvell Technology','NASDAQ'],
+  ['ARM','Arm Holdings','NASDAQ'],
+  ['QQQ','Invesco QQQ ETF','NASDAQ'],
+  // USD — NYSE
+  ['ORCL','Oracle Corp.','NYSE'],
+  ['CRM','Salesforce Inc.','NYSE'],
+  ['JPM','JPMorgan Chase','NYSE'],
+  ['BAC','Bank of America','NYSE'],
+  ['GS','Goldman Sachs','NYSE'],
+  ['MS','Morgan Stanley','NYSE'],
+  ['WFC','Wells Fargo','NYSE'],
+  ['BLK','BlackRock Inc.','NYSE'],
+  ['V','Visa Inc.','NYSE'],
+  ['MA','Mastercard Inc.','NYSE'],
+  ['UNH','UnitedHealth Group','NYSE'],
+  ['LLY','Eli Lilly','NYSE'],
+  ['JNJ','Johnson & Johnson','NYSE'],
+  ['MRK','Merck & Co.','NYSE'],
+  ['ABBV','AbbVie Inc.','NYSE'],
+  ['TMO','Thermo Fisher','NYSE'],
+  ['CAT','Caterpillar Inc.','NYSE'],
+  ['GE','GE Aerospace','NYSE'],
+  ['RTX','RTX Corp.','NYSE'],
+  ['LMT','Lockheed Martin','NYSE'],
+  ['XOM','Exxon Mobil','NYSE'],
+  ['CVX','Chevron Corp.','NYSE'],
+  ['COP','ConocoPhillips','NYSE'],
+  ['EOG','EOG Resources','NYSE'],
+  ['WMT','Walmart Inc.','NYSE'],
+  ['HD','Home Depot','NYSE'],
+  ['MCD','McDonald\'s Corp.','NYSE'],
+  ['NKE','Nike Inc.','NYSE'],
+  ['TGT','Target Corp.','NYSE'],
+  ['NOW','ServiceNow','NYSE'],
+  ['SNOW','Snowflake Inc.','NYSE'],
+  ['NET','Cloudflare Inc.','NYSE'],
+  ['HUBS','HubSpot Inc.','NYSE'],
+  ['VEEV','Veeva Systems','NYSE'],
+  ['BRK-B','Berkshire Hathaway','NYSE'],
+  ['KO','Coca-Cola Co.','NYSE'],
+  ['PG','Procter & Gamble','NYSE'],
+  ['IBM','IBM Corp.','NYSE'],
+  ['O','Realty Income','NYSE'],
+  ['SPY','SPDR S&P 500 ETF','NYSE'],
+  ['IWM','iShares Russell 2000','NYSE'],
+  ['GLD','SPDR Gold Shares','NYSE'],
+  ['TLT','iShares 20+ Year Treasury','NYSE'],
+]
+
+// Build a Map for O(1) lookup: ticker -> { name, exchange }
+const SEED_MAP = new Map(SEED_UNIVERSE.map(([t, n, e]) => [t.toUpperCase(), { ticker: t, name: n, exchange: e, _seed: true }]))
 
 function sortByScore(stocks, horizon) {
   return [...stocks].sort((a, b) => {
@@ -43,9 +181,7 @@ function ScoreBar({ score, color }) {
     <div style={{ position: 'relative', height: '6px', borderRadius: '3px', background: 'var(--color-surface-offset)', overflow: 'hidden', flex: 1 }}>
       <div style={{
         position: 'absolute', left: 0, top: 0, bottom: 0,
-        width: `${pct}%`,
-        background: color,
-        borderRadius: '3px',
+        width: `${pct}%`, background: color, borderRadius: '3px',
         transition: 'width 600ms cubic-bezier(0.16,1,0.3,1)',
         boxShadow: `0 0 8px ${color}`,
       }} />
@@ -57,15 +193,10 @@ function ReasonBadge({ label, positive }) {
   return (
     <span style={{
       display: 'inline-flex', alignItems: 'center', gap: '4px',
-      padding: '3px 9px',
-      borderRadius: 'var(--radius-full)',
+      padding: '3px 9px', borderRadius: 'var(--radius-full)',
       fontSize: '0.68rem', fontWeight: 600, letterSpacing: '0.02em',
-      background: positive
-        ? 'color-mix(in oklch,var(--color-buy) 10%,transparent)'
-        : 'color-mix(in oklch,var(--color-sell) 10%,transparent)',
-      border: positive
-        ? '1px solid color-mix(in oklch,var(--color-buy) 25%,transparent)'
-        : '1px solid color-mix(in oklch,var(--color-sell) 25%,transparent)',
+      background: positive ? 'color-mix(in oklch,var(--color-buy) 10%,transparent)' : 'color-mix(in oklch,var(--color-sell) 10%,transparent)',
+      border: positive ? '1px solid color-mix(in oklch,var(--color-buy) 25%,transparent)' : '1px solid color-mix(in oklch,var(--color-sell) 25%,transparent)',
       color: positive ? 'var(--color-buy)' : 'var(--color-sell)',
     }}>
       {positive ? '✓' : '✗'} {label}
@@ -86,7 +217,6 @@ function buildReasoning(stock, horizon) {
   if (stock.fcf_yield != null && stock.div_yield != null) {
     reasons.push({ label: `FCF yield (${(stock.fcf_yield*100).toFixed(1)}%) ${stock.fcf_yield > stock.div_yield ? '>' : '≤'} Div yield (${(stock.div_yield*100).toFixed(1)}%)`, positive: stock.fcf_yield > stock.div_yield })
   }
-  if (stock.revenue_cagr_5y != null) reasons.push({ label: `5Y Revenue CAGR: ${(stock.revenue_cagr_5y*100).toFixed(1)}%`, positive: stock.revenue_cagr_5y > 0.05 })
   if (stock.above_50ma != null)  reasons.push({ label: stock.above_50ma  ? 'Price above 50-day MA'  : 'Price below 50-day MA',  positive: !!stock.above_50ma })
   if (stock.above_200ma != null) reasons.push({ label: stock.above_200ma ? 'Price above 200-day MA' : 'Price below 200-day MA', positive: !!stock.above_200ma })
   if (stock.rsi != null) {
@@ -101,23 +231,19 @@ function buildReasoning(stock, horizon) {
   return reasons
 }
 
-/* ── Exchange pill ── */
 function ExchangeBadge({ exchange }) {
-  const meta = EXCHANGE_META[exchange] || { label: exchange || '—', color: 'var(--color-text-faint)' }
+  const meta = EXCHANGE_META[exchange] || { label: exchange || '—', color: '#6b7280' }
   return (
     <span style={{
-      padding: '1px 7px',
-      borderRadius: 'var(--radius-full)',
+      padding: '1px 7px', borderRadius: 'var(--radius-full)',
       fontSize: '0.60rem', fontWeight: 700, letterSpacing: '0.06em',
-      background: `color-mix(in oklch, ${meta.color} 12%, transparent)`,
-      border: `1px solid color-mix(in oklch, ${meta.color} 28%, transparent)`,
-      color: meta.color,
-      whiteSpace: 'nowrap',
+      background: `${meta.color}1e`,
+      border: `1px solid ${meta.color}44`,
+      color: meta.color, whiteSpace: 'nowrap',
     }}>{meta.label}</span>
   )
 }
 
-/* ── Portal dropdown ── */
 function SuggestionsPortal({ anchorRef, suggestions, horizon, onSelect }) {
   const [rect, setRect] = useState(null)
   useEffect(() => {
@@ -155,7 +281,8 @@ function SuggestionsPortal({ anchorRef, suggestions, horizon, onSelect }) {
             style={{
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
               width: '100%', padding: '10px 14px',
-              background: 'transparent', border: 'none', borderBottom: '1px solid var(--color-divider)',
+              background: 'transparent', border: 'none',
+              borderBottom: '1px solid var(--color-divider)',
               cursor: 'pointer', textAlign: 'left', transition: 'background 120ms',
             }}
             onMouseEnter={e => e.currentTarget.style.background = 'var(--color-surface-offset)'}
@@ -167,7 +294,10 @@ function SuggestionsPortal({ anchorRef, suggestions, horizon, onSelect }) {
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               {exch && <ExchangeBadge exchange={exch} />}
-              {rc && <span style={{ padding: '2px 8px', borderRadius: 'var(--radius-full)', fontSize: '0.65rem', fontWeight: 700, background: rc.bg, border: `1px solid ${rc.border}`, color: rc.text }}>{sh.rating}</span>}
+              {rc
+                ? <span style={{ padding: '2px 8px', borderRadius: 'var(--radius-full)', fontSize: '0.65rem', fontWeight: 700, background: rc.bg, border: `1px solid ${rc.border}`, color: rc.text }}>{sh.rating}</span>
+                : <span style={{ padding: '2px 8px', borderRadius: 'var(--radius-full)', fontSize: '0.60rem', color: 'var(--color-text-faint)', border: '1px solid var(--color-border)' }}>catalogue</span>
+              }
             </div>
           </button>
         )
@@ -177,7 +307,6 @@ function SuggestionsPortal({ anchorRef, suggestions, horizon, onSelect }) {
   )
 }
 
-/* ── Result modal ── */
 function ResultModal({ result, h, ratingStyle, reasons, horizon, onClose }) {
   useEffect(() => {
     const handler = (e) => { if (e.key === 'Escape') onClose() }
@@ -207,13 +336,13 @@ function ResultModal({ result, h, ratingStyle, reasons, horizon, onClose }) {
           position: 'absolute', top: '12px', right: '14px',
           background: 'transparent', border: 'none', cursor: 'pointer',
           color: 'var(--color-text-faint)', fontSize: '1.1rem', lineHeight: 1,
-          padding: '4px 6px', borderRadius: 'var(--radius-md)', transition: 'color 150ms, background 150ms', zIndex: 1,
+          padding: '4px 6px', borderRadius: 'var(--radius-md)',
+          transition: 'color 150ms, background 150ms', zIndex: 1,
         }}
           onMouseEnter={e => { e.currentTarget.style.color = 'var(--color-text)'; e.currentTarget.style.background = 'var(--color-surface-offset)' }}
           onMouseLeave={e => { e.currentTarget.style.color = 'var(--color-text-faint)'; e.currentTarget.style.background = 'transparent' }}
           title="Close (Esc)">✕</button>
 
-        {/* Header */}
         <div style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           flexWrap: 'wrap', gap: '10px', padding: '16px 48px 16px 18px',
@@ -231,7 +360,6 @@ function ResultModal({ result, h, ratingStyle, reasons, horizon, onClose }) {
           )}
         </div>
 
-        {/* Rank row */}
         <div style={{ display: 'flex', flexWrap: 'wrap', borderBottom: '1px solid var(--color-divider)' }}>
           {[
             { label: 'Overall Rank', value: `#${result.globalRank}`, sub: `of all ${result.isCad ? 'CAD' : 'USD'} stocks` },
@@ -247,7 +375,6 @@ function ResultModal({ result, h, ratingStyle, reasons, horizon, onClose }) {
           ))}
         </div>
 
-        {/* Score bar */}
         {h.score != null && (
           <div style={{ padding: '12px 18px 8px', borderBottom: '1px solid var(--color-divider)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -258,7 +385,6 @@ function ResultModal({ result, h, ratingStyle, reasons, horizon, onClose }) {
           </div>
         )}
 
-        {/* Horizon grid */}
         {result.stock.horizons && (
           <div style={{ display: 'flex', flexWrap: 'wrap', padding: '10px 18px', borderBottom: '1px solid var(--color-divider)', background: 'color-mix(in oklch,var(--color-surface-offset) 50%,transparent)' }}>
             {Object.entries(HORIZON_LABELS).map(([hKey, hLabel]) => {
@@ -277,7 +403,6 @@ function ResultModal({ result, h, ratingStyle, reasons, horizon, onClose }) {
           </div>
         )}
 
-        {/* Reasoning */}
         <div style={{ padding: '14px 18px 18px' }}>
           <div style={{ fontSize: '0.65rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--color-text-faint)', marginBottom: '8px' }}>Why this rating?</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
@@ -295,14 +420,14 @@ function ResultModal({ result, h, ratingStyle, reasons, horizon, onClose }) {
   )
 }
 
-// ── Load supplemental ticker universe from cache JSON files ────────────────
-// These cover ALL tickers on TSX/TSXV/NYSE/NASDAQ — not just those already
-// analysed in recommendations.json.  We fetch at mount and merge in.
-async function loadSupplementalUniverse(base) {
+// ── Supplemental fetch — loads full exchange universe from public/tickers/ ──
+// These are larger JSON files copied from backend/ by the CI workflow.
+// If they 404 (first deploy / CI not yet run), the SEED_UNIVERSE above covers
+// all known tickers so search still works immediately.
+async function loadSupplementalUniverse(baseUrl) {
   const files = [
-    { url: `${base}../backend/tsx_tickers_cache.json`,    isCad: true  },
-    { url: `${base}../backend/nyse_tickers_cache.json`,   isCad: false },
-    { url: `${base}../backend/nasdaq_tickers_cache.json`, isCad: false },
+    { url: `${baseUrl}tickers/tsx.json`,           isCad: true  },
+    { url: `${baseUrl}tickers/nyse_nasdaq.json`,   isCad: false },
   ]
   const all = []
   for (const { url, isCad } of files) {
@@ -310,117 +435,135 @@ async function loadSupplementalUniverse(base) {
       const res = await fetch(url)
       if (!res.ok) continue
       const json = await res.json()
-      const rows = json.tickers || []
+      const rows = Array.isArray(json.tickers) ? json.tickers : []
       for (const row of rows) {
-        if (row.ticker) {
-          all.push({
-            ticker:    row.ticker,
-            name:      row.name || '',
-            exchange:  row.exchange || (isCad ? 'TSX' : 'NYSE'),
-            _isCadSup: isCad,
-            _supplemental: true,
-          })
-        }
+        if (row.ticker) all.push({
+          ticker:   row.ticker,
+          name:     row.name     || '',
+          exchange: row.exchange || (isCad ? 'TSX' : 'NYSE'),
+          _sup: true,
+        })
       }
-    } catch {}
+    } catch { /* network unavailable — seed fallback covers us */ }
   }
   return all
 }
 
-// TickerSearchBox now accepts cadRaw/usdRaw (full unsorted universe from reco.json)
 export default function TickerSearchBox({ cadRaw, usdRaw, cadSorted, usdSorted, horizon }) {
   const [query,     setQuery]     = useState('')
   const [result,    setResult]    = useState(null)
   const [focused,   setFocused]   = useState(false)
   const [notFound,  setNotFound]  = useState(false)
   const [modalOpen, setModalOpen] = useState(false)
-  // Supplemental universe from cache JSON files (TSX/TSXV/NYSE/NASDAQ)
-  const [supUniverse, setSupUniverse] = useState([])
+  const [supRows,   setSupRows]   = useState([])   // loaded async from public/tickers/
   const inputRef   = useRef(null)
   const wrapperRef = useRef(null)
 
-  // Load supplemental universe once on mount
+  // Load supplemental universe once on mount (best-effort; seed covers fallback)
   useEffect(() => {
     const base = (typeof import.meta !== 'undefined' && import.meta.env?.BASE_URL) || '/'
-    loadSupplementalUniverse(base).then(rows => setSupUniverse(rows))
+    loadSupplementalUniverse(base).then(rows => setSupRows(rows))
   }, [])
 
-  // Full universe sorted by score for rank lookup — independent of tile sort direction
-  const cadAllSorted = useMemo(() => sortByScore(cadRaw, horizon), [cadRaw, horizon])
-  const usdAllSorted = useMemo(() => sortByScore(usdRaw, horizon), [usdRaw, horizon])
-
-  // Analysed stocks (from recommendations.json) tagged with _market
+  // Full analysed universe (from recommendations.json) — tagged with exchange
   const analysedCombined = useMemo(() => [
-    ...cadRaw.map(s => ({ ...s, _market: s.exchange || 'CAD' })),
-    ...usdRaw.map(s => ({ ...s, _market: s.exchange || 'USD' })),
+    ...cadRaw.map(s => ({ ...s, _market: s.exchange || 'TSX'    })),
+    ...usdRaw.map(s => ({ ...s, _market: s.exchange || 'NYSE'   })),
   ], [cadRaw, usdRaw])
 
-  // Build a Set of tickers already in recommendations so we don't duplicate in suggestions
-  const analysedTickers = useMemo(() => new Set(analysedCombined.map(s => s.ticker?.toUpperCase())), [analysedCombined])
+  // Set of tickers already analysed (for dedup)
+  const analysedSet = useMemo(
+    () => new Set(analysedCombined.map(s => s.ticker?.toUpperCase())),
+    [analysedCombined]
+  )
 
-  // Supplemental rows not yet in recommendations (pure lookup / not-yet-analysed)
-  const supOnly = useMemo(() =>
-    supUniverse.filter(s => !analysedTickers.has(s.ticker?.toUpperCase())),
-  [supUniverse, analysedTickers])
+  // Build full search pool:
+  //   1. Analysed stocks (have ratings/scores)
+  //   2. Seed universe (inline, always available, filtered to non-analysed)
+  //   3. Supplemental rows from public/tickers/ (filtered to non-analysed)
+  const searchPool = useMemo(() => {
+    const seedOnly = SEED_UNIVERSE
+      .filter(([t]) => !analysedSet.has(t.toUpperCase()))
+      .map(([t, n, e]) => ({ ticker: t, name: n, exchange: e, _seed: true }))
 
-  // Full search pool: analysed first, then supplemental (catalogue-only)
-  const searchPool = useMemo(() => [...analysedCombined, ...supOnly], [analysedCombined, supOnly])
+    const supOnly = supRows
+      .filter(r => !analysedSet.has(r.ticker?.toUpperCase()) && !SEED_MAP.has(r.ticker?.toUpperCase()))
+
+    return [...analysedCombined, ...seedOnly, ...supOnly]
+  }, [analysedCombined, analysedSet, supRows])
 
   const totalCount = useMemo(() => {
-    // Unique ticker count across analysed + supplemental
     const seen = new Set()
     for (const s of searchPool) if (s.ticker) seen.add(s.ticker.toUpperCase())
     return seen.size
   }, [searchPool])
 
+  // Sort analysed lists by score for rank computation
+  const cadAllSorted = useMemo(() => sortByScore(cadRaw, horizon), [cadRaw, horizon])
+  const usdAllSorted = useMemo(() => sortByScore(usdRaw, horizon), [usdRaw, horizon])
+
+  // Autocomplete suggestions
   const suggestions = useMemo(() => {
     const q = query.trim().toUpperCase()
     if (!q) return []
-    const startsWith = searchPool.filter(s => s.ticker?.toUpperCase().startsWith(q))
-    const nameMatch  = searchPool.filter(s =>
-      !s.ticker?.toUpperCase().startsWith(q) &&
-      s.name?.toUpperCase().includes(q)
+    const starts = searchPool.filter(s => s.ticker?.toUpperCase().startsWith(q))
+    const names  = searchPool.filter(s =>
+      !s.ticker?.toUpperCase().startsWith(q) && s.name?.toUpperCase().includes(q)
     )
-    return [...startsWith, ...nameMatch].slice(0, 12)
+    return [...starts, ...names].slice(0, 12)
   }, [query, searchPool])
 
   const handleSearch = useCallback((ticker) => {
     const q = (ticker || query).trim().toUpperCase()
     if (!q) return
 
+    // 1. Check analysed lists first (have full ratings + scores)
     const cadIdx = cadAllSorted.findIndex(s => s.ticker?.toUpperCase() === q)
     const usdIdx = usdAllSorted.findIndex(s => s.ticker?.toUpperCase() === q)
 
-    if (cadIdx === -1 && usdIdx === -1) {
-      // Check supplemental — show catalogue entry (no analysis data yet)
-      const supMatch = supUniverse.find(s => s.ticker?.toUpperCase() === q)
-      if (supMatch) {
-        setResult(null); setNotFound(false); setModalOpen(false)
-        // Show not-found with helpful message about exchange
-        setNotFound(true)
-        return
-      }
-      setResult(null); setNotFound(true); setModalOpen(false)
+    if (cadIdx !== -1 || usdIdx !== -1) {
+      setNotFound(false)
+      const isCad     = cadIdx !== -1
+      const stock     = isCad ? cadAllSorted[cadIdx] : usdAllSorted[usdIdx]
+      const globalRank = isCad ? cadIdx + 1 : usdIdx + 1
+      const market    = isCad ? 'CAD 🍁' : 'USD 🦅'
+      const tierList  = isCad
+        ? cadAllSorted.filter(s => s.cap_tier === stock.cap_tier)
+        : usdAllSorted.filter(s => s.cap_tier === stock.cap_tier)
+      const tierRank  = tierList.findIndex(s => s.ticker === stock.ticker) + 1
+      const visibleList = isCad ? cadSorted : usdSorted
+      const inTop30   = visibleList.some(s => s.ticker === stock.ticker)
+      setResult({ stock, market, globalRank, tierRank, inTop30, isCad })
+      setModalOpen(true)
       return
     }
 
-    setNotFound(false)
-    const isCad     = cadIdx !== -1
-    const stock     = isCad ? cadAllSorted[cadIdx] : usdAllSorted[usdIdx]
-    const globalRank = isCad ? cadIdx + 1 : usdIdx + 1
-    const market    = isCad ? 'CAD 🍁' : 'USD 🦅'
+    // 2. Not yet analysed — check seed + supplemental catalogue
+    const seedHit = SEED_MAP.get(q)
+    const supHit  = supRows.find(r => r.ticker?.toUpperCase() === q)
+    const hit     = seedHit || supHit
 
-    const tierList  = isCad
-      ? cadAllSorted.filter(s => s.cap_tier === stock.cap_tier)
-      : usdAllSorted.filter(s => s.cap_tier === stock.cap_tier)
-    const tierRank  = tierList.findIndex(s => s.ticker === stock.ticker) + 1
+    if (hit) {
+      // Found in catalogue but no analysis data yet — show a lightweight info card
+      setNotFound(false)
+      setResult({
+        stock:      { ticker: hit.ticker, name: hit.name, exchange: hit.exchange },
+        market:     (hit.exchange === 'TSX' || hit.exchange === 'TSXV') ? 'CAD 🍁' : 'USD 🦅',
+        globalRank: '—',
+        tierRank:   '—',
+        inTop30:    false,
+        isCad:      hit.exchange === 'TSX' || hit.exchange === 'TSXV',
+        _catalogueOnly: true,
+      })
+      setModalOpen(true)
+      return
+    }
 
-    const visibleList = isCad ? cadSorted : usdSorted
-    const inTop30   = visibleList.some(s => s.ticker === stock.ticker)
-
-    setResult({ stock, market, globalRank, tierRank, inTop30, isCad })
-    setModalOpen(true)
-  }, [query, cadAllSorted, usdAllSorted, cadSorted, usdSorted, supUniverse])
+    // 3. Truly not found
+    setResult(null)
+    setNotFound(true)
+    setModalOpen(false)
+  }, [query, cadAllSorted, usdAllSorted, cadSorted, usdSorted, supRows])
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter')  handleSearch()
@@ -437,14 +580,8 @@ export default function TickerSearchBox({ cadRaw, usdRaw, cadSorted, usdSorted, 
 
   const h           = result?.stock?.horizons?.[horizon]
   const ratingStyle = h?.rating ? RATING_COLORS[h.rating] : null
-  const reasons     = result ? buildReasoning(result.stock, horizon) : []
-  const showSuggestions = focused && suggestions.length > 0 && !result
-
-  // Counts for hint line
-  const cadAnalysed = cadRaw.length
-  const usdAnalysed = usdRaw.length
-  const supCadCount = supOnly.filter(s => s._isCadSup).length
-  const supUsdCount = supOnly.filter(s => !s._isCadSup).length
+  const reasons     = (result && !result._catalogueOnly) ? buildReasoning(result.stock, horizon) : []
+  const showSuggestions = focused && suggestions.length > 0
 
   return (
     <div ref={wrapperRef} style={{ maxWidth: '720px', margin: '0 auto 32px', position: 'relative' }}>
@@ -462,9 +599,12 @@ export default function TickerSearchBox({ cadRaw, usdRaw, cadSorted, usdSorted, 
         <input
           ref={inputRef}
           type="text"
-          placeholder="Search TSX, TSXV, NYSE or NASDAQ… e.g. NVDA, AAPL, RY.TO, Shopify"
+          placeholder="Search TSX · TSXV · NYSE · NASDAQ — e.g. NVDA, AAPL, MSFT, RY.TO"
           value={query}
-          onChange={e => { setQuery(e.target.value.toUpperCase()); setResult(null); setNotFound(false); setModalOpen(false) }}
+          onChange={e => {
+            setQuery(e.target.value.toUpperCase())
+            setResult(null); setNotFound(false); setModalOpen(false)
+          }}
           onKeyDown={handleKeyDown}
           onFocus={() => setFocused(true)}
           onBlur={() => setTimeout(() => setFocused(false), 160)}
@@ -477,59 +617,109 @@ export default function TickerSearchBox({ cadRaw, usdRaw, cadSorted, usdSorted, 
           }}
         />
         {query && (
-          <button onClick={() => { setQuery(''); setResult(null); setNotFound(false); setModalOpen(false) }}
+          <button
+            onClick={() => { setQuery(''); setResult(null); setNotFound(false); setModalOpen(false) }}
             style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--color-text-faint)', fontSize: '1rem', lineHeight: 1, padding: '0 2px' }}
             title="Clear">✕</button>
         )}
-        <button onClick={() => handleSearch()}
+        <button
+          onClick={() => handleSearch()}
           style={{
             padding: '5px 16px', borderRadius: 'var(--radius-full)', border: 'none',
             background: 'var(--color-primary)', color: '#fff',
-            fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.04em', cursor: 'pointer',
-            transition: 'opacity 160ms', whiteSpace: 'nowrap',
+            fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.04em',
+            cursor: 'pointer', transition: 'opacity 160ms', whiteSpace: 'nowrap',
           }}
           onMouseEnter={e => e.currentTarget.style.opacity = '0.85'}
           onMouseLeave={e => e.currentTarget.style.opacity = '1'}
         >Look up</button>
       </div>
 
-      {/* Universe count hint */}
-      {!query && (
-        <div style={{ textAlign: 'center', marginTop: '6px', fontSize: '0.68rem', color: 'var(--color-text-faint)', display: 'flex', justifyContent: 'center', gap: '10px', flexWrap: 'wrap' }}>
-          <span>🔎 Searching across <strong style={{ color: 'var(--color-text-muted)' }}>{totalCount.toLocaleString()}</strong> tickers —</span>
-          <span style={{ color: 'var(--color-primary)' }}>TSX · TSXV</span>
-          <span style={{ color: 'var(--color-text-faint)' }}>·</span>
-          <span style={{ color: 'var(--color-navy)' }}>NYSE · NASDAQ</span>
-          {(cadAnalysed + usdAnalysed) > 0 && (
-            <span style={{ color: 'var(--color-text-faint)', fontSize: '0.64rem' }}>
-              ({cadAnalysed} CAD + {usdAnalysed} USD analysed
-              {(supCadCount + supUsdCount) > 0 ? ` · ${supCadCount + supUsdCount} catalogue-only` : ''})
-            </span>
-          )}
-        </div>
-      )}
+      {/* Hint line */}
+      <div style={{
+        textAlign: 'center', marginTop: '6px', fontSize: '0.68rem',
+        color: 'var(--color-text-faint)',
+        display: 'flex', justifyContent: 'center', alignItems: 'center',
+        gap: '8px', flexWrap: 'wrap',
+      }}>
+        <span>🔎 <strong style={{ color: 'var(--color-text-muted)' }}>{totalCount.toLocaleString()}</strong> tickers across</span>
+        <span style={{ color: '#22c55e', fontWeight: 600 }}>TSX · TSXV</span>
+        <span>+</span>
+        <span style={{ color: '#3b82f6', fontWeight: 600 }}>NYSE · NASDAQ</span>
+        {cadRaw.length + usdRaw.length > 0 && (
+          <span style={{ fontSize: '0.62rem', color: 'var(--color-text-faint)' }}>
+            · {cadRaw.length + usdRaw.length} analysed with ratings
+          </span>
+        )}
+      </div>
 
-      {/* Autocomplete portal */}
+      {/* Autocomplete */}
       {showSuggestions && (
-        <SuggestionsPortal anchorRef={wrapperRef} suggestions={suggestions} horizon={horizon} onSelect={handleSuggestionClick} />
+        <SuggestionsPortal
+          anchorRef={wrapperRef}
+          suggestions={suggestions}
+          horizon={horizon}
+          onSelect={handleSuggestionClick}
+        />
       )}
 
       {/* Not found */}
       {notFound && (
         <div className="fade-in" style={{
           marginTop: '10px', padding: '14px 18px',
-          borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)',
-          background: 'var(--color-surface)', color: 'var(--color-text-muted)', fontSize: '0.82rem',
+          borderRadius: 'var(--radius-lg)',
+          border: '1px solid var(--color-border)',
+          background: 'var(--color-surface)',
+          color: 'var(--color-text-muted)', fontSize: '0.82rem',
           display: 'flex', alignItems: 'center', gap: '8px',
         }}>
-          <span>🔎</span>
-          <span><strong style={{ color: 'var(--color-text)', fontFamily: 'var(--font-mono)' }}>{query}</strong> was not found across TSX, TSXV, NYSE, or NASDAQ ({totalCount.toLocaleString()} tickers tracked). It may not be listed — try a different symbol or trigger a refresh.</span>
+          <span>🔍</span>
+          <span>
+            <strong style={{ color: 'var(--color-text)', fontFamily: 'var(--font-mono)' }}>{query}</strong>
+            {' '}not found across TSX, TSXV, NYSE, or NASDAQ ({totalCount.toLocaleString()} tickers tracked). Check the symbol or trigger a data refresh.
+          </span>
         </div>
       )}
 
-      {/* Result modal portal */}
-      {modalOpen && result && h && (
-        <ResultModal result={result} h={h} ratingStyle={ratingStyle} reasons={reasons} horizon={horizon} onClose={closeModal} />
+      {/* Catalogue-only info card (found in seed/sup but not yet analysed) */}
+      {modalOpen && result?._catalogueOnly && (
+        createPortal(
+          <>
+            <div onClick={closeModal} style={{ position: 'fixed', inset: 0, zIndex: 99998, background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(4px)', animation: 'fadeIn 0.18s ease' }} />
+            <div style={{
+              position: 'fixed', top: '50%', left: '50%',
+              transform: 'translate(-50%,-50%)',
+              zIndex: 99999, width: 'min(480px,94vw)',
+              borderRadius: 'var(--radius-xl)',
+              border: '1px solid var(--color-border)',
+              background: 'var(--color-surface)',
+              boxShadow: '0 32px 80px rgba(0,0,0,0.6)',
+              animation: 'slideUp 0.22s cubic-bezier(0.16,1,0.3,1)',
+              padding: '24px',
+            }}>
+              <button onClick={closeModal} style={{ position: 'absolute', top: '12px', right: '14px', background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--color-text-faint)', fontSize: '1.1rem' }} title="Close">✕</button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+                <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 800, fontSize: '1.3rem', color: 'var(--color-primary)' }}>{result.stock.ticker}</span>
+                {result.stock.name && <span style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>{result.stock.name}</span>}
+                {result.stock.exchange && <ExchangeBadge exchange={result.stock.exchange} />}
+              </div>
+              <div style={{ padding: '12px 14px', borderRadius: 'var(--radius-md)', background: 'color-mix(in oklch,var(--color-primary) 8%,transparent)', border: '1px solid color-mix(in oklch,var(--color-primary) 20%,transparent)', fontSize: '0.82rem', color: 'var(--color-text-muted)', lineHeight: 1.7 }}>
+                📋 <strong style={{ color: 'var(--color-primary)' }}>{result.stock.ticker}</strong> is listed on <strong>{result.stock.exchange}</strong> and tracked in the universe, but hasn't been scored in the latest analysis run yet.<br/><br/>
+                💡 Trigger a <strong>manual refresh</strong> from the top-right button to include it in the next analysis cycle.
+              </div>
+            </div>
+          </>,
+          document.body
+        )
+      )}
+
+      {/* Full result modal (analysed stock) */}
+      {modalOpen && result && !result._catalogueOnly && h && (
+        <ResultModal
+          result={result} h={h}
+          ratingStyle={ratingStyle} reasons={reasons}
+          horizon={horizon} onClose={closeModal}
+        />
       )}
     </div>
   )
