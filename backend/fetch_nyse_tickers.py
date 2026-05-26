@@ -1,24 +1,19 @@
 #!/usr/bin/env python3
 """
-fetch_nyse_tickers.py  (v1)
+fetch_nyse_tickers.py  (v2)
 
-Fetches all NYSE-listed company tickers from the SEC EDGAR full-text
-company-search API and writes:
-  backend/nyse_tickers_cache.txt   – one yfinance ticker per line
-  backend/nyse_tickers_cache.json  – structured [{ticker, name, cik, sic_desc}]
+Fetches all NYSE + NASDAQ listed common stock tickers and writes:
+  backend/nyse_tickers_cache.txt   - one yfinance ticker per line
+  backend/nyse_tickers_cache.json  - structured [{ticker, name, exchange, sector}]
 
-Data source: SEC EDGAR  https://efts.sec.gov/LATEST/search-index?q=%22%22&dateRange=custom
-Exchange filter: uses the EDGAR company-search endpoint which returns the
-exchange field.  We page through all results filtering on exchange="NYSE".
-
-Fallback: if the EDGAR API is unreachable (GitHub Actions IP block), the
-script falls back to fetching the Nasdaq trader FTP file which lists all
-US-exchange securities and then filters for exchange=N (NYSE).
+Data sources:
+  Primary  : Nasdaq Trader FTP files
+             - nasdaqlisted.txt  -> NASDAQ stocks (exchange code Q)
+             - otherlisted.txt   -> NYSE/AMEX/ARCA stocks (exchange code N, A, P)
+  Fallback : SEC EDGAR company_tickers_exchange.json
 
 Usage:
     python backend/fetch_nyse_tickers.py
-
-Outputs are read by analyze_stocks.py at runtime (same pattern as TSX).
 """
 
 import time
@@ -28,40 +23,20 @@ import os
 import sys
 from datetime import datetime, timezone
 
-# ---------------------------------------------------------------------------
-# Paths
-# ---------------------------------------------------------------------------
 BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
 TXT_CACHE   = os.path.join(BACKEND_DIR, "nyse_tickers_cache.txt")
 JSON_CACHE  = os.path.join(BACKEND_DIR, "nyse_tickers_cache.json")
 
-# ---------------------------------------------------------------------------
-# Source 1: Nasdaq Trader FTP  (primary – most reliable from CI)
-# Lists ALL US-exchange securities; we filter by exchange code.
-# ---------------------------------------------------------------------------
-NASDAQ_TRADER_URL = (
-    "https://ftp.nasdaqtrader.com/dynamic/SymDir/otherlisted.txt"
-)
-# NYSE exchange code in this file is "N"
-NYSE_EXCHANGE_CODE = "N"
-
-# ---------------------------------------------------------------------------
-# Source 2: SEC EDGAR full-text company search (fallback / enrichment)
-# Returns JSON with cik, entityName, exchanges, tickers.
-# ---------------------------------------------------------------------------
-EDGAR_COMPANY_URL  = "https://efts.sec.gov/LATEST/search-index?q=%22%22&entity=&dateRange=custom&startdt=&enddt=&forms="
+# Nasdaq Trader FTP URLs
+NASDAQ_LISTED_URL  = "https://ftp.nasdaqtrader.com/dynamic/SymDir/nasdaqlisted.txt"
+OTHER_LISTED_URL   = "https://ftp.nasdaqtrader.com/dynamic/SymDir/otherlisted.txt"
 EDGAR_TICKERS_URL  = "https://www.sec.gov/files/company_tickers_exchange.json"
 
-# ---------------------------------------------------------------------------
-# Filters
-# ---------------------------------------------------------------------------
-# Exclude these product types that aren't common stocks
-EXCLUDE_SUFFIXES = (
-    # Warrants, rights, units, preferreds (common naming conventions)
-    " WS", "+", "$", " RT", " WT", " UN", " WI",
-    ".WS", ".RT", ".WT", ".UN",
-)
-# Tickers longer than 5 chars are usually ETFs, CEFs, or structured products
+# Exchange codes to include
+# nasdaqlisted.txt: all rows are NASDAQ (no exchange column needed)
+# otherlisted.txt:  N=NYSE, A=AMEX/NYSE-MKT, P=NYSE-ARCA
+OTHER_EXCHANGE_CODES = {"N", "A", "P"}
+
 MAX_TICKER_LEN = 5
 
 HEADERS = {
@@ -70,70 +45,122 @@ HEADERS = {
 }
 
 
-def fetch_via_nasdaq_trader() -> list:
+def fetch_nasdaq_listed() -> list:
     """
-    Primary method: Nasdaq Trader 'otherlisted.txt' file.
+    Fetch nasdaqlisted.txt — all NASDAQ-listed securities.
     Columns (pipe-delimited):
-      ACT Symbol | Security Name | Exchange | CQS Symbol | ETF | Round Lot Size | Test Issue | NASDAQ Symbol
-    Exchange codes: A=AMEX/NYSE-MKT, N=NYSE, P=NYSE-ARCA, Z=BATS, V=IEX
-    We want Exchange == N.
+      Symbol | Security Name | Market Category | Test Issue | Financial Status | Round Lot Size | ETF | NextShares
     """
-    print("  [nasdaq-trader] Fetching otherlisted.txt ...", flush=True)
+    print("  [nasdaq-listed] Fetching nasdaqlisted.txt ...", flush=True)
     try:
-        resp = requests.get(NASDAQ_TRADER_URL, headers=HEADERS, timeout=30)
+        resp = requests.get(NASDAQ_LISTED_URL, headers=HEADERS, timeout=30)
         resp.raise_for_status()
     except Exception as e:
-        print(f"  [nasdaq-trader] FAILED: {e}")
+        print(f"  [nasdaq-listed] FAILED: {e}")
         return []
 
     lines   = resp.text.splitlines()
     results = []
     seen    = set()
 
-    for line in lines[1:]:   # skip header
+    for line in lines[1:]:  # skip header
         if line.startswith("File Creation Time"):
             break
         parts = line.split("|")
         if len(parts) < 8:
             continue
 
-        ticker   = parts[0].strip()
-        name     = parts[1].strip()
-        exchange = parts[2].strip()
-        is_etf   = parts[4].strip()   # "Y" or "N"
+        ticker      = parts[0].strip()
+        name        = parts[1].strip()
+        test_issue  = parts[3].strip()   # Y = test issue
+        fin_status  = parts[4].strip()   # D = deficient, E = delinquent, Q = bankrupt, N = normal
+        is_etf      = parts[6].strip()   # Y or N
 
-        if exchange != NYSE_EXCHANGE_CODE:
+        if test_issue == "Y":
             continue
         if is_etf == "Y":
             continue
         if not ticker or len(ticker) > MAX_TICKER_LEN:
             continue
-        # Skip warrants, preferreds, rights, units
-        if any(ticker.endswith(sfx) for sfx in ("W", "R", "U")) and len(ticker) > 4:
-            continue
-        # Skip test issues
-        if parts[6].strip() == "Y":
+        # Skip warrants/rights/units by common suffix patterns
+        if ticker.endswith(("W", "R", "U")) and len(ticker) > 4:
             continue
 
-        yf_sym = ticker  # NYSE tickers need no suffix in yfinance
-        if yf_sym not in seen:
-            seen.add(yf_sym)
+        if ticker not in seen:
+            seen.add(ticker)
             results.append({
-                "ticker":   yf_sym,
+                "ticker":   ticker,
                 "name":     name,
-                "exchange": "NYSE",
+                "exchange": "NASDAQ",
                 "sector":   "",
             })
 
-    print(f"  [nasdaq-trader] {len(results)} NYSE common stocks found.", flush=True)
+    print(f"  [nasdaq-listed] {len(results)} NASDAQ common stocks found.", flush=True)
     return results
 
 
-def fetch_via_edgar_exchange_json() -> list:
+def fetch_other_listed() -> list:
     """
-    Fallback method: SEC EDGAR company_tickers_exchange.json.
-    Contains {0: {cik, name, ticker, exchange}, 1: ...}.
-    Filter on exchange == "NYSE".
+    Fetch otherlisted.txt — NYSE, AMEX, ARCA and other exchange securities.
+    Columns (pipe-delimited):
+      ACT Symbol | Security Name | Exchange | CQS Symbol | ETF | Round Lot Size | Test Issue | NASDAQ Symbol
+    Exchange codes: A=AMEX/NYSE-MKT, N=NYSE, P=NYSE-ARCA, Z=BATS, V=IEX
+    """
+    print("  [other-listed] Fetching otherlisted.txt ...", flush=True)
+    try:
+        resp = requests.get(OTHER_LISTED_URL, headers=HEADERS, timeout=30)
+        resp.raise_for_status()
+    except Exception as e:
+        print(f"  [other-listed] FAILED: {e}")
+        return []
+
+    lines   = resp.text.splitlines()
+    results = []
+    seen    = set()
+
+    exchange_map = {"N": "NYSE", "A": "NYSE-MKT", "P": "NYSE-ARCA"}
+
+    for line in lines[1:]:  # skip header
+        if line.startswith("File Creation Time"):
+            break
+        parts = line.split("|")
+        if len(parts) < 8:
+            continue
+
+        ticker     = parts[0].strip()
+        name       = parts[1].strip()
+        exchange   = parts[2].strip()
+        is_etf     = parts[4].strip()   # Y or N
+        test_issue = parts[6].strip()   # Y = test issue
+
+        if exchange not in OTHER_EXCHANGE_CODES:
+            continue
+        if is_etf == "Y":
+            continue
+        if not ticker or len(ticker) > MAX_TICKER_LEN:
+            continue
+        if ticker.endswith(("W", "R", "U")) and len(ticker) > 4:
+            continue
+        if test_issue == "Y":
+            continue
+
+        if ticker not in seen:
+            seen.add(ticker)
+            results.append({
+                "ticker":   ticker,
+                "name":     name,
+                "exchange": exchange_map.get(exchange, exchange),
+                "sector":   "",
+            })
+
+    print(f"  [other-listed] {len(results)} NYSE/AMEX/ARCA common stocks found.", flush=True)
+    return results
+
+
+def fetch_via_edgar_fallback() -> list:
+    """
+    Fallback: SEC EDGAR company_tickers_exchange.json.
+    Covers NYSE and NASDAQ exchanges.
     """
     print("  [edgar] Fetching company_tickers_exchange.json ...", flush=True)
     try:
@@ -146,15 +173,14 @@ def fetch_via_edgar_exchange_json() -> list:
 
     results = []
     seen    = set()
+    target_exchanges = {"NYSE", "NASDAQ", "NYSE MKT", "NYSE ARCA"}
 
-    for _idx, item in data.get("data", {}).items() if isinstance(data.get("data"), dict) \
-            else enumerate(data.get("data", [])):
-        # data is either a list-of-lists or dict-of-lists depending on SEC format
-        # Normalise both shapes:
-        if isinstance(item, (list, tuple)):
-            # [cik, name, ticker, exchange]
-            if len(item) < 4:
-                continue
+    items = data.get("data", [])
+    if isinstance(items, dict):
+        items = list(items.values())
+
+    for item in items:
+        if isinstance(item, (list, tuple)) and len(item) >= 4:
             cik, name, ticker, exchange = item[0], item[1], item[2], item[3]
         elif isinstance(item, dict):
             cik      = item.get("cik_str", "")
@@ -164,7 +190,7 @@ def fetch_via_edgar_exchange_json() -> list:
         else:
             continue
 
-        if str(exchange).upper() != "NYSE":
+        if str(exchange).upper() not in {e.upper() for e in target_exchanges}:
             continue
         if not ticker or len(str(ticker)) > MAX_TICKER_LEN:
             continue
@@ -175,34 +201,34 @@ def fetch_via_edgar_exchange_json() -> list:
             results.append({
                 "ticker":   yf_sym,
                 "name":     str(name),
-                "exchange": "NYSE",
+                "exchange": str(exchange),
                 "sector":   "",
                 "cik":      str(cik),
             })
 
-    print(f"  [edgar] {len(results)} NYSE entries found.", flush=True)
+    print(f"  [edgar] {len(results)} NYSE+NASDAQ entries found.", flush=True)
     return results
 
 
 def main():
     print("=" * 60)
-    print("fetch_nyse_tickers.py  v1 – NYSE common stocks")
+    print("fetch_nyse_tickers.py  v2 – NYSE + NASDAQ common stocks")
     print("=" * 60)
 
-    # Try primary source first
-    print("\n[1/2] Trying Nasdaq Trader file (primary)...")
-    rows = fetch_via_nasdaq_trader()
+    print("\n[1/2] Fetching from Nasdaq Trader FTP files (primary)...")
+    nasdaq_rows = fetch_nasdaq_listed()
+    nyse_rows   = fetch_other_listed()
+    rows = nasdaq_rows + nyse_rows
 
-    # Fallback to EDGAR if primary returns nothing
     if not rows:
         print("\n[2/2] Primary empty – trying SEC EDGAR fallback...")
-        rows = fetch_via_edgar_exchange_json()
+        rows = fetch_via_edgar_fallback()
 
     if not rows:
-        print("[WARN] No NYSE tickers retrieved from any source. Caches NOT updated.")
+        print("[WARN] No tickers retrieved from any source. Caches NOT updated.")
         sys.exit(0)
 
-    # Sort and deduplicate
+    # Deduplicate and sort
     seen   = set()
     deduped = []
     for row in rows:
@@ -222,7 +248,8 @@ def main():
             {
                 "generated_at": datetime.now(timezone.utc).isoformat(),
                 "count":        len(deduped),
-                "source":       "nasdaq-trader-otherlisted + sec-edgar-fallback",
+                "source":       "nasdaq-trader-nasdaqlisted + nasdaq-trader-otherlisted + sec-edgar-fallback",
+                "exchanges":    ["NASDAQ", "NYSE", "NYSE-MKT", "NYSE-ARCA"],
                 "tickers":      deduped,
             },
             f,
@@ -230,7 +257,9 @@ def main():
             ensure_ascii=False,
         )
 
-    print(f"\nSaved {len(deduped)} NYSE common stock tickers:")
+    nasdaq_count = sum(1 for r in deduped if r.get("exchange") == "NASDAQ")
+    nyse_count   = len(deduped) - nasdaq_count
+    print(f"\nSaved {len(deduped)} tickers ({nasdaq_count} NASDAQ + {nyse_count} NYSE/other):")
     print(f"  TXT  : {TXT_CACHE}")
     print(f"  JSON : {JSON_CACHE}")
 
