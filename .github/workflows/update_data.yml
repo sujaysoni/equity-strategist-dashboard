@@ -2,12 +2,27 @@ name: Update Stock Recommendations
 
 on:
   schedule:
-    - cron: '0 13 * * 1-5'   # 09:00 AM EDT
-    - cron: '0 14 * * 1-5'   # 10:00 AM EDT
+    # ------------------------------------------------------------------ #
+    # Target: 10:00 AM Eastern — every weekday, year-round.
+    #
+    # GitHub crons run in UTC. Eastern time has two offsets:
+    #   EDT  (Mar 2nd Sun → Nov 1st Sun)  = UTC-4  → 14:00 UTC
+    #   EST  (Nov 1st Sun → Mar 2nd Sun)  = UTC-5  → 15:00 UTC
+    #
+    # We fire at BOTH 14:00 UTC and 15:00 UTC Mon-Fri so that exactly
+    # one of them always lands at 10:00 AM Eastern regardless of DST.
+    # A dedup guard in the job skips the run if analysis already ran
+    # within the past 3 hours, so only one execution actually proceeds.
+    #
+    #   14:00 UTC = 10:00 AM EDT (active ~Mar–Nov)
+    #   15:00 UTC = 10:00 AM EST (active ~Nov–Mar)
+    # ------------------------------------------------------------------ #
+    - cron: '0 14 * * 1-5'   # 10:00 AM EDT  (UTC-4, summer)
+    - cron: '0 15 * * 1-5'   # 10:00 AM EST  (UTC-5, winter)
   repository_dispatch:
     types: [refresh-analysis]
-  workflow_dispatch:
-  workflow_call:
+  workflow_dispatch:          # manual trigger from GitHub UI or API
+  workflow_call:              # allows deploy.yml to call this as a sub-workflow
 
 jobs:
   analyze:
@@ -22,18 +37,52 @@ jobs:
         with:
           fetch-depth: 0
 
+      # ------------------------------------------------------------------ #
+      # DST dedup guard — skip if recommendations.json was already written
+      # within the last 3 hours (prevents the non-DST cron slot from
+      # running a duplicate analysis on the same day).
+      # Skipped entirely for workflow_dispatch / repository_dispatch.
+      # ------------------------------------------------------------------ #
+      - name: Check if already ran today (DST dedup)
+        id: dedup
+        if: github.event_name == 'schedule'
+        run: |
+          if [ -f public/recommendations.json ]; then
+            # Extract generated_at from JSON (first 512 bytes is enough)
+            GEN=$(head -c 512 public/recommendations.json | grep -oP '"generated_at"\s*:\s*"\K[^"]+' | head -1)
+            if [ -n "$GEN" ]; then
+              GEN_EPOCH=$(date -d "$GEN" +%s 2>/dev/null || echo 0)
+              NOW_EPOCH=$(date +%s)
+              AGE=$(( NOW_EPOCH - GEN_EPOCH ))
+              echo "Last run: $GEN  (${AGE}s ago)"
+              if [ "$AGE" -lt 10800 ]; then
+                echo "skip=true" >> "$GITHUB_OUTPUT"
+                echo "Already ran within 3 hours — skipping duplicate DST slot."
+              else
+                echo "skip=false" >> "$GITHUB_OUTPUT"
+              fi
+            else
+              echo "skip=false" >> "$GITHUB_OUTPUT"
+            fi
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Set up Python 3.11
+        if: steps.dedup.outputs.skip != 'true'
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           cache: 'pip'
 
       - name: Install system deps
+        if: steps.dedup.outputs.skip != 'true'
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq libxml2-dev libxslt-dev
 
       - name: Install Python dependencies
+        if: steps.dedup.outputs.skip != 'true'
         run: |
           pip install --upgrade pip wheel setuptools
           pip install -r requirements.txt
@@ -41,45 +90,51 @@ jobs:
           python -c "import pandas;   print('pandas',   pandas.__version__)"
 
       # ------------------------------------------------------------------ #
-      # Refresh ticker caches (NYSE+NASDAQ together, TSX/TSXV separately)
+      # Refresh ticker caches BEFORE analysis so the universe is current.
+      # fetch_nyse_tickers.py fetches BOTH NYSE and NASDAQ.
       # ------------------------------------------------------------------ #
       - name: Refresh TSX / TSXV ticker cache
+        if: steps.dedup.outputs.skip != 'true'
         run: python backend/fetch_tsx_tickers.py
         continue-on-error: true
 
       - name: Refresh NYSE + NASDAQ ticker cache
+        if: steps.dedup.outputs.skip != 'true'
         run: python backend/fetch_nyse_tickers.py
         continue-on-error: true
 
       # Copy caches into public/tickers/ so the frontend can fetch them
       - name: Copy ticker caches to public/tickers/
+        if: steps.dedup.outputs.skip != 'true'
         run: |
           mkdir -p public/tickers
-          [ -f backend/tsx_tickers_cache.json ]  && cp backend/tsx_tickers_cache.json  public/tickers/tsx.json         || true
-          [ -f backend/nyse_tickers_cache.json ] && cp backend/nyse_tickers_cache.json public/tickers/nyse_nasdaq.json  || true
+          [ -f backend/tsx_tickers_cache.json ]  && cp backend/tsx_tickers_cache.json  public/tickers/tsx.json        || true
+          [ -f backend/nyse_tickers_cache.json ] && cp backend/nyse_tickers_cache.json public/tickers/nyse_nasdaq.json || true
 
       # ------------------------------------------------------------------ #
       # Core analysis
       # ------------------------------------------------------------------ #
       - name: Run analysis
+        if: steps.dedup.outputs.skip != 'true'
         env:
           POLYGON_API_KEY:   ${{ secrets.POLYGON_API_KEY }}
           ALPHA_VANTAGE_KEY: ${{ secrets.ALPHA_VANTAGE_KEY }}
         run: python backend/analyze_stocks.py
 
       # ------------------------------------------------------------------ #
-      # Commit all outputs
+      # Commit all outputs — push triggers deploy.yml automatically
       # ------------------------------------------------------------------ #
       - name: Commit & push results
+        if: steps.dedup.outputs.skip != 'true'
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name  "github-actions[bot]"
           git add public/recommendations.json
-          git add public/tickers/          || true
-          git add backend/tsx_tickers_cache.txt    || true
-          git add backend/tsx_tickers_cache.json   || true
-          git add backend/nyse_tickers_cache.txt    || true
-          git add backend/nyse_tickers_cache.json   || true
+          git add public/tickers/               || true
+          git add backend/tsx_tickers_cache.txt  || true
+          git add backend/tsx_tickers_cache.json || true
+          git add backend/nyse_tickers_cache.txt  || true
+          git add backend/nyse_tickers_cache.json || true
           if git diff --staged --quiet; then
             echo "No changes to commit."
           else
