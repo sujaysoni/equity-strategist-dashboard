@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-05-27T04:06:48.471782Z",
+  "generated_at": "2026-05-27T16:58:15.989425Z",
   "count": 2171,
-  "tsx_count": 753,
-  "tsxv_count": 1418,
+  "tsx_count": 754,
+  "tsxv_count": 1417,
   "tickers": [
     {
       "ticker": "AAA-P.V",
@@ -164,6 +164,12 @@
       "ticker": "ACS.V",
       "name": "Archon Minerals Limited",
       "exchange": "TSXV",
+      "sector": ""
+    },
+    {
+      "ticker": "ACT.TO",
+      "name": "Aduro Clean Technologies Inc.",
+      "exchange": "TSX",
       "sector": ""
     },
     {
@@ -10681,12 +10687,6 @@
     {
       "ticker": "SNI-PR-A.V",
       "name": "Sonor Investments Limited",
-      "exchange": "TSXV",
-      "sector": ""
-    },
-    {
-      "ticker": "SNM.V",
-      "name": "ShaMaran Petroleum Corp.",
       "exchange": "TSXV",
       "sector": ""
     },
