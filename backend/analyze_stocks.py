@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Equity Strategist Dashboard - Analysis Engine v8
+Equity Strategist Dashboard - Analysis Engine v9
 
 Universe sourcing:
   - Primary: tsx_tickers_cache.txt  (CAD)  + nyse_tickers_cache.txt  (USD)
@@ -21,6 +21,12 @@ A 'data_source' field is written per ticker:
   'live_yahoo'    = all key fields fetched live
   'partial_yahoo' = some fields live, some from static seed
   'static_seed'   = live fetch failed entirely; all values from seed dict
+
+v9 changes (timeout fix):
+  - MAX_TICKERS_PER_EXCHANGE = 150  hard cap to stay well within 6h limit
+  - BATCH_SIZE raised 10 -> 25      fewer sleeps per universe
+  - SLEEP_S reduced 3 -> 1          less dead time between batches
+  - Universe priority: seed tickers first (have fallback data), then live-only
 """
 
 import os, json, math, time, traceback, sys
@@ -52,8 +58,14 @@ HORIZON_WEIGHTS = {
     "ultra_long":  dict(roe=0.20,fcf=0.15,debt=0.10,rsi=0.00,ma50=0.00,ma200=0.05,insider=0.05,shenanigan=-0.05,moat=0.45),
 }
 
-BATCH_SIZE = 10   # smaller batches to avoid rate-limiting
-SLEEP_S    = 3
+# ── v9 performance tuning ────────────────────────────────────────────────────
+# With MAX=150 per exchange, BATCH=25, SLEEP=1:
+#   CAD: 150 tickers / 25 per batch = 6 sleeps × 1s = ~6s sleep + ~10 min API calls
+#   USD: 150 tickers / 25 per batch = 6 sleeps × 1s = ~6s sleep + ~10 min API calls
+#   Total estimated runtime: ~25-35 minutes — safely within 360-minute limit.
+MAX_TICKERS_PER_EXCHANGE = 150   # hard cap per exchange
+BATCH_SIZE = 25                  # raised from 10 → fewer inter-batch sleeps
+SLEEP_S    = 1                   # reduced from 3 → less dead time
 
 # ---------------------------------------------------------------------------
 # STATIC FUNDAMENTALS SEED  (fallback only — used when live fetch fails)
@@ -213,7 +225,6 @@ def load_ticker_cache(path):
             t = line.strip()
             if t and not t.startswith("#"):
                 tickers.append(t)
-    # deduplicate while preserving order
     seen = set()
     result = []
     for t in tickers:
@@ -221,6 +232,27 @@ def load_ticker_cache(path):
             seen.add(t)
             result.append(t)
     return result
+
+
+def cap_universe(tickers, seed_keys, label, max_n):
+    """
+    Cap ticker list to max_n.
+    Priority: seed tickers first (have static fallback data), then live-only.
+    Logs a warning if truncation occurs.
+    """
+    if len(tickers) <= max_n:
+        return tickers
+
+    seed_set   = set(seed_keys)
+    with_seed  = [t for t in tickers if t in seed_set]
+    live_only  = [t for t in tickers if t not in seed_set]
+
+    combined = with_seed + live_only
+    capped   = combined[:max_n]
+
+    print(f"  [{label}] Universe capped {len(tickers)} -> {max_n} "
+          f"({len(with_seed)} seed + {len(live_only)} live-only, kept top {max_n})", flush=True)
+    return capped
 
 
 def safe(val, default=None):
@@ -318,7 +350,7 @@ def fetch_live_fundamentals(sym, seed):
     try:
         ticker = yf.Ticker(sym)
 
-        # ── 1. Market Cap via fast_info (very reliable) ──────────────────────
+        # ── 1. Market Cap via fast_info ──────────────────────────────────────
         try:
             fi = ticker.fast_info
             mcap = safe(getattr(fi, "market_cap", None))
@@ -329,7 +361,7 @@ def fetch_live_fundamentals(sym, seed):
         except Exception as e:
             print(f"    fast_info error: {e}")
 
-        # ── 2. Dividend yield + PE via info dict ──────────────────────────────
+        # ── 2. Dividend yield + PE via info dict ─────────────────────────────
         try:
             info = {}
             try:
@@ -346,7 +378,6 @@ def fetch_live_fundamentals(sym, seed):
                 live["pe_fwd"] = raw_pe
                 live_fields += 1
                 print(f"    pe_fwd live: {raw_pe:.1f}x")
-            # Also pick up sector/industry/name for non-seed tickers
             if not info.get("shortName") and info.get("longName"):
                 live["_name"]     = info.get("longName", sym)
             elif info.get("shortName"):
@@ -434,8 +465,7 @@ def fetch_live_fundamentals(sym, seed):
         pe_fwd         = live.get("pe_fwd",           seed_pe),
         net_inc_pos    = live.get("net_inc_pos",      seed_ni_pos),
         op_cf_pos      = live.get("op_cf_pos",        seed_ocf_pos),
-        insider_pct    = seed_ins,   # SEDI/Form4 not available via yfinance
-        # carry enriched name/sector/industry from live info if seed was null
+        insider_pct    = seed_ins,
         _name          = live.get("_name",     name),
         _exchange      = live.get("_exchange", exchange),
         _sector        = live.get("_sector",   sector),
@@ -454,11 +484,6 @@ def fetch_live_fundamentals(sym, seed):
 
 
 def score_ticker(sym, seed, hist, live_fund):
-    """
-    seed may be None for tickers not in the static FUNDAMENTALS dict.
-    All metadata (name, exchange, sector, industry) is resolved via live_fund
-    in that case.
-    """
     if seed is not None:
         name, exchange, sector, industry = seed[0], seed[1], seed[2], seed[3]
     else:
@@ -558,14 +583,9 @@ def score_ticker(sym, seed, hist, live_fund):
 
 
 def process_universe(tickers, label):
-    """
-    Process a list of tickers.  Any ticker is accepted — seed from FUNDAMENTALS
-    if available, otherwise use NULL_SEED so live yfinance is the sole source.
-    No ticker is silently skipped just because it lacks a seed entry.
-    """
     results = []
     for i, sym in enumerate(tickers):
-        seed = FUNDAMENTALS.get(sym)   # None if not in static dict — that's OK
+        seed = FUNDAMENTALS.get(sym)
         print(f"  [{label}] {i+1}/{len(tickers)} {sym}"
               f"{'  (seed)' if seed else '  (live-only)'}", flush=True)
         try:
@@ -608,15 +628,15 @@ def sort_key(s):
 
 def main():
     print("=" * 60, flush=True)
-    print("Equity Strategist Dashboard - Analysis Engine v8", flush=True)
+    print("Equity Strategist Dashboard - Analysis Engine v9", flush=True)
     print(f"Python  {sys.version}", flush=True)
     print(f"yfinance {yf.__version__}", flush=True)
     print(f"pandas   {pd.__version__}", flush=True)
+    print(f"MAX_TICKERS_PER_EXCHANGE = {MAX_TICKERS_PER_EXCHANGE}", flush=True)
+    print(f"BATCH_SIZE = {BATCH_SIZE}  SLEEP_S = {SLEEP_S}", flush=True)
     print("=" * 60, flush=True)
 
     # ── Build dynamic universe from refreshed cache files ────────────────────
-    # The cache files are updated by fetch_tsx_tickers.py / fetch_nyse_tickers.py
-    # before analyze_stocks.py runs, so the count changes day-to-day.
     cad_from_cache = load_ticker_cache(TSX_CACHE_TXT)
     usd_from_cache = load_ticker_cache(NYSE_CACHE_TXT)
 
@@ -628,6 +648,13 @@ def main():
         print("  WARNING: nyse cache empty — falling back to FUNDAMENTALS USD keys", flush=True)
         usd_from_cache = [s for s in FUNDAMENTALS
                           if not s.endswith(".TO") and not s.endswith(".V")]
+
+    # ── Cap universe to avoid GitHub Actions timeout ──────────────────────────
+    cad_keys = [k for k in FUNDAMENTALS if k.endswith(".TO") or k.endswith(".V")]
+    usd_keys = [k for k in FUNDAMENTALS if not k.endswith(".TO") and not k.endswith(".V")]
+
+    cad_from_cache = cap_universe(cad_from_cache, cad_keys, "CAD", MAX_TICKERS_PER_EXCHANGE)
+    usd_from_cache = cap_universe(usd_from_cache, usd_keys, "USD", MAX_TICKERS_PER_EXCHANGE)
 
     print(f"Universe: {len(cad_from_cache)} CAD + {len(usd_from_cache)} USD "
           f"= {len(cad_from_cache)+len(usd_from_cache)} total", flush=True)
@@ -656,6 +683,8 @@ def main():
             horizons  = HORIZON_LABELS,
             cap_tiers = {"mega": ">= $200B", "large": "$10B-$200B",
                          "mid": "$2B-$10B", "small": "< $2B"},
+            engine_version = "v9",
+            max_tickers_per_exchange = MAX_TICKERS_PER_EXCHANGE,
             note = "For informational purposes only. Not financial advice.",
         )
     )
