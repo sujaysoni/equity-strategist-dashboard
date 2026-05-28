@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-05-27T16:58:15.989425Z",
-  "count": 2171,
+  "generated_at": "2026-05-28T16:16:31.236412Z",
+  "count": 2170,
   "tsx_count": 754,
-  "tsxv_count": 1417,
+  "tsxv_count": 1416,
   "tickers": [
     {
       "ticker": "AAA-P.V",
@@ -3625,12 +3625,6 @@
     {
       "ticker": "ECCV-P.V",
       "name": "ECC Ventures 5 Corp.",
-      "exchange": "TSXV",
-      "sector": ""
-    },
-    {
-      "ticker": "ECM.V",
-      "name": "Ecolomondo Corporation",
       "exchange": "TSXV",
       "sector": ""
     },
@@ -8280,7 +8274,7 @@
     },
     {
       "ticker": "NVRO.V",
-      "name": "EnviroGold Global Limited",
+      "name": "NVRO Metals Limited",
       "exchange": "TSXV",
       "sector": ""
     },
