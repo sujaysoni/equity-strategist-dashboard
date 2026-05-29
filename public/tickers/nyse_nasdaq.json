@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-05-28T16:17:31.740321+00:00",
-  "count": 7112,
+  "generated_at": "2026-05-29T16:22:40.618612+00:00",
+  "count": 7106,
   "source": "nasdaq-trader-nasdaqlisted + nasdaq-trader-otherlisted + sec-edgar-fallback",
   "exchanges": [
     "NASDAQ",
@@ -1264,7 +1264,7 @@
     },
     {
       "ticker": "AGAE",
-      "name": "Allied Gaming & Entertainment Inc.",
+      "name": "All In FutureTech Alliance, Inc.",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1708341"
@@ -1905,27 +1905,6 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "3545"
-    },
-    {
-      "ticker": "ALCY",
-      "name": "Alchemy Investments Acquisition Corp 1",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1901336"
-    },
-    {
-      "ticker": "ALCYU",
-      "name": "Alchemy Investments Acquisition Corp 1",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1901336"
-    },
-    {
-      "ticker": "ALCYW",
-      "name": "Alchemy Investments Acquisition Corp 1",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1901336"
     },
     {
       "ticker": "ALDF",
@@ -3062,13 +3041,6 @@
       "cik": "1944885"
     },
     {
-      "ticker": "APLS",
-      "name": "Apellis Pharmaceuticals, Inc.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1492422"
-    },
-    {
       "ticker": "APM",
       "name": "Aptorum Group Ltd",
       "exchange": "Nasdaq",
@@ -3144,6 +3116,13 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1521332"
+    },
+    {
+      "ticker": "APURU",
+      "name": "Aperture AC",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2093524"
     },
     {
       "ticker": "APUS",
@@ -5652,13 +5631,6 @@
       "cik": "1101215"
     },
     {
-      "ticker": "BFLX",
-      "name": "Cann American Corp.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1368620"
-    },
-    {
       "ticker": "BFLY",
       "name": "Butterfly Network, Inc.",
       "exchange": "NYSE",
@@ -6814,6 +6786,13 @@
       "cik": "1776985"
     },
     {
+      "ticker": "BNY",
+      "name": "Bank of New York Mellon Corp",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "1390777"
+    },
+    {
       "ticker": "BNZI",
       "name": "Banzai International, Inc.",
       "exchange": "Nasdaq",
@@ -7162,6 +7141,13 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1067983"
+    },
+    {
+      "ticker": "BRKHU",
+      "name": "BurTech Acquisition Corp II",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2098707"
     },
     {
       "ticker": "BRKR",
@@ -7914,7 +7900,7 @@
     },
     {
       "ticker": "BYFC",
-      "name": "BROADWAY FINANCIAL CORP DE",
+      "name": "BROADWAY FINANCIAL CORP \\DE\\",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1001171"
@@ -8705,13 +8691,6 @@
     },
     {
       "ticker": "CCLD",
-      "name": "CareCloud, Inc.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1582982"
-    },
-    {
-      "ticker": "CCLDO",
       "name": "CareCloud, Inc.",
       "exchange": "Nasdaq",
       "sector": "",
@@ -10538,6 +10517,13 @@
       "cik": "1050377"
     },
     {
+      "ticker": "CNXU",
+      "name": "Conexeu Sciences Inc.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2066836"
+    },
+    {
       "ticker": "COAG",
       "name": "Hemab Therapeutics Holdings, Inc.",
       "exchange": "Nasdaq",
@@ -11455,13 +11441,6 @@
       "cik": "1057352"
     },
     {
-      "ticker": "CSGS",
-      "name": "CSG SYSTEMS INTERNATIONAL INC",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1005757"
-    },
-    {
       "ticker": "CSHR",
       "name": "CoinShares PLC",
       "exchange": "Nasdaq",
@@ -11588,25 +11567,11 @@
       "cik": "723254"
     },
     {
-      "ticker": "CTBB",
-      "name": "QWEST CORP",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "68622"
-    },
-    {
       "ticker": "CTBI",
       "name": "COMMUNITY TRUST BANCORP INC /KY/",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "350852"
-    },
-    {
-      "ticker": "CTDD",
-      "name": "QWEST CORP",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "68622"
     },
     {
       "ticker": "CTEV",
@@ -11628,13 +11593,6 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1831915"
-    },
-    {
-      "ticker": "CTLP",
-      "name": "CANTALOUPE, INC.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "896429"
     },
     {
       "ticker": "CTM",
@@ -13199,7 +13157,7 @@
     },
     {
       "ticker": "DMRC",
-      "name": "Digimarc Parent, Inc.",
+      "name": "Digimarc Corp",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "2119322"
@@ -14470,13 +14428,6 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1759783"
-    },
-    {
-      "ticker": "EHAB",
-      "name": "Enhabit, Inc.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1803737"
     },
     {
       "ticker": "EHC",
@@ -15865,13 +15816,6 @@
       "cik": "1069157"
     },
     {
-      "ticker": "EWCZ",
-      "name": "European Wax Center, Inc.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1856236"
-    },
-    {
       "ticker": "EWTX",
       "name": "Edgewise Therapeutics, Inc.",
       "exchange": "Nasdaq",
@@ -16230,6 +16174,13 @@
     },
     {
       "ticker": "FBYD",
+      "name": "Falcon's Beyond Global, Inc.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "1937987"
+    },
+    {
+      "ticker": "FBYDP",
       "name": "Falcon's Beyond Global, Inc.",
       "exchange": "Nasdaq",
       "sector": "",
@@ -16815,13 +16766,6 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "2059033"
-    },
-    {
-      "ticker": "FIHL",
-      "name": "Pelagos Insurance Capital Ltd",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1636639"
     },
     {
       "ticker": "FINS",
@@ -18098,6 +18042,13 @@
       "cik": "1353614"
     },
     {
+      "ticker": "FXACU",
+      "name": "FortuneX Acquisition Corp",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2121703"
+    },
+    {
       "ticker": "FXB",
       "name": "Invesco CurrencyShares British Pound Sterling Trust",
       "exchange": "NYSE",
@@ -18169,28 +18120,28 @@
     },
     {
       "ticker": "GAIN",
-      "name": "GLADSTONE INVESTMENT CORPORATION\\DE",
+      "name": "GLADSTONE INVESTMENT CORPORATIONDE",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1321741"
     },
     {
       "ticker": "GAING",
-      "name": "GLADSTONE INVESTMENT CORPORATION\\DE",
+      "name": "GLADSTONE INVESTMENT CORPORATIONDE",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1321741"
     },
     {
       "ticker": "GAINI",
-      "name": "GLADSTONE INVESTMENT CORPORATION\\DE",
+      "name": "GLADSTONE INVESTMENT CORPORATIONDE",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1321741"
     },
     {
       "ticker": "GAINZ",
-      "name": "GLADSTONE INVESTMENT CORPORATION\\DE",
+      "name": "GLADSTONE INVESTMENT CORPORATIONDE",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1321741"
@@ -20805,6 +20756,20 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1114446"
+    },
+    {
+      "ticker": "HDRN",
+      "name": "GigCapital7 Corp.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2023730"
+    },
+    {
+      "ticker": "HDRNW",
+      "name": "GigCapital7 Corp.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2023730"
     },
     {
       "ticker": "HDSN",
@@ -25168,6 +25133,13 @@
       "cik": "2068454"
     },
     {
+      "ticker": "KPET",
+      "name": "KPET Ultra Paceline Corp",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "2095297"
+    },
+    {
       "ticker": "KPLT",
       "name": "Katapult Holdings, Inc.",
       "exchange": "Nasdaq",
@@ -25593,13 +25565,6 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1075880"
-    },
-    {
-      "ticker": "KZR",
-      "name": "Kezar Life Sciences, Inc.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1645666"
     },
     {
       "ticker": "L",
@@ -26114,7 +26079,7 @@
     },
     {
       "ticker": "LFCR",
-      "name": "LIFECORE BIOMEDICAL, INC. DE",
+      "name": "LIFECORE BIOMEDICAL, INC. \\DE\\",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1005286"
@@ -29324,13 +29289,6 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1280452"
-    },
-    {
-      "ticker": "MPX",
-      "name": "MARINE PRODUCTS GROUP, LLC",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1129155"
     },
     {
       "ticker": "MQ",
@@ -32770,6 +32728,13 @@
       "cik": "1414932"
     },
     {
+      "ticker": "OCTVV",
+      "name": "Octave Intelligence plc",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2083632"
+    },
+    {
       "ticker": "OCUL",
       "name": "OCULAR THERAPEUTIX, INC",
       "exchange": "Nasdaq",
@@ -32943,6 +32908,13 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1587732"
+    },
+    {
+      "ticker": "OHACU",
+      "name": "Oceanhawk Acquisition Corp.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2090787"
     },
     {
       "ticker": "OHI",
@@ -34394,13 +34366,6 @@
       "cik": "1546066"
     },
     {
-      "ticker": "PBF",
-      "name": "PBF Energy Inc.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1534504"
-    },
-    {
       "ticker": "PBFS",
       "name": "Pioneer Bancorp, Inc./MD",
       "exchange": "Nasdaq",
@@ -34763,6 +34728,13 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "318300"
+    },
+    {
+      "ticker": "PECEU",
+      "name": "Peace Acquisition Corp.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2088626"
     },
     {
       "ticker": "PECO",
@@ -36634,6 +36606,13 @@
       "cik": "1050915"
     },
     {
+      "ticker": "PWRL",
+      "name": "Powerlaw Corp.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2052053"
+    },
+    {
       "ticker": "PXED",
       "name": "Phoenix Education Partners, Inc.",
       "exchange": "NYSE",
@@ -36933,6 +36912,20 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1618756"
+    },
+    {
+      "ticker": "QTEX",
+      "name": "Inspira Technologies OXY B.H.N. Ltd",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "1837493"
+    },
+    {
+      "ticker": "QTEXW",
+      "name": "Inspira Technologies OXY B.H.N. Ltd",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "1837493"
     },
     {
       "ticker": "QTI",
@@ -38742,7 +38735,7 @@
     },
     {
       "ticker": "RTB",
-      "name": "RYVYL Inc.",
+      "name": "RTB Digital, Inc.",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1419275"
@@ -38872,13 +38865,6 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "31791"
-    },
-    {
-      "ticker": "RVYL",
-      "name": "RYVYL Inc.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1419275"
     },
     {
       "ticker": "RWAY",
@@ -39180,6 +39166,13 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "2029138"
+    },
+    {
+      "ticker": "SAGU",
+      "name": "Shreya Acquisition Group",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "2083452"
     },
     {
       "ticker": "SAH",
@@ -39523,6 +39516,13 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "2081909"
+    },
+    {
+      "ticker": "SCA",
+      "name": "Stellus Capital Investment Corp",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "1551901"
     },
     {
       "ticker": "SCAG",
@@ -41147,13 +41147,6 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "827187"
-    },
-    {
-      "ticker": "SNCY",
-      "name": "Sun Country Airlines Holdings, LLC",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1743907"
     },
     {
       "ticker": "SND",
@@ -44502,13 +44495,6 @@
       "cik": "1880661"
     },
     {
-      "ticker": "TPH",
-      "name": "Tri Pointe Homes, Inc.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1561680"
-    },
-    {
       "ticker": "TPL",
       "name": "Texas Pacific Land Corp",
       "exchange": "NYSE",
@@ -45510,13 +45496,6 @@
       "cik": "1275014"
     },
     {
-      "ticker": "UDMY",
-      "name": "Udemy, Inc.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1607939"
-    },
-    {
       "ticker": "UDN",
       "name": "INVESCO DB US DOLLAR INDEX BEARISH FUND",
       "exchange": "NYSE",
@@ -45987,7 +45966,7 @@
     },
     {
       "ticker": "USB",
-      "name": "US BANCORP \\DE\\",
+      "name": "US BANCORP DE",
       "exchange": "NYSE",
       "sector": "",
       "cik": "36104"
@@ -47093,7 +47072,7 @@
     },
     {
       "ticker": "VRDN",
-      "name": "Viridian Therapeutics, Inc.\\DE",
+      "name": "Viridian Therapeutics, Inc.DE",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1590750"
@@ -48035,27 +48014,6 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1096275"
-    },
-    {
-      "ticker": "WLAC",
-      "name": "Willow Lane Acquisition Corp.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "2032379"
-    },
-    {
-      "ticker": "WLACU",
-      "name": "Willow Lane Acquisition Corp.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "2032379"
-    },
-    {
-      "ticker": "WLACW",
-      "name": "Willow Lane Acquisition Corp.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "2032379"
     },
     {
       "ticker": "WLDN",
