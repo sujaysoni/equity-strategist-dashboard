@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-05-29T22:22:43.852131Z",
-  "count": 2170,
-  "tsx_count": 754,
-  "tsxv_count": 1416,
+  "generated_at": "2026-06-01T13:30:16.955843Z",
+  "count": 2167,
+  "tsx_count": 753,
+  "tsxv_count": 1414,
   "tickers": [
     {
       "ticker": "AAA-P.V",
@@ -3125,12 +3125,6 @@
       "sector": ""
     },
     {
-      "ticker": "CYTO.V",
-      "name": "Cytophage Technologies Ltd.",
-      "exchange": "TSXV",
-      "sector": ""
-    },
-    {
       "ticker": "CZZ.V",
       "name": "Cleghorn Minerals Ltd.",
       "exchange": "TSXV",
@@ -4463,12 +4457,6 @@
       "sector": ""
     },
     {
-      "ticker": "FO.V",
-      "name": "Falcon Oil & Gas Ltd.",
-      "exchange": "TSXV",
-      "sector": ""
-    },
-    {
       "ticker": "FONC-P.V",
       "name": "Florence One Capital Inc.",
       "exchange": "TSXV",
@@ -4694,12 +4682,6 @@
       "ticker": "FVL.TO",
       "name": "Freegold Ventures Limited",
       "exchange": "TSX",
-      "sector": ""
-    },
-    {
-      "ticker": "FW.V",
-      "name": "Flow Capital Corp.",
-      "exchange": "TSXV",
       "sector": ""
     },
     {
@@ -10745,12 +10727,6 @@
       "sector": ""
     },
     {
-      "ticker": "SPAC-RT-U.TO",
-      "name": "Mercer Park Opportunities Corp.",
-      "exchange": "TSX",
-      "sector": ""
-    },
-    {
       "ticker": "SPB.TO",
       "name": "Superior Plus Corp.",
       "exchange": "TSX",
@@ -11779,6 +11755,12 @@
     {
       "ticker": "TUK.V",
       "name": "Tuktu Resources Ltd.",
+      "exchange": "TSXV",
+      "sector": ""
+    },
+    {
+      "ticker": "TUNG.V",
+      "name": "American Tungsten Corp.",
       "exchange": "TSXV",
       "sector": ""
     },
