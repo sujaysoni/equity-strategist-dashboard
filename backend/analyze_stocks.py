@@ -1,32 +1,22 @@
 #!/usr/bin/env python3
 """
-Equity Strategist Dashboard - Analysis Engine v9
+Equity Strategist Dashboard - Analysis Engine v10
 
-Universe sourcing:
-  - Primary: tsx_tickers_cache.txt  (CAD)  + nyse_tickers_cache.txt  (USD)
-  - These cache files are refreshed by fetch_tsx_tickers.py / fetch_nyse_tickers.py
-    each run, so the tracked count changes day-to-day as tickers enter/leave the exchanges.
-  - FUNDAMENTALS dict below is a *seed fallback only* — used when live yfinance
-    fetch returns nothing for a field.  Any ticker in the cache is analyzed even
-    if it has no seed entry.
+UNIVERSE (ALL three cache files — no cap):
+  CAD : tsx_tickers_cache.txt
+  USD : nyse_tickers_cache.txt   +  nasdaq_tickers_cache.json
 
-Fundamentals sourcing priority (per ticker):
-  1. yf.Ticker fast_info   -> market_cap, current_price, shares_outstanding
-  2. yf.Ticker financials  -> ROE (net_income / total_equity), gross_margin
-  3. yf.Ticker cashflow    -> FCF yield  (operatingCashflow - capex) / mkt_cap
-  4. yf.Ticker info        -> div_yield, pe_fwd, debt/equity (attempted; may be blocked)
-  5. Static seed dict      -> fallback for any field that failed live fetch
+This version removes the MAX_TICKERS_PER_EXCHANGE hard-cap so every ticker
+in every cache is reviewed each daily run, however long that takes.
 
-A 'data_source' field is written per ticker:
-  'live_yahoo'    = all key fields fetched live
-  'partial_yahoo' = some fields live, some from static seed
-  'static_seed'   = live fetch failed entirely; all values from seed dict
-
-v9 changes (timeout fix):
-  - MAX_TICKERS_PER_EXCHANGE = 150  hard cap to stay well within 6h limit
-  - BATCH_SIZE raised 10 -> 25      fewer sleeps per universe
-  - SLEEP_S reduced 3 -> 1          less dead time between batches
-  - Universe priority: seed tickers first (have fallback data), then live-only
+Key v10 changes:
+  - Reads nasdaq_tickers_cache.json in addition to the .txt files
+  - No upper-limit on tickers per exchange (runs until done)
+  - Adaptive back-off on HTTP 429 / too-many-requests errors
+  - Progress checkpointing: partial results written every 50 tickers so a
+    crash mid-run doesn't lose all work
+  - BATCH_SIZE = 20, base SLEEP_S = 0.5  (yfinance is fast; throttle gently)
+  - All v9 scoring / horizon logic preserved unchanged
 """
 
 import os, json, math, time, traceback, sys
@@ -36,10 +26,12 @@ from datetime import datetime, timezone
 
 BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
 OUT_PATH    = os.path.join(BACKEND_DIR, "..", "public", "recommendations.json")
+CHECKPOINT  = os.path.join(BACKEND_DIR, "_checkpoint.json")  # partial results
 
-# Cache file paths (written by fetch_tsx_tickers.py / fetch_nyse_tickers.py)
-TSX_CACHE_TXT  = os.path.join(BACKEND_DIR, "tsx_tickers_cache.txt")
-NYSE_CACHE_TXT = os.path.join(BACKEND_DIR, "nyse_tickers_cache.txt")
+# Cache file paths
+TSX_CACHE_TXT    = os.path.join(BACKEND_DIR, "tsx_tickers_cache.txt")
+NYSE_CACHE_TXT   = os.path.join(BACKEND_DIR, "nyse_tickers_cache.txt")
+NASDAQ_CACHE_JSON= os.path.join(BACKEND_DIR, "nasdaq_tickers_cache.json")
 
 MEGA_CAP  = 200e9
 LARGE_CAP = 10e9
@@ -58,20 +50,15 @@ HORIZON_WEIGHTS = {
     "ultra_long":  dict(roe=0.20,fcf=0.15,debt=0.10,rsi=0.00,ma50=0.00,ma200=0.05,insider=0.05,shenanigan=-0.05,moat=0.45),
 }
 
-# ── v9 performance tuning ────────────────────────────────────────────────────
-# With MAX=150 per exchange, BATCH=25, SLEEP=1:
-#   CAD: 150 tickers / 25 per batch = 6 sleeps × 1s = ~6s sleep + ~10 min API calls
-#   USD: 150 tickers / 25 per batch = 6 sleeps × 1s = ~6s sleep + ~10 min API calls
-#   Total estimated runtime: ~25-35 minutes — safely within 360-minute limit.
-MAX_TICKERS_PER_EXCHANGE = 150   # hard cap per exchange
-BATCH_SIZE = 25                  # raised from 10 → fewer inter-batch sleeps
-SLEEP_S    = 1                   # reduced from 3 → less dead time
+# Batching / rate-limit settings
+BATCH_SIZE        = 20     # tickers per batch before a courtesy sleep
+SLEEP_S           = 0.5   # base inter-batch sleep (seconds)
+MAX_RETRIES       = 3     # retries per ticker on HTTP 429
+RETRY_BACKOFF_S   = 15    # seconds to wait on a 429 before retry
+CHECKPOINT_EVERY  = 50   # write partial results to disk every N tickers
 
 # ---------------------------------------------------------------------------
 # STATIC FUNDAMENTALS SEED  (fallback only — used when live fetch fails)
-# Format: ticker -> (name, exchange, sector, industry, market_cap_usd,
-#                    roe, fcf_yield, div_yield, debt_eq, gross_margin,
-#                    pe_fwd, net_inc_pos, op_cf_pos, insider_pct)
 # ---------------------------------------------------------------------------
 FUNDAMENTALS = {
     # ---- CAD ----------------------------------------------------------------
@@ -203,57 +190,75 @@ FUNDAMENTALS = {
     "TLT":     ("iShares 20+ Year Treasury","NYSE","ETF","Long-Term Bonds",48e9,0.000,0.042,0.042,0,1.000,0,True,True,0.0),
 }
 
-# ETF tickers — skip fundamental live-fetch for these (no financials available)
 ETF_TICKERS = {"SPY","QQQ","IWM","GLD","TLT"}
 
-# ---------------------------------------------------------------------------
-# NULL SEED — used for tickers that exist in the cache but not in FUNDAMENTALS
-# All fields are zero/False so the live yfinance fetch is the sole data source
-# ---------------------------------------------------------------------------
 NULL_SEED = ("Unknown","Unknown","Unknown","Unknown",0,
              0.0, 0.0, 0.0, 0.0, 0.0, 0.0, False, False, 0.0)
 
 
-def load_ticker_cache(path):
-    """Read a one-ticker-per-line cache file; return a deduplicated list."""
+# ---------------------------------------------------------------------------
+# UNIVERSE LOADERS
+# ---------------------------------------------------------------------------
+
+def load_txt_cache(path):
+    """Read one-ticker-per-line .txt file; return deduped list."""
     if not os.path.exists(path):
         print(f"  WARNING: cache file not found: {path}", flush=True)
         return []
-    tickers = []
+    seen, result = set(), []
     with open(path) as f:
         for line in f:
             t = line.strip()
-            if t and not t.startswith("#"):
-                tickers.append(t)
-    seen = set()
-    result = []
+            if t and not t.startswith("#") and t not in seen:
+                seen.add(t)
+                result.append(t)
+    return result
+
+
+def load_json_cache(path):
+    """
+    Read a JSON ticker cache.  Handles two common shapes:
+      - list of strings:              ["AAPL", "MSFT", ...]
+      - list of dicts with 'symbol':  [{"symbol": "AAPL", ...}, ...]
+      - dict with 'data' key:         {"data": [...], ...}
+    Returns a deduped list of ticker strings.
+    """
+    if not os.path.exists(path):
+        print(f"  WARNING: cache file not found: {path}", flush=True)
+        return []
+    with open(path) as f:
+        raw = json.load(f)
+
+    # Unwrap common wrapper dict
+    if isinstance(raw, dict):
+        for key in ("data", "tickers", "symbols", "rows"):
+            if key in raw:
+                raw = raw[key]
+                break
+        else:
+            # flat dict {symbol: info, ...}
+            raw = list(raw.keys())
+
+    tickers = []
+    for item in raw:
+        if isinstance(item, str):
+            tickers.append(item.strip())
+        elif isinstance(item, dict):
+            sym = item.get("symbol") or item.get("ticker") or item.get("Symbol") or item.get("Ticker")
+            if sym:
+                tickers.append(str(sym).strip())
+
+    seen, result = set(), []
     for t in tickers:
-        if t not in seen:
+        if t and t not in seen:
             seen.add(t)
             result.append(t)
     return result
 
 
-def cap_universe(tickers, seed_keys, label, max_n):
-    """
-    Cap ticker list to max_n.
-    Priority: seed tickers first (have static fallback data), then live-only.
-    Logs a warning if truncation occurs.
-    """
-    if len(tickers) <= max_n:
-        return tickers
-
-    seed_set   = set(seed_keys)
-    with_seed  = [t for t in tickers if t in seed_set]
-    live_only  = [t for t in tickers if t not in seed_set]
-
-    combined = with_seed + live_only
-    capped   = combined[:max_n]
-
-    print(f"  [{label}] Universe capped {len(tickers)} -> {max_n} "
-          f"({len(with_seed)} seed + {len(live_only)} live-only, kept top {max_n})", flush=True)
-    return capped
-
+# ---------------------------------------------------------------------------
+# HELPERS
+# ---------------------------------------------------------------------------
 
 def safe(val, default=None):
     try:
@@ -283,43 +288,46 @@ def calc_rsi(closes, period=14):
 
 
 def get_price_data(sym):
-    """Download OHLCV via yf.download — reliable even from CI."""
-    for period in ("1y", "6mo", "3mo"):
-        try:
-            h = yf.download(sym, period=period, auto_adjust=True,
-                            progress=False, show_errors=False)
-            if h is None or h.empty:
-                continue
-            if isinstance(h.columns, pd.MultiIndex):
-                h.columns = [c[0] if isinstance(c, tuple) else c for c in h.columns]
-            h.columns = [str(c).strip().title() for c in h.columns]
-            if "Close" in h.columns and len(h) > 5:
-                return h
-        except Exception as e:
-            print(f"    hist {period}: {e}")
+    """Download OHLCV with retry on 429."""
+    for attempt in range(MAX_RETRIES):
+        for period in ("1y", "6mo", "3mo"):
+            try:
+                h = yf.download(sym, period=period, auto_adjust=True,
+                                progress=False, show_errors=False)
+                if h is None or h.empty:
+                    continue
+                if isinstance(h.columns, pd.MultiIndex):
+                    h.columns = [c[0] if isinstance(c, tuple) else c for c in h.columns]
+                h.columns = [str(c).strip().title() for c in h.columns]
+                if "Close" in h.columns and len(h) > 5:
+                    return h
+            except Exception as e:
+                msg = str(e).lower()
+                if "429" in msg or "too many" in msg:
+                    print(f"    429 rate-limit on price fetch — waiting {RETRY_BACKOFF_S}s", flush=True)
+                    time.sleep(RETRY_BACKOFF_S)
+                    break   # break period loop, retry outer
+                print(f"    hist {period}: {e}")
     return None
 
 
 def _series_latest(df, *row_keys):
-    """Pull the most-recent non-null value from a financials DataFrame row."""
     if df is None or df.empty:
         return None
     for key in row_keys:
         for idx in df.index:
-            if str(idx).lower().replace(" ", "").replace("_", "") == key.lower().replace(" ", "").replace("_", ""):
+            if str(idx).lower().replace(" ","").replace("_","") == key.lower().replace(" ","").replace("_",""):
                 row = df.loc[idx].dropna()
                 if not row.empty:
                     return safe(row.iloc[0])
     return None
 
 
+# ---------------------------------------------------------------------------
+# LIVE FUNDAMENTALS
+# ---------------------------------------------------------------------------
+
 def fetch_live_fundamentals(sym, seed):
-    """
-    Attempt to fetch live fundamentals from Yahoo Finance.
-    seed may be None (for tickers not in the static FUNDAMENTALS dict),
-    in which case NULL_SEED is used so the live fetch is the only data source.
-    Returns a dict of live values + 'data_source' indicator.
-    """
     if seed is None:
         seed = NULL_SEED
 
@@ -327,134 +335,126 @@ def fetch_live_fundamentals(sym, seed):
      seed_roe, seed_fcf, seed_div, seed_debt,
      seed_gm, seed_pe, seed_ni_pos, seed_ocf_pos, seed_ins) = seed
 
-    # ETFs: skip live fundamental fetch entirely
     if sym in ETF_TICKERS:
         return dict(
-            market_cap_usd = seed_mcap,
-            roe            = seed_roe,
-            fcf_yield      = seed_fcf,
-            div_yield      = seed_div,
-            debt_eq        = seed_debt,
-            gross_margin   = seed_gm,
-            pe_fwd         = seed_pe,
-            net_inc_pos    = seed_ni_pos,
-            op_cf_pos      = seed_ocf_pos,
-            insider_pct    = seed_ins,
-            data_source    = "static_seed",
+            market_cap_usd=seed_mcap, roe=seed_roe, fcf_yield=seed_fcf,
+            div_yield=seed_div, debt_eq=seed_debt, gross_margin=seed_gm,
+            pe_fwd=seed_pe, net_inc_pos=seed_ni_pos, op_cf_pos=seed_ocf_pos,
+            insider_pct=seed_ins, data_source="static_seed",
+            last_updated_utc=datetime.now(timezone.utc).isoformat(),
         )
 
     live = {}
     live_fields = 0
-    total_fields = 6  # mcap, roe, fcf, div, gm, pe
+    total_fields = 6
 
-    try:
-        ticker = yf.Ticker(sym)
-
-        # ── 1. Market Cap via fast_info ──────────────────────────────────────
+    for attempt in range(MAX_RETRIES):
         try:
-            fi = ticker.fast_info
-            mcap = safe(getattr(fi, "market_cap", None))
-            if mcap and mcap > 1e6:
-                live["market_cap_usd"] = mcap
-                live_fields += 1
-                print(f"    mcap live: ${mcap/1e9:.1f}B")
-        except Exception as e:
-            print(f"    fast_info error: {e}")
+            ticker = yf.Ticker(sym)
 
-        # ── 2. Dividend yield + PE via info dict ─────────────────────────────
-        try:
-            info = {}
+            # 1. Market cap
+            try:
+                fi   = ticker.fast_info
+                mcap = safe(getattr(fi, "market_cap", None))
+                if mcap and mcap > 1e6:
+                    live["market_cap_usd"] = mcap
+                    live_fields += 1
+            except Exception as e:
+                if "429" in str(e):
+                    time.sleep(RETRY_BACKOFF_S)
+                    continue
+
+            # 2. Div yield + PE via info
             try:
                 info = ticker.info or {}
-            except Exception:
-                pass
-            raw_div = safe(info.get("dividendYield") or info.get("trailingAnnualDividendYield"))
-            if raw_div is not None and raw_div >= 0:
-                live["div_yield"] = raw_div
-                live_fields += 1
-                print(f"    div_yield live: {raw_div*100:.2f}%")
-            raw_pe = safe(info.get("forwardPE") or info.get("trailingPE"))
-            if raw_pe is not None and 0 < raw_pe < 1000:
-                live["pe_fwd"] = raw_pe
-                live_fields += 1
-                print(f"    pe_fwd live: {raw_pe:.1f}x")
-            if not info.get("shortName") and info.get("longName"):
-                live["_name"]     = info.get("longName", sym)
-            elif info.get("shortName"):
-                live["_name"]     = info["shortName"]
-            if info.get("sector"):
-                live["_sector"]   = info["sector"]
-            if info.get("industry"):
-                live["_industry"] = info["industry"]
-            if info.get("exchange"):
-                live["_exchange"] = info["exchange"]
-        except Exception as e:
-            print(f"    info fetch note: {e}")
-
-        # ── 3. Income statement → ROE & Gross Margin ─────────────────────────
-        try:
-            fin   = ticker.financials
-            bs    = ticker.balance_sheet
-            cf    = ticker.cashflow
-
-            gp  = _series_latest(fin, "GrossProfit", "Gross Profit")
-            rev = _series_latest(fin, "TotalRevenue", "Total Revenue")
-            if gp is not None and rev and rev != 0:
-                gm = gp / rev
-                if 0 < gm < 1:
-                    live["gross_margin"] = gm
+                raw_div = safe(info.get("dividendYield") or info.get("trailingAnnualDividendYield"))
+                if raw_div is not None and raw_div >= 0:
+                    live["div_yield"] = raw_div
                     live_fields += 1
-                    print(f"    gross_margin live: {gm*100:.1f}%")
-
-            ni  = _series_latest(fin, "NetIncome", "Net Income")
-            eq  = _series_latest(bs,  "StockholdersEquity", "Stockholders Equity",
-                                       "CommonStockEquity", "Total Stockholders Equity")
-            if ni is not None and eq and eq != 0:
-                roe = ni / eq
-                if -2 < roe < 10:
-                    live["roe"] = roe
+                raw_pe = safe(info.get("forwardPE") or info.get("trailingPE"))
+                if raw_pe is not None and 0 < raw_pe < 1000:
+                    live["pe_fwd"] = raw_pe
                     live_fields += 1
-                    print(f"    roe live: {roe*100:.1f}%")
+                for fld, keys in (("_name", ("shortName","longName")),
+                                   ("_sector", ("sector",)),
+                                   ("_industry", ("industry",)),
+                                   ("_exchange", ("exchange",))):
+                    for k in keys:
+                        if info.get(k):
+                            live[fld] = info[k]
+                            break
+            except Exception as e:
+                if "429" in str(e):
+                    time.sleep(RETRY_BACKOFF_S)
+                    continue
 
-            ocf = _series_latest(cf, "OperatingCashFlow", "Operating Cash Flow",
-                                       "CashFlowFromContinuingOperatingActivities")
-            if ni is not None:
-                live["net_inc_pos"] = ni > 0
-            if ocf is not None:
-                live["op_cf_pos"] = ocf > 0
+            # 3. Financials
+            try:
+                fin = ticker.financials
+                bs  = ticker.balance_sheet
+                cf  = ticker.cashflow
 
-            capex = _series_latest(cf, "CapitalExpenditures", "Capital Expenditures",
-                                        "CapitalExpenditure")
-            mcap_for_fcf = live.get("market_cap_usd") or seed_mcap
-            if ocf is not None and capex is not None and mcap_for_fcf:
-                fcf = ocf - abs(capex)
-                fcf_yield = fcf / mcap_for_fcf
-                if -0.5 < fcf_yield < 0.5:
-                    live["fcf_yield"] = fcf_yield
-                    live_fields += 1
-                    print(f"    fcf_yield live: {fcf_yield*100:.2f}%")
+                gp  = _series_latest(fin, "GrossProfit", "Gross Profit")
+                rev = _series_latest(fin, "TotalRevenue", "Total Revenue")
+                if gp is not None and rev and rev != 0:
+                    gm = gp / rev
+                    if 0 < gm < 1:
+                        live["gross_margin"] = gm
+                        live_fields += 1
+
+                ni  = _series_latest(fin, "NetIncome", "Net Income")
+                eq  = _series_latest(bs,  "StockholdersEquity","Stockholders Equity",
+                                          "CommonStockEquity","Total Stockholders Equity")
+                if ni is not None and eq and eq != 0:
+                    roe = ni / eq
+                    if -2 < roe < 10:
+                        live["roe"] = roe
+                        live_fields += 1
+
+                ocf   = _series_latest(cf, "OperatingCashFlow","Operating Cash Flow",
+                                           "CashFlowFromContinuingOperatingActivities")
+                capex = _series_latest(cf, "CapitalExpenditures","Capital Expenditures",
+                                           "CapitalExpenditure")
+                if ni  is not None: live["net_inc_pos"] = ni > 0
+                if ocf is not None: live["op_cf_pos"]   = ocf > 0
+
+                mcap_for_fcf = live.get("market_cap_usd") or seed_mcap
+                if ocf is not None and capex is not None and mcap_for_fcf:
+                    fcf = ocf - abs(capex)
+                    fy  = fcf / mcap_for_fcf
+                    if -0.5 < fy < 0.5:
+                        live["fcf_yield"] = fy
+                        live_fields += 1
+            except Exception as e:
+                if "429" in str(e):
+                    time.sleep(RETRY_BACKOFF_S)
+                    continue
+
+            # 4. Debt / equity
+            try:
+                bs2  = ticker.balance_sheet
+                tde  = _series_latest(bs2, "TotalDebt","Total Debt","LongTermDebt")
+                eq2  = _series_latest(bs2, "StockholdersEquity","Stockholders Equity",
+                                           "CommonStockEquity","Total Stockholders Equity")
+                if tde is not None and eq2 and eq2 != 0:
+                    de = (tde / eq2) * 100
+                    if 0 <= de < 2000:
+                        live["debt_eq"] = de
+            except Exception as e:
+                if "429" in str(e):
+                    time.sleep(RETRY_BACKOFF_S)
+                    continue
+
+            break   # success — exit retry loop
 
         except Exception as e:
-            print(f"    financials fetch note: {e}")
+            if "429" in str(e) or "too many" in str(e).lower():
+                print(f"    429 on {sym} attempt {attempt+1} — sleeping {RETRY_BACKOFF_S}s", flush=True)
+                time.sleep(RETRY_BACKOFF_S)
+            else:
+                print(f"    yf.Ticker init error for {sym}: {e}")
+                break
 
-        # ── 4. Debt/Equity via balance sheet ─────────────────────────────────
-        try:
-            bs  = ticker.balance_sheet
-            tde = _series_latest(bs, "TotalDebt", "Total Debt", "LongTermDebt")
-            eq2 = _series_latest(bs, "StockholdersEquity", "Stockholders Equity",
-                                       "CommonStockEquity", "Total Stockholders Equity")
-            if tde is not None and eq2 and eq2 != 0:
-                de = (tde / eq2) * 100
-                if 0 <= de < 2000:
-                    live["debt_eq"] = de
-                    print(f"    debt/equity live: {de:.0f}%")
-        except Exception as e:
-            print(f"    debt fetch note: {e}")
-
-    except Exception as e:
-        print(f"    yf.Ticker init error for {sym}: {e}")
-
-    # ── Merge live values over seed, determine data_source ───────────────────
     result = dict(
         market_cap_usd = live.get("market_cap_usd", seed_mcap),
         roe            = live.get("roe",             seed_roe),
@@ -483,6 +483,10 @@ def fetch_live_fundamentals(sym, seed):
     return result
 
 
+# ---------------------------------------------------------------------------
+# SCORING
+# ---------------------------------------------------------------------------
+
 def score_ticker(sym, seed, hist, live_fund):
     if seed is not None:
         name, exchange, sector, industry = seed[0], seed[1], seed[2], seed[3]
@@ -492,18 +496,18 @@ def score_ticker(sym, seed, hist, live_fund):
         sector   = live_fund.get("_sector",   "Unknown")
         industry = live_fund.get("_industry", "Unknown")
 
-    roe_raw    = live_fund["roe"]
-    fcf_yield  = live_fund["fcf_yield"]
-    div_yield  = live_fund["div_yield"]
-    debt_eq    = live_fund["debt_eq"]
-    gross_mg   = live_fund["gross_margin"]
-    pe_fwd     = live_fund["pe_fwd"]
-    net_inc_pos= live_fund["net_inc_pos"]
-    op_cf_pos  = live_fund["op_cf_pos"]
-    insider_pct= live_fund["insider_pct"]
+    roe_raw     = live_fund["roe"]
+    fcf_yield   = live_fund["fcf_yield"]
+    div_yield   = live_fund["div_yield"]
+    debt_eq     = live_fund["debt_eq"]
+    gross_mg    = live_fund["gross_margin"]
+    pe_fwd      = live_fund["pe_fwd"]
+    net_inc_pos = live_fund["net_inc_pos"]
+    op_cf_pos   = live_fund["op_cf_pos"]
+    insider_pct = live_fund["insider_pct"]
 
-    closes     = hist["Close"].dropna() if hist is not None else None
-    rsi_val    = calc_rsi(closes)
+    closes    = hist["Close"].dropna() if hist is not None else None
+    rsi_val   = calc_rsi(closes)
     above_50 = above_200 = None
     if closes is not None and len(closes) > 0:
         lp = float(closes.iloc[-1])
@@ -541,13 +545,13 @@ def score_ticker(sym, seed, hist, live_fund):
         tp, rp = [], []
         if roe_raw   and roe_raw   > 0.12: tp.append(f"ROE {roe_raw*100:.0f}%")
         if fcf_yield and fcf_yield > 0.03: tp.append(f"FCF yield {fcf_yield*100:.1f}%")
-        if above_50:                       tp.append("above 50-DMA")
-        if above_200:                      tp.append("above 200-DMA")
-        if ins_buy:                        tp.append("insider buying")
+        if above_50:                        tp.append("above 50-DMA")
+        if above_200:                       tp.append("above 200-DMA")
+        if ins_buy:                         tp.append("insider buying")
         if gross_mg  and gross_mg  > 0.50: tp.append(f"wide margins ({gross_mg*100:.0f}%)")
         if rsi_val   and rsi_val   < 35:   tp.append(f"oversold RSI {rsi_val:.0f}")
 
-        if shenan:                         rp.append("earnings-OCF divergence")
+        if shenan:                          rp.append("earnings-OCF divergence")
         if debt_eq   and debt_eq   > 150:  rp.append("high leverage")
         if rsi_val   and rsi_val   > 70:   rp.append("overbought RSI")
         if above_200 is False:             rp.append("below 200-DMA")
@@ -560,45 +564,45 @@ def score_ticker(sym, seed, hist, live_fund):
         )
 
     return horizons, dict(
-        name               = name,
-        exchange           = exchange,
-        sector             = sector,
-        industry           = industry,
-        market_cap_usd     = live_fund["market_cap_usd"],
-        cap_tier           = cap_tier(live_fund["market_cap_usd"]),
-        roe                = roe_raw,
-        fcf_yield          = fcf_yield,
-        div_yield          = div_yield,
-        debt_ebitda        = debt_eq,
-        rsi_14             = rsi_val,
-        above_50ma         = above_50,
-        above_200ma        = above_200,
-        insider_buy_signal = ins_buy,
-        shenanigan_flag    = shenan,
-        gross_margin       = gross_mg,
-        pe_fwd             = pe_fwd,
-        data_source        = live_fund["data_source"],
-        last_updated_utc   = live_fund["last_updated_utc"],
+        name=name, exchange=exchange, sector=sector, industry=industry,
+        market_cap_usd=live_fund["market_cap_usd"],
+        cap_tier=cap_tier(live_fund["market_cap_usd"]),
+        roe=roe_raw, fcf_yield=fcf_yield, div_yield=div_yield,
+        debt_ebitda=debt_eq, rsi_14=rsi_val,
+        above_50ma=above_50, above_200ma=above_200,
+        insider_buy_signal=ins_buy, shenanigan_flag=shenan,
+        gross_margin=gross_mg, pe_fwd=pe_fwd,
+        data_source=live_fund["data_source"],
+        last_updated_utc=live_fund["last_updated_utc"],
     )
 
 
-def process_universe(tickers, label):
-    results = []
-    for i, sym in enumerate(tickers):
+# ---------------------------------------------------------------------------
+# PROCESS UNIVERSE  (no ticker cap; checkpointing every N tickers)
+# ---------------------------------------------------------------------------
+
+def process_universe(tickers, label, existing_results=None):
+    """
+    Process every ticker in `tickers`.  If `existing_results` is provided
+    (from a checkpoint file), tickers already processed are skipped so a
+    re-run after a partial failure continues where it left off.
+    """
+    done_syms = {r["ticker"] for r in (existing_results or [])}
+    results   = list(existing_results or [])
+
+    remaining = [t for t in tickers if t not in done_syms]
+    print(f"  [{label}] Total: {len(tickers)}  Already done: {len(done_syms)}  "
+          f"Remaining: {len(remaining)}", flush=True)
+
+    for i, sym in enumerate(remaining):
         seed = FUNDAMENTALS.get(sym)
-        print(f"  [{label}] {i+1}/{len(tickers)} {sym}"
+        print(f"  [{label}] {len(done_syms)+i+1}/{len(tickers)}  {sym}"
               f"{'  (seed)' if seed else '  (live-only)'}", flush=True)
         try:
             hist      = get_price_data(sym)
             live_fund = fetch_live_fundamentals(sym, seed)
 
-            if hist is not None:
-                print(f"    price rows: {len(hist)}", flush=True)
-            else:
-                print(f"    no price data — using static signals", flush=True)
-
             horizons, metrics = score_ticker(sym, seed, hist, live_fund)
-
             results.append(dict(
                 ticker   = sym,
                 name     = metrics.pop("name"),
@@ -609,63 +613,115 @@ def process_universe(tickers, label):
                 horizons = horizons,
             ))
             print(f"    -> OK  score={horizons['short']['score']}  "
-                  f"source={metrics['data_source']}  cap={metrics['cap_tier']}", flush=True)
+                  f"src={metrics['data_source']}  cap={metrics['cap_tier']}", flush=True)
         except Exception:
             print(f"    -> ERROR:\n{traceback.format_exc()}", flush=True)
 
+        # Batch sleep
         if (i + 1) % BATCH_SIZE == 0:
             time.sleep(SLEEP_S)
+
+        # Checkpoint: persist partial results so a crash doesn't lose all work
+        if (i + 1) % CHECKPOINT_EVERY == 0:
+            _write_checkpoint(results, label)
+            print(f"  [{label}] Checkpoint saved ({len(results)} tickers so far)", flush=True)
 
     return results
 
 
+def _write_checkpoint(results, label):
+    try:
+        existing = {}
+        if os.path.exists(CHECKPOINT):
+            with open(CHECKPOINT) as f:
+                existing = json.load(f)
+        existing[label] = results
+        with open(CHECKPOINT, "w") as f:
+            json.dump(existing, f, default=str)
+    except Exception as e:
+        print(f"  WARNING: checkpoint write failed: {e}", flush=True)
+
+
+def _load_checkpoint(label):
+    try:
+        if os.path.exists(CHECKPOINT):
+            with open(CHECKPOINT) as f:
+                data = json.load(f)
+            return data.get(label, [])
+    except Exception:
+        pass
+    return []
+
+
 def sort_key(s):
     order = {"BUY": 0, "HOLD": 1, "SELL": 2}
-    r     = order.get(s.get("horizons", {}).get("short", {}).get("rating", "HOLD"), 1)
-    score = s.get("horizons", {}).get("short", {}).get("score", 50)
+    r     = order.get(s.get("horizons",{}).get("short",{}).get("rating","HOLD"), 1)
+    score = s.get("horizons",{}).get("short",{}).get("score", 50)
     return (r, -score)
 
 
+# ---------------------------------------------------------------------------
+# MAIN
+# ---------------------------------------------------------------------------
+
 def main():
-    print("=" * 60, flush=True)
-    print("Equity Strategist Dashboard - Analysis Engine v9", flush=True)
-    print(f"Python  {sys.version}", flush=True)
+    start_ts = time.time()
+    print("=" * 70, flush=True)
+    print("Equity Strategist Dashboard - Analysis Engine v10", flush=True)
+    print(f"Python   {sys.version}", flush=True)
     print(f"yfinance {yf.__version__}", flush=True)
     print(f"pandas   {pd.__version__}", flush=True)
-    print(f"MAX_TICKERS_PER_EXCHANGE = {MAX_TICKERS_PER_EXCHANGE}", flush=True)
-    print(f"BATCH_SIZE = {BATCH_SIZE}  SLEEP_S = {SLEEP_S}", flush=True)
-    print("=" * 60, flush=True)
+    print(f"Run start (UTC): {datetime.now(timezone.utc).isoformat()}", flush=True)
+    print(f"BATCH_SIZE={BATCH_SIZE}  SLEEP_S={SLEEP_S}  "
+          f"MAX_RETRIES={MAX_RETRIES}  CHECKPOINT_EVERY={CHECKPOINT_EVERY}", flush=True)
+    print("NO ticker cap — every cache ticker will be reviewed.", flush=True)
+    print("=" * 70, flush=True)
 
-    # ── Build dynamic universe from refreshed cache files ────────────────────
-    cad_from_cache = load_ticker_cache(TSX_CACHE_TXT)
-    usd_from_cache = load_ticker_cache(NYSE_CACHE_TXT)
+    # ── 1. Load universe from all three cache files ──────────────────────────
+    cad_tickers   = load_txt_cache(TSX_CACHE_TXT)
+    nyse_tickers  = load_txt_cache(NYSE_CACHE_TXT)
+    nasdaq_tickers= load_json_cache(NASDAQ_CACHE_JSON)
 
-    # Fall back to FUNDAMENTALS keys if cache files are missing/empty
-    if not cad_from_cache:
-        print("  WARNING: tsx cache empty — falling back to FUNDAMENTALS CAD keys", flush=True)
-        cad_from_cache = [s for s in FUNDAMENTALS if s.endswith(".TO") or s.endswith(".V")]
-    if not usd_from_cache:
-        print("  WARNING: nyse cache empty — falling back to FUNDAMENTALS USD keys", flush=True)
-        usd_from_cache = [s for s in FUNDAMENTALS
-                          if not s.endswith(".TO") and not s.endswith(".V")]
+    # Deduplicate NYSE + NASDAQ into a single USD universe
+    usd_seen = set()
+    usd_tickers = []
+    for t in nyse_tickers + nasdaq_tickers:
+        if t not in usd_seen:
+            usd_seen.add(t)
+            usd_tickers.append(t)
 
-    # ── Cap universe to avoid GitHub Actions timeout ──────────────────────────
-    cad_keys = [k for k in FUNDAMENTALS if k.endswith(".TO") or k.endswith(".V")]
-    usd_keys = [k for k in FUNDAMENTALS if not k.endswith(".TO") and not k.endswith(".V")]
+    # Fallback: if cache files are empty use FUNDAMENTALS seed keys
+    if not cad_tickers:
+        print("  WARNING: TSX cache empty — using FUNDAMENTALS CAD keys", flush=True)
+        cad_tickers = [s for s in FUNDAMENTALS if s.endswith(".TO") or s.endswith(".V")]
+    if not usd_tickers:
+        print("  WARNING: NYSE/NASDAQ caches empty — using FUNDAMENTALS USD keys", flush=True)
+        usd_tickers = [s for s in FUNDAMENTALS
+                       if not s.endswith(".TO") and not s.endswith(".V")]
 
-    cad_from_cache = cap_universe(cad_from_cache, cad_keys, "CAD", MAX_TICKERS_PER_EXCHANGE)
-    usd_from_cache = cap_universe(usd_from_cache, usd_keys, "USD", MAX_TICKERS_PER_EXCHANGE)
+    print(f"Universe loaded: {len(cad_tickers)} CAD  |  "
+          f"{len(nyse_tickers)} NYSE + {len(nasdaq_tickers)} NASDAQ "
+          f"= {len(usd_tickers)} USD (deduped)", flush=True)
+    print(f"Grand total to review: {len(cad_tickers)+len(usd_tickers)}", flush=True)
 
-    print(f"Universe: {len(cad_from_cache)} CAD + {len(usd_from_cache)} USD "
-          f"= {len(cad_from_cache)+len(usd_from_cache)} total", flush=True)
+    # ── 2. Load checkpoints (resume after any partial failure) ────────────────
+    cad_checkpoint = _load_checkpoint("CAD")
+    usd_checkpoint = _load_checkpoint("USD")
+    if cad_checkpoint:
+        print(f"  Resuming CAD from checkpoint ({len(cad_checkpoint)} already done)", flush=True)
+    if usd_checkpoint:
+        print(f"  Resuming USD from checkpoint ({len(usd_checkpoint)} already done)", flush=True)
 
-    cad = process_universe(cad_from_cache, "CAD")
-    usd = process_universe(usd_from_cache, "USD")
+    # ── 3. Process ────────────────────────────────────────────────────────────
+    cad = process_universe(cad_tickers, "CAD", cad_checkpoint)
+    usd = process_universe(usd_tickers, "USD", usd_checkpoint)
 
     cad.sort(key=sort_key)
     usd.sort(key=sort_key)
 
-    print(f"\nResults: {len(cad)} CAD, {len(usd)} USD", flush=True)
+    elapsed = time.time() - start_ts
+    print(f"\nResults: {len(cad)} CAD | {len(usd)} USD", flush=True)
+    print(f"Elapsed: {elapsed/60:.1f} min", flush=True)
 
     if len(cad) == 0 and len(usd) == 0:
         print("ERROR: Zero results produced.", file=sys.stderr)
@@ -673,8 +729,10 @@ def main():
 
     live_count    = sum(1 for s in cad+usd if s.get("data_source") == "live_yahoo")
     partial_count = sum(1 for s in cad+usd if s.get("data_source") == "partial_yahoo")
-    print(f"  live_yahoo: {live_count}  partial: {partial_count}", flush=True)
+    static_count  = sum(1 for s in cad+usd if s.get("data_source") == "static_seed")
+    print(f"  live_yahoo: {live_count}  partial: {partial_count}  static: {static_count}", flush=True)
 
+    # ── 4. Write output ────────────────────────────────────────────────────────
     payload = dict(
         generated_at = datetime.now(timezone.utc).isoformat(),
         cad  = cad,
@@ -683,8 +741,15 @@ def main():
             horizons  = HORIZON_LABELS,
             cap_tiers = {"mega": ">= $200B", "large": "$10B-$200B",
                          "mid": "$2B-$10B", "small": "< $2B"},
-            engine_version = "v9",
-            max_tickers_per_exchange = MAX_TICKERS_PER_EXCHANGE,
+            engine_version = "v10",
+            universe = {
+                "cad_total": len(cad_tickers),
+                "nyse_loaded": len(nyse_tickers),
+                "nasdaq_loaded": len(nasdaq_tickers),
+                "usd_total_deduped": len(usd_tickers),
+                "grand_total": len(cad_tickers) + len(usd_tickers),
+            },
+            elapsed_minutes = round(elapsed / 60, 1),
             note = "For informational purposes only. Not financial advice.",
         )
     )
@@ -693,6 +758,10 @@ def main():
     os.makedirs(os.path.dirname(out), exist_ok=True)
     with open(out, "w") as f:
         json.dump(payload, f, indent=2, default=str)
+
+    # Clean up checkpoint on successful completion
+    if os.path.exists(CHECKPOINT):
+        os.remove(CHECKPOINT)
 
     print(f"\nWrote {out}", flush=True)
     print(f"  CAD BUYs: {sum(1 for s in cad if s['horizons']['short']['rating']=='BUY')}", flush=True)
