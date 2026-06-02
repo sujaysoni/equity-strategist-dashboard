@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-02T01:11:56.266534Z",
+  "generated_at": "2026-06-02T17:01:15.668632Z",
   "count": 2167,
   "tsx_count": 753,
   "tsxv_count": 1414,
@@ -356,12 +356,6 @@
       "ticker": "AGMR.TO",
       "name": "Silver Mountain Resources Inc.",
       "exchange": "TSX",
-      "sector": ""
-    },
-    {
-      "ticker": "AGT.V",
-      "name": "Applied Graphite Technologies Corporation",
-      "exchange": "TSXV",
       "sector": ""
     },
     {
@@ -4543,6 +4537,12 @@
     {
       "ticker": "FRNT.V",
       "name": "FRNT Financial Inc.",
+      "exchange": "TSXV",
+      "sector": ""
+    },
+    {
+      "ticker": "FROG.V",
+      "name": "Bullfrog Gold Corporation",
       "exchange": "TSXV",
       "sector": ""
     },
