@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-06-02T17:01:15.668632Z",
-  "count": 2167,
-  "tsx_count": 753,
-  "tsxv_count": 1414,
+  "generated_at": "2026-06-03T18:26:54.072219Z",
+  "count": 2164,
+  "tsx_count": 751,
+  "tsxv_count": 1413,
   "tickers": [
     {
       "ticker": "AAA-P.V",
@@ -2083,12 +2083,6 @@
     {
       "ticker": "CBI.V",
       "name": "Colibri Resource Corporation",
-      "exchange": "TSXV",
-      "sector": ""
-    },
-    {
-      "ticker": "CBIT.V",
-      "name": "Cathedra Bitcoin Inc.",
       "exchange": "TSXV",
       "sector": ""
     },
@@ -9809,12 +9803,6 @@
       "sector": ""
     },
     {
-      "ticker": "RPR-DB-A.TO",
-      "name": "Ravelin Properties REIT",
-      "exchange": "TSX",
-      "sector": ""
-    },
-    {
       "ticker": "RPX.V",
       "name": "RPX Gold Inc.",
       "exchange": "TSXV",
@@ -12577,12 +12565,6 @@
     {
       "ticker": "WN.TO",
       "name": "George Weston Limited",
-      "exchange": "TSX",
-      "sector": ""
-    },
-    {
-      "ticker": "WNDR.TO",
-      "name": "WonderFi Technologies Inc.",
       "exchange": "TSX",
       "sector": ""
     },
