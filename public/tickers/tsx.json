@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-06-04T16:43:13.052695Z",
-  "count": 2164,
+  "generated_at": "2026-06-05T16:25:34.091271Z",
+  "count": 2166,
   "tsx_count": 751,
-  "tsxv_count": 1413,
+  "tsxv_count": 1415,
   "tickers": [
     {
       "ticker": "AAA-P.V",
@@ -2891,6 +2891,12 @@
       "sector": ""
     },
     {
+      "ticker": "CSX.V",
+      "name": "Clean Seed Capital Group Ltd.",
+      "exchange": "TSXV",
+      "sector": ""
+    },
+    {
       "ticker": "CT-P.V",
       "name": "CarbonTech Capital Corp.",
       "exchange": "TSXV",
@@ -2954,12 +2960,6 @@
       "ticker": "CTV.V",
       "name": "CleanTech Vanadium Mining Corp.",
       "exchange": "TSXV",
-      "sector": ""
-    },
-    {
-      "ticker": "CTX.TO",
-      "name": "Crescita Therapeutics Inc.",
-      "exchange": "TSX",
       "sector": ""
     },
     {
@@ -4422,7 +4422,7 @@
     },
     {
       "ticker": "FMT.V",
-      "name": "Fuerte Metals Corporation.",
+      "name": "Fuerte Metals Corporation",
       "exchange": "TSXV",
       "sector": ""
     },
@@ -6107,6 +6107,12 @@
       "sector": ""
     },
     {
+      "ticker": "JAY.V",
+      "name": "Blue Jay Gold Corp.",
+      "exchange": "TSXV",
+      "sector": ""
+    },
+    {
       "ticker": "JDN.V",
       "name": "Jayden Resources Inc.",
       "exchange": "TSXV",
@@ -7254,7 +7260,7 @@
     },
     {
       "ticker": "MFA-P.V",
-      "name": "Mayfair Acquisition Corporation",
+      "name": "Mayfair Acquisition Corp.",
       "exchange": "TSXV",
       "sector": ""
     },
@@ -12038,6 +12044,12 @@
       "ticker": "VG.V",
       "name": "Volcanic Gold Mines Inc",
       "exchange": "TSXV",
+      "sector": ""
+    },
+    {
+      "ticker": "VGC.TO",
+      "name": "Valor Gold Corp.",
+      "exchange": "TSX",
       "sector": ""
     },
     {
