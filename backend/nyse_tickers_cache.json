@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-06-05T16:26:34.581661+00:00",
-  "count": 7113,
+  "generated_at": "2026-06-06T22:45:28.894139+00:00",
+  "count": 7117,
   "source": "nasdaq-trader-nasdaqlisted + nasdaq-trader-otherlisted + sec-edgar-fallback",
   "exchanges": [
     "NASDAQ",
@@ -120,6 +120,13 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "2102123"
+    },
+    {
+      "ticker": "AADX",
+      "name": "Applied Aerospace & Defense, Inc.",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "2118195"
     },
     {
       "ticker": "AAL",
@@ -4712,6 +4719,13 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1701478"
+    },
+    {
+      "ticker": "AZUL",
+      "name": "AZUL SA",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "1432364"
     },
     {
       "ticker": "AZZ",
@@ -12520,7 +12534,7 @@
     },
     {
       "ticker": "DCBG",
-      "name": "Dime Community Bancshares, Inc. /NY/",
+      "name": "Dime Commercial Bancshares, Inc. /NY/",
       "exchange": "NYSE",
       "sector": "",
       "cik": "846617"
@@ -12562,7 +12576,7 @@
     },
     {
       "ticker": "DCOM",
-      "name": "Dime Community Bancshares, Inc. /NY/",
+      "name": "Dime Commercial Bancshares, Inc. /NY/",
       "exchange": "NYSE",
       "sector": "",
       "cik": "846617"
@@ -17354,6 +17368,13 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1828937"
+    },
+    {
+      "ticker": "FOCL",
+      "name": "EDAP TMS SA",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "1041934"
     },
     {
       "ticker": "FOF",
@@ -32267,10 +32288,10 @@
     },
     {
       "ticker": "NVRI",
-      "name": "ENVIRI Corp",
+      "name": "Enviri II Corp",
       "exchange": "NYSE",
       "sector": "",
-      "cik": "45876"
+      "cik": "2104052"
     },
     {
       "ticker": "NVS",
@@ -47321,6 +47342,13 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1967649"
+    },
+    {
+      "ticker": "VSXY",
+      "name": "Victoria's Secret & Co.",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "1856437"
     },
     {
       "ticker": "VTAK",
