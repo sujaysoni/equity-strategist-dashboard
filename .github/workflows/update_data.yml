@@ -1,43 +1,56 @@
 name: Update Stock Recommendations
 
+# -----------------------------------------------------------------------
+# HOW THE PIPELINE WORKS
+# -----------------------------------------------------------------------
+# Three sequential jobs share a 6-hour timeout each (18 h total budget):
+#
+#  Job 1 — fetch-tickers
+#    Refreshes TSX/TSXV + NYSE/NASDAQ ticker caches.
+#    Uploads them as a GitHub Actions artifact (ttl: 1 day).
+#    Runs the DST dedup guard so jobs 2 & 3 never fire twice in one day.
+#
+#  Job 2 — analyze-cad
+#    Downloads the ticker artifact.
+#    Runs analyze_stocks.py --exchange CAD --deadline-minutes 340
+#    (soft-kills itself 20 min before the 360-min GitHub hard limit).
+#    Uploads _checkpoint_CAD.json + the partial recommendations.json
+#    (partial flag = true, usd=[]) as an artifact.
+#
+#  Job 3 — analyze-usd
+#    Downloads both artifacts.
+#    Restores ticker caches + the partial recommendations.json.
+#    Runs analyze_stocks.py --exchange USD --deadline-minutes 340.
+#    The script reads the CAD results from recommendations.json and merges
+#    them with the fresh USD results before writing the final output.
+#    Commits & pushes — triggering deploy.yml to rebuild the site.
+#
+# If either analysis job hits the soft deadline it exits with code 0 and
+# marks the output partial=true.  The next scheduled run downloads the
+# stale checkpoint artifact and resumes where it left off.
+# -----------------------------------------------------------------------
+
 on:
   schedule:
-    # ------------------------------------------------------------------ #
-    # Target: 10:00 AM Eastern — every weekday, year-round.
-    #
-    # GitHub crons run in UTC. Eastern time has two offsets:
-    #   EDT  (Mar 2nd Sun → Nov 1st Sun)  = UTC-4  → 14:00 UTC
-    #   EST  (Nov 1st Sun → Mar 2nd Sun)  = UTC-5  → 15:00 UTC
-    #
-    # We fire at BOTH 14:00 UTC and 15:00 UTC Mon-Fri so that exactly
-    # one of them always lands at 10:00 AM Eastern regardless of DST.
-    # A dedup guard in the job skips the run if analysis already ran
-    # within the past 3 hours, so only one execution actually proceeds.
-    #
-    #   14:00 UTC = 10:00 AM EDT (active ~Mar–Nov)
-    #   15:00 UTC = 10:00 AM EST (active ~Nov–Mar)
-    # ------------------------------------------------------------------ #
     - cron: '0 14 * * 1-5'   # 10:00 AM EDT  (UTC-4, summer)
     - cron: '0 15 * * 1-5'   # 10:00 AM EST  (UTC-5, winter)
   repository_dispatch:
     types: [refresh-analysis]
-  workflow_dispatch:          # manual trigger from GitHub UI or API
-  # NOTE: workflow_call intentionally removed.
-  # When workflow_call is listed alongside a schedule trigger, GitHub
-  # classifies the file as a reusable workflow and SILENTLY SUPPRESSES
-  # the cron scheduler entirely. Removing it restores normal scheduling.
+  workflow_dispatch:
 
-# -----------------------------------------------------------------------
-# Top-level permissions — MUST be at workflow level (not job level) for
-# the GITHUB_TOKEN to have contents:write so the push step works.
-# -----------------------------------------------------------------------
 permissions:
   contents: write
 
+# -----------------------------------------------------------------------
+# JOB 1 — fetch-tickers
+# -----------------------------------------------------------------------
 jobs:
-  analyze:
+  fetch-tickers:
+    name: "1 — Refresh ticker caches"
     runs-on: ubuntu-22.04
-    timeout-minutes: 360
+    timeout-minutes: 30
+    outputs:
+      skip: ${{ steps.dedup.outputs.skip }}
 
     steps:
       - name: Checkout repository
@@ -47,25 +60,27 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       # ------------------------------------------------------------------ #
-      # DST dedup guard — skip if recommendations.json was already written
-      # within the last 3 hours (prevents the non-DST cron slot from
-      # running a duplicate analysis on the same day).
-      # Skipped entirely for workflow_dispatch / repository_dispatch.
+      # DST dedup guard — skip the whole pipeline if today's run already   #
+      # completed within the last 3 hours.                                  #
       # ------------------------------------------------------------------ #
       - name: Check if already ran today (DST dedup)
         id: dedup
         if: github.event_name == 'schedule'
         run: |
           if [ -f public/recommendations.json ]; then
-            GEN=$(head -c 512 public/recommendations.json | grep -oP '"generated_at"\s*:\s*"\K[^"]+' | head -1)
+            GEN=$(head -c 512 public/recommendations.json \
+                  | grep -oP '"generated_at"\s*:\s*"\K[^"]+' | head -1)
             if [ -n "$GEN" ]; then
+              PARTIAL=$(head -c 512 public/recommendations.json \
+                        | grep -oP '"partial"\s*:\s*\K(true|false)' | head -1)
               GEN_EPOCH=$(date -d "$GEN" +%s 2>/dev/null || echo 0)
               NOW_EPOCH=$(date +%s)
               AGE=$(( NOW_EPOCH - GEN_EPOCH ))
-              echo "Last run: $GEN  (${AGE}s ago)"
-              if [ "$AGE" -lt 10800 ]; then
+              echo "Last run: $GEN  (${AGE}s ago)  partial=$PARTIAL"
+              # Skip only if recent AND fully complete (partial != true)
+              if [ "$AGE" -lt 10800 ] && [ "$PARTIAL" != "true" ]; then
                 echo "skip=true" >> "$GITHUB_OUTPUT"
-                echo "Already ran within 3 hours — skipping duplicate DST slot."
+                echo "Already ran and completed within 3 hours — skipping."
               else
                 echo "skip=false" >> "$GITHUB_OUTPUT"
               fi
@@ -94,17 +109,7 @@ jobs:
         run: |
           pip install --upgrade pip wheel setuptools
           pip install -r requirements.txt
-          python -c "import yfinance; print('yfinance', yfinance.__version__)"
-          python -c "import pandas;   print('pandas',   pandas.__version__)"
 
-      # ------------------------------------------------------------------ #
-      # Refresh ticker caches BEFORE analysis so the universe is current.
-      # fetch_nyse_tickers.py (v3) now writes THREE files:
-      #   backend/nyse_tickers_cache.txt    (combined, all tickers)
-      #   backend/nyse_tickers_cache.json   (NYSE/AMEX/ARCA only)
-      #   backend/nasdaq_tickers_cache.json (NASDAQ only, replaces stale seed)
-      # continue-on-error: scraping failure must not abort the whole run.
-      # ------------------------------------------------------------------ #
       - name: Refresh TSX / TSXV ticker cache
         if: steps.dedup.outputs.skip != 'true'
         run: python backend/fetch_tsx_tickers.py
@@ -115,69 +120,200 @@ jobs:
         run: python backend/fetch_nyse_tickers.py
         continue-on-error: true
 
-      # ------------------------------------------------------------------ #
-      # Validate that the ticker fetches produced non-empty caches.
-      # Prints counts to the Actions log so a zero-count failure is
-      # immediately visible rather than silently producing stale output.
-      # ------------------------------------------------------------------ #
       - name: Validate ticker caches
         if: steps.dedup.outputs.skip != 'true'
         run: |
           python - <<'EOF'
-          import json, os, sys
-
+          import json, os
           base = "backend"
           files = {
-              "TSX/TSXV"     : os.path.join(base, "tsx_tickers_cache.json"),
-              "NYSE/AMEX"    : os.path.join(base, "nyse_tickers_cache.json"),
-              "NASDAQ"       : os.path.join(base, "nasdaq_tickers_cache.json"),
+              "TSX/TSXV" : os.path.join(base, "tsx_tickers_cache.json"),
+              "NYSE/AMEX": os.path.join(base, "nyse_tickers_cache.json"),
+              "NASDAQ"   : os.path.join(base, "nasdaq_tickers_cache.json"),
           }
-          all_ok = True
           for label, path in files.items():
               if not os.path.exists(path):
-                  print(f"  [WARN] {label}: file not found ({path})", flush=True)
-                  all_ok = False
-                  continue
-              with open(path) as f:
-                  d = json.load(f)
+                  print(f"  [WARN] {label}: not found", flush=True); continue
+              with open(path) as f: d = json.load(f)
               count = d.get("count", len(d.get("tickers", [])))
-              gen   = d.get("generated_at", "unknown")
-              print(f"  {label:15s}: {count:,} tickers  (generated {gen})", flush=True)
-              if count == 0:
-                  print(f"  [WARN] {label} cache is EMPTY — analysis will fall back to seed.", flush=True)
-
-          if not all_ok:
-              print("One or more cache files missing — continuing with seed fallback.", flush=True)
+              print(f"  {label:15s}: {count:,} tickers", flush=True)
           EOF
 
       - name: Copy ticker caches to public/tickers/
         if: steps.dedup.outputs.skip != 'true'
         run: |
           mkdir -p public/tickers
-          # TSX / TSXV
-          [ -f backend/tsx_tickers_cache.json ]     && cp backend/tsx_tickers_cache.json     public/tickers/tsx.json        || true
-          # NYSE / AMEX / ARCA
-          [ -f backend/nyse_tickers_cache.json ]    && cp backend/nyse_tickers_cache.json    public/tickers/nyse.json       || true
-          # NASDAQ (live, written by fetch_nyse_tickers.py v3)
-          [ -f backend/nasdaq_tickers_cache.json ]  && cp backend/nasdaq_tickers_cache.json  public/tickers/nasdaq.json     || true
-          # Legacy combined file kept for any front-end code that still reads it
-          [ -f backend/nyse_tickers_cache.json ]    && cp backend/nyse_tickers_cache.json    public/tickers/nyse_nasdaq.json || true
+          [ -f backend/tsx_tickers_cache.json ]    && cp backend/tsx_tickers_cache.json    public/tickers/tsx.json        || true
+          [ -f backend/nyse_tickers_cache.json ]   && cp backend/nyse_tickers_cache.json   public/tickers/nyse.json       || true
+          [ -f backend/nasdaq_tickers_cache.json ] && cp backend/nasdaq_tickers_cache.json public/tickers/nasdaq.json     || true
+          [ -f backend/nyse_tickers_cache.json ]   && cp backend/nyse_tickers_cache.json   public/tickers/nyse_nasdaq.json || true
 
-      # ------------------------------------------------------------------ #
-      # Core analysis
-      # ------------------------------------------------------------------ #
-      - name: Run analysis
+      # Upload fresh ticker caches so analysis jobs use the same snapshot
+      - name: Upload ticker-cache artifact
         if: steps.dedup.outputs.skip != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ticker-caches
+          retention-days: 1
+          path: |
+            backend/tsx_tickers_cache.txt
+            backend/tsx_tickers_cache.json
+            backend/nyse_tickers_cache.txt
+            backend/nyse_tickers_cache.json
+            backend/nasdaq_tickers_cache.json
+
+# -----------------------------------------------------------------------
+# JOB 2 — analyze-cad
+# -----------------------------------------------------------------------
+  analyze-cad:
+    name: "2 — Analyze CAD (TSX / TSXV)"
+    runs-on: ubuntu-22.04
+    timeout-minutes: 360
+    needs: fetch-tickers
+    if: needs.fetch-tickers.outputs.skip != 'true'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install system deps
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libxml2-dev libxslt-dev
+
+      - name: Install Python dependencies
+        run: |
+          pip install --upgrade pip wheel setuptools
+          pip install -r requirements.txt
+
+      - name: Download ticker-cache artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ticker-caches
+          path: backend/
+
+      # Download prior CAD checkpoint if it exists (resume on partial runs)
+      - name: Download prior CAD checkpoint (if any)
+        uses: actions/download-artifact@v4
+        with:
+          name: checkpoint-cad
+          path: backend/
+        continue-on-error: true   # artifact won't exist on first run
+
+      - name: Run CAD analysis
         env:
           POLYGON_API_KEY:   ${{ secrets.POLYGON_API_KEY }}
           ALPHA_VANTAGE_KEY: ${{ secrets.ALPHA_VANTAGE_KEY }}
-        run: python backend/analyze_stocks.py
+        run: |
+          python backend/analyze_stocks.py \
+            --exchange CAD \
+            --deadline-minutes 340
+
+      # Always upload checkpoint + partial output so job 3 can consume them
+      - name: Upload CAD results artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cad-results
+          retention-days: 1
+          path: |
+            backend/_checkpoint_CAD.json
+            public/recommendations.json
+
+      # Save CAD checkpoint separately so it can be re-downloaded next run
+      - name: Upload CAD checkpoint artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: checkpoint-cad
+          retention-days: 2
+          path: backend/_checkpoint_CAD.json
+        continue-on-error: true   # may not exist if run completed cleanly
+
+# -----------------------------------------------------------------------
+# JOB 3 — analyze-usd
+# -----------------------------------------------------------------------
+  analyze-usd:
+    name: "3 — Analyze USD (NYSE / NASDAQ)"
+    runs-on: ubuntu-22.04
+    timeout-minutes: 360
+    needs: analyze-cad
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install system deps
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libxml2-dev libxslt-dev
+
+      - name: Install Python dependencies
+        run: |
+          pip install --upgrade pip wheel setuptools
+          pip install -r requirements.txt
+
+      - name: Download ticker-cache artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ticker-caches
+          path: backend/
+
+      - name: Download CAD results artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: cad-results
+          path: .
+
+      # Download prior USD checkpoint if it exists (resume on partial runs)
+      - name: Download prior USD checkpoint (if any)
+        uses: actions/download-artifact@v4
+        with:
+          name: checkpoint-usd
+          path: backend/
+        continue-on-error: true
+
+      - name: Run USD analysis
+        env:
+          POLYGON_API_KEY:   ${{ secrets.POLYGON_API_KEY }}
+          ALPHA_VANTAGE_KEY: ${{ secrets.ALPHA_VANTAGE_KEY }}
+        run: |
+          python backend/analyze_stocks.py \
+            --exchange USD \
+            --deadline-minutes 340
+
+      # Save USD checkpoint in case this job also times out
+      - name: Upload USD checkpoint artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: checkpoint-usd
+          retention-days: 2
+          path: backend/_checkpoint_USD.json
+        continue-on-error: true
 
       # ------------------------------------------------------------------ #
-      # Commit all outputs — push triggers deploy.yml automatically
+      # Commit all outputs — push triggers deploy.yml automatically         #
       # ------------------------------------------------------------------ #
       - name: Commit & push results
-        if: steps.dedup.outputs.skip != 'true'
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name  "github-actions[bot]"

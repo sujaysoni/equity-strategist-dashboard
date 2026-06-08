@@ -1,37 +1,39 @@
 #!/usr/bin/env python3
 """
-Equity Strategist Dashboard - Analysis Engine v10
+Equity Strategist Dashboard - Analysis Engine v11
 
 UNIVERSE (ALL three cache files — no cap):
   CAD : tsx_tickers_cache.txt
-  USD : nyse_tickers_cache.txt   +  nasdaq_tickers_cache.json
+  USD : nyse_tickers_cache.txt  +  nasdaq_tickers_cache.json
 
-This version removes the MAX_TICKERS_PER_EXCHANGE hard-cap so every ticker
-in every cache is reviewed each daily run, however long that takes.
-
-Key v10 changes:
-  - Reads nasdaq_tickers_cache.json in addition to the .txt files
-  - No upper-limit on tickers per exchange (runs until done)
-  - Adaptive back-off on HTTP 429 / too-many-requests errors
-  - Progress checkpointing: partial results written every 50 tickers so a
-    crash mid-run doesn't lose all work
-  - BATCH_SIZE = 20, base SLEEP_S = 0.5  (yfinance is fast; throttle gently)
-  - All v9 scoring / horizon logic preserved unchanged
+v11 changes vs v10
+------------------
+* --exchange CAD|USD   CLI flag — each CI job processes one exchange only
+* --deadline-minutes N CLI flag — soft kill: flush results and exit cleanly
+  N minutes after start (default 340, leaving ~20 min buffer inside the
+  GitHub 360-minute job limit).
+* Checkpoint files are now per-exchange:  _checkpoint_CAD.json / _checkpoint_USD.json
+* CAD job writes a *partial* recommendations.json  (cad=results, usd=[])
+* USD job reads the partial JSON produced by the CAD job, merges results,
+  and writes the final recommendations.json
+* All v10 scoring / horizon / seed logic is UNCHANGED
 """
 
-import os, json, math, time, traceback, sys
+import os, json, math, time, traceback, sys, argparse
 import yfinance as yf
 import pandas as pd
 from datetime import datetime, timezone
 
 BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
 OUT_PATH    = os.path.join(BACKEND_DIR, "..", "public", "recommendations.json")
-CHECKPOINT  = os.path.join(BACKEND_DIR, "_checkpoint.json")  # partial results
+
+def _checkpoint_path(label):
+    return os.path.join(BACKEND_DIR, f"_checkpoint_{label}.json")
 
 # Cache file paths
-TSX_CACHE_TXT    = os.path.join(BACKEND_DIR, "tsx_tickers_cache.txt")
-NYSE_CACHE_TXT   = os.path.join(BACKEND_DIR, "nyse_tickers_cache.txt")
-NASDAQ_CACHE_JSON= os.path.join(BACKEND_DIR, "nasdaq_tickers_cache.json")
+TSX_CACHE_TXT     = os.path.join(BACKEND_DIR, "tsx_tickers_cache.txt")
+NYSE_CACHE_TXT    = os.path.join(BACKEND_DIR, "nyse_tickers_cache.txt")
+NASDAQ_CACHE_JSON = os.path.join(BACKEND_DIR, "nasdaq_tickers_cache.json")
 
 MEGA_CAP  = 200e9
 LARGE_CAP = 10e9
@@ -51,11 +53,11 @@ HORIZON_WEIGHTS = {
 }
 
 # Batching / rate-limit settings
-BATCH_SIZE        = 20     # tickers per batch before a courtesy sleep
-SLEEP_S           = 0.5   # base inter-batch sleep (seconds)
-MAX_RETRIES       = 3     # retries per ticker on HTTP 429
-RETRY_BACKOFF_S   = 15    # seconds to wait on a 429 before retry
-CHECKPOINT_EVERY  = 50   # write partial results to disk every N tickers
+BATCH_SIZE       = 20    # tickers per batch before a courtesy sleep
+SLEEP_S          = 0.5   # base inter-batch sleep (seconds)
+MAX_RETRIES      = 3     # retries per ticker on HTTP 429
+RETRY_BACKOFF_S  = 15    # seconds to wait on a 429 before retry
+CHECKPOINT_EVERY = 50    # write partial results to disk every N tickers
 
 # ---------------------------------------------------------------------------
 # STATIC FUNDAMENTALS SEED  (fallback only — used when live fetch fails)
@@ -220,7 +222,7 @@ def load_json_cache(path):
     Read a JSON ticker cache.  Handles two common shapes:
       - list of strings:              ["AAPL", "MSFT", ...]
       - list of dicts with 'symbol':  [{"symbol": "AAPL", ...}, ...]
-      - dict with 'data' key:         {"data": [...], ...}
+      - dict with 'data' / 'tickers' / 'symbols' key
     Returns a deduped list of ticker strings.
     """
     if not os.path.exists(path):
@@ -229,14 +231,12 @@ def load_json_cache(path):
     with open(path) as f:
         raw = json.load(f)
 
-    # Unwrap common wrapper dict
     if isinstance(raw, dict):
         for key in ("data", "tickers", "symbols", "rows"):
             if key in raw:
                 raw = raw[key]
                 break
         else:
-            # flat dict {symbol: info, ...}
             raw = list(raw.keys())
 
     tickers = []
@@ -306,7 +306,7 @@ def get_price_data(sym):
                 if "429" in msg or "too many" in msg:
                     print(f"    429 rate-limit on price fetch — waiting {RETRY_BACKOFF_S}s", flush=True)
                     time.sleep(RETRY_BACKOFF_S)
-                    break   # break period loop, retry outer
+                    break
                 print(f"    hist {period}: {e}")
     return None
 
@@ -352,7 +352,6 @@ def fetch_live_fundamentals(sym, seed):
         try:
             ticker = yf.Ticker(sym)
 
-            # 1. Market cap
             try:
                 fi   = ticker.fast_info
                 mcap = safe(getattr(fi, "market_cap", None))
@@ -364,7 +363,6 @@ def fetch_live_fundamentals(sym, seed):
                     time.sleep(RETRY_BACKOFF_S)
                     continue
 
-            # 2. Div yield + PE via info
             try:
                 info = ticker.info or {}
                 raw_div = safe(info.get("dividendYield") or info.get("trailingAnnualDividendYield"))
@@ -388,7 +386,6 @@ def fetch_live_fundamentals(sym, seed):
                     time.sleep(RETRY_BACKOFF_S)
                     continue
 
-            # 3. Financials
             try:
                 fin = ticker.financials
                 bs  = ticker.balance_sheet
@@ -430,7 +427,6 @@ def fetch_live_fundamentals(sym, seed):
                     time.sleep(RETRY_BACKOFF_S)
                     continue
 
-            # 4. Debt / equity
             try:
                 bs2  = ticker.balance_sheet
                 tde  = _series_latest(bs2, "TotalDebt","Total Debt","LongTermDebt")
@@ -445,7 +441,7 @@ def fetch_live_fundamentals(sym, seed):
                     time.sleep(RETRY_BACKOFF_S)
                     continue
 
-            break   # success — exit retry loop
+            break
 
         except Exception as e:
             if "429" in str(e) or "too many" in str(e).lower():
@@ -578,30 +574,46 @@ def score_ticker(sym, seed, hist, live_fund):
 
 
 # ---------------------------------------------------------------------------
-# PROCESS UNIVERSE  (no ticker cap; checkpointing every N tickers)
+# PROCESS UNIVERSE
 # ---------------------------------------------------------------------------
 
-def process_universe(tickers, label, existing_results=None):
+def process_universe(tickers, label, existing_results, deadline_ts):
     """
-    Process every ticker in `tickers`.  If `existing_results` is provided
-    (from a checkpoint file), tickers already processed are skipped so a
-    re-run after a partial failure continues where it left off.
+    Process every ticker in `tickers`.
+
+    `existing_results` — list of already-scored records (from checkpoint);
+                         tickers already in here are skipped.
+    `deadline_ts`      — Unix timestamp; when time.time() approaches this
+                         value the loop saves a checkpoint and exits cleanly
+                         so the caller can write partial output before GitHub
+                         hard-kills the runner.
     """
-    done_syms = {r["ticker"] for r in (existing_results or [])}
-    results   = list(existing_results or [])
+    DEADLINE_BUFFER_S = 90   # stop 90 s before the hard deadline
+
+    done_syms = {r["ticker"] for r in existing_results}
+    results   = list(existing_results)
 
     remaining = [t for t in tickers if t not in done_syms]
     print(f"  [{label}] Total: {len(tickers)}  Already done: {len(done_syms)}  "
           f"Remaining: {len(remaining)}", flush=True)
 
+    timed_out = False
     for i, sym in enumerate(remaining):
+        # ── soft deadline check ──────────────────────────────────────────────
+        if time.time() >= deadline_ts - DEADLINE_BUFFER_S:
+            print(f"  [{label}] Soft deadline reached at ticker {sym} "
+                  f"({len(done_syms)+i}/{len(tickers)}) — saving checkpoint and exiting.",
+                  flush=True)
+            _write_checkpoint(results, label)
+            timed_out = True
+            break
+
         seed = FUNDAMENTALS.get(sym)
         print(f"  [{label}] {len(done_syms)+i+1}/{len(tickers)}  {sym}"
               f"{'  (seed)' if seed else '  (live-only)'}", flush=True)
         try:
             hist      = get_price_data(sym)
             live_fund = fetch_live_fundamentals(sym, seed)
-
             horizons, metrics = score_ticker(sym, seed, hist, live_fund)
             results.append(dict(
                 ticker   = sym,
@@ -617,39 +629,36 @@ def process_universe(tickers, label, existing_results=None):
         except Exception:
             print(f"    -> ERROR:\n{traceback.format_exc()}", flush=True)
 
-        # Batch sleep
         if (i + 1) % BATCH_SIZE == 0:
             time.sleep(SLEEP_S)
 
-        # Checkpoint: persist partial results so a crash doesn't lose all work
         if (i + 1) % CHECKPOINT_EVERY == 0:
             _write_checkpoint(results, label)
             print(f"  [{label}] Checkpoint saved ({len(results)} tickers so far)", flush=True)
 
-    return results
+    return results, timed_out
 
 
 def _write_checkpoint(results, label):
+    path = _checkpoint_path(label)
     try:
-        existing = {}
-        if os.path.exists(CHECKPOINT):
-            with open(CHECKPOINT) as f:
-                existing = json.load(f)
-        existing[label] = results
-        with open(CHECKPOINT, "w") as f:
-            json.dump(existing, f, default=str)
+        with open(path, "w") as f:
+            json.dump(results, f, default=str)
+        print(f"  Checkpoint written: {path}  ({len(results)} records)", flush=True)
     except Exception as e:
         print(f"  WARNING: checkpoint write failed: {e}", flush=True)
 
 
 def _load_checkpoint(label):
+    path = _checkpoint_path(label)
     try:
-        if os.path.exists(CHECKPOINT):
-            with open(CHECKPOINT) as f:
+        if os.path.exists(path):
+            with open(path) as f:
                 data = json.load(f)
-            return data.get(label, [])
-    except Exception:
-        pass
+            print(f"  Loaded checkpoint {path}: {len(data)} records", flush=True)
+            return data
+    except Exception as e:
+        print(f"  WARNING: could not load checkpoint {path}: {e}", flush=True)
     return []
 
 
@@ -660,37 +669,94 @@ def sort_key(s):
     return (r, -score)
 
 
+def _write_output(cad, usd, cad_tickers, nyse_tickers, nasdaq_tickers, usd_tickers,
+                  start_ts, partial=False):
+    """Serialize recommendations.json; partial=True when USD is not yet done."""
+    elapsed = time.time() - start_ts
+    cad_s = sorted(cad, key=sort_key)
+    usd_s = sorted(usd, key=sort_key)
+    payload = dict(
+        generated_at = datetime.now(timezone.utc).isoformat(),
+        partial      = partial,   # frontend can show a banner when True
+        cad          = cad_s,
+        usd          = usd_s,
+        meta = dict(
+            horizons  = HORIZON_LABELS,
+            cap_tiers = {"mega": ">= $200B", "large": "$10B-$200B",
+                         "mid": "$2B-$10B", "small": "< $2B"},
+            engine_version = "v11",
+            universe = {
+                "cad_total"         : len(cad_tickers),
+                "nyse_loaded"       : len(nyse_tickers),
+                "nasdaq_loaded"     : len(nasdaq_tickers),
+                "usd_total_deduped" : len(usd_tickers),
+                "grand_total"       : len(cad_tickers) + len(usd_tickers),
+                "cad_scored"        : len(cad_s),
+                "usd_scored"        : len(usd_s),
+            },
+            elapsed_minutes = round(elapsed / 60, 1),
+            note = "For informational purposes only. Not financial advice.",
+        )
+    )
+    out = os.path.abspath(OUT_PATH)
+    os.makedirs(os.path.dirname(out), exist_ok=True)
+    with open(out, "w") as f:
+        json.dump(payload, f, indent=2, default=str)
+    status = "PARTIAL" if partial else "FINAL"
+    print(f"  Wrote {status} output -> {out}  "
+          f"(CAD {len(cad_s)}, USD {len(usd_s)})", flush=True)
+
+
 # ---------------------------------------------------------------------------
 # MAIN
 # ---------------------------------------------------------------------------
 
 def main():
-    start_ts = time.time()
+    parser = argparse.ArgumentParser(description="Equity Strategist Analysis Engine v11")
+    parser.add_argument(
+        "--exchange",
+        choices=["CAD", "USD", "ALL"],
+        default="ALL",
+        help="Which exchange group to process in this invocation (default: ALL)."
+    )
+    parser.add_argument(
+        "--deadline-minutes",
+        type=float,
+        default=340.0,
+        dest="deadline_minutes",
+        help="Soft kill: exit cleanly this many minutes after start (default 340)."
+             " Set to 0 to disable."
+    )
+    args = parser.parse_args()
+
+    start_ts    = time.time()
+    deadline_ts = (start_ts + args.deadline_minutes * 60) if args.deadline_minutes > 0 \
+                  else float("inf")
+
     print("=" * 70, flush=True)
-    print("Equity Strategist Dashboard - Analysis Engine v10", flush=True)
+    print("Equity Strategist Dashboard - Analysis Engine v11", flush=True)
     print(f"Python   {sys.version}", flush=True)
     print(f"yfinance {yf.__version__}", flush=True)
     print(f"pandas   {pd.__version__}", flush=True)
     print(f"Run start (UTC): {datetime.now(timezone.utc).isoformat()}", flush=True)
+    print(f"Exchange filter : {args.exchange}", flush=True)
+    print(f"Soft deadline   : {args.deadline_minutes} min from start", flush=True)
     print(f"BATCH_SIZE={BATCH_SIZE}  SLEEP_S={SLEEP_S}  "
           f"MAX_RETRIES={MAX_RETRIES}  CHECKPOINT_EVERY={CHECKPOINT_EVERY}", flush=True)
     print("NO ticker cap — every cache ticker will be reviewed.", flush=True)
     print("=" * 70, flush=True)
 
-    # ── 1. Load universe from all three cache files ──────────────────────────
-    cad_tickers   = load_txt_cache(TSX_CACHE_TXT)
-    nyse_tickers  = load_txt_cache(NYSE_CACHE_TXT)
-    nasdaq_tickers= load_json_cache(NASDAQ_CACHE_JSON)
+    # ── 1. Load universe ─────────────────────────────────────────────────────
+    cad_tickers    = load_txt_cache(TSX_CACHE_TXT)
+    nyse_tickers   = load_txt_cache(NYSE_CACHE_TXT)
+    nasdaq_tickers = load_json_cache(NASDAQ_CACHE_JSON)
 
-    # Deduplicate NYSE + NASDAQ into a single USD universe
-    usd_seen = set()
-    usd_tickers = []
+    usd_seen, usd_tickers = set(), []
     for t in nyse_tickers + nasdaq_tickers:
         if t not in usd_seen:
             usd_seen.add(t)
             usd_tickers.append(t)
 
-    # Fallback: if cache files are empty use FUNDAMENTALS seed keys
     if not cad_tickers:
         print("  WARNING: TSX cache empty — using FUNDAMENTALS CAD keys", flush=True)
         cad_tickers = [s for s in FUNDAMENTALS if s.endswith(".TO") or s.endswith(".V")]
@@ -704,68 +770,82 @@ def main():
           f"= {len(usd_tickers)} USD (deduped)", flush=True)
     print(f"Grand total to review: {len(cad_tickers)+len(usd_tickers)}", flush=True)
 
-    # ── 2. Load checkpoints (resume after any partial failure) ────────────────
-    cad_checkpoint = _load_checkpoint("CAD")
-    usd_checkpoint = _load_checkpoint("USD")
-    if cad_checkpoint:
-        print(f"  Resuming CAD from checkpoint ({len(cad_checkpoint)} already done)", flush=True)
-    if usd_checkpoint:
-        print(f"  Resuming USD from checkpoint ({len(usd_checkpoint)} already done)", flush=True)
+    # ── 2. Load checkpoints ───────────────────────────────────────────────────
+    cad_ckpt = _load_checkpoint("CAD") if args.exchange in ("CAD", "ALL") else []
+    usd_ckpt = _load_checkpoint("USD") if args.exchange in ("USD", "ALL") else []
+
+    # USD job: also load CAD results that were written to recommendations.json
+    # by the prior CAD job, so the final merge is complete.
+    if args.exchange == "USD":
+        out_path = os.path.abspath(OUT_PATH)
+        if os.path.exists(out_path):
+            try:
+                with open(out_path) as f:
+                    prev = json.load(f)
+                prior_cad = prev.get("cad", [])
+                if prior_cad:
+                    print(f"  USD job: loaded {len(prior_cad)} CAD results "
+                          f"from prior recommendations.json", flush=True)
+                    cad_ckpt = prior_cad
+            except Exception as e:
+                print(f"  WARNING: could not read prior recommendations.json: {e}", flush=True)
 
     # ── 3. Process ────────────────────────────────────────────────────────────
-    cad = process_universe(cad_tickers, "CAD", cad_checkpoint)
-    usd = process_universe(usd_tickers, "USD", usd_checkpoint)
+    cad_results  = cad_ckpt
+    usd_results  = usd_ckpt
+    cad_timed_out = False
+    usd_timed_out = False
 
-    cad.sort(key=sort_key)
-    usd.sort(key=sort_key)
+    if args.exchange in ("CAD", "ALL"):
+        if cad_ckpt:
+            print(f"  Resuming CAD from checkpoint ({len(cad_ckpt)} already done)", flush=True)
+        cad_results, cad_timed_out = process_universe(
+            cad_tickers, "CAD", cad_ckpt, deadline_ts)
+
+    if args.exchange in ("USD", "ALL") and not cad_timed_out:
+        if usd_ckpt:
+            print(f"  Resuming USD from checkpoint ({len(usd_ckpt)} already done)", flush=True)
+        usd_results, usd_timed_out = process_universe(
+            usd_tickers, "USD", usd_ckpt, deadline_ts)
 
     elapsed = time.time() - start_ts
-    print(f"\nResults: {len(cad)} CAD | {len(usd)} USD", flush=True)
+    print(f"\nResults: {len(cad_results)} CAD | {len(usd_results)} USD", flush=True)
     print(f"Elapsed: {elapsed/60:.1f} min", flush=True)
 
-    if len(cad) == 0 and len(usd) == 0:
+    is_partial = cad_timed_out or usd_timed_out or \
+                 (args.exchange == "CAD") or \
+                 (args.exchange == "USD" and usd_timed_out)
+
+    if len(cad_results) == 0 and len(usd_results) == 0:
         print("ERROR: Zero results produced.", file=sys.stderr)
         sys.exit(1)
 
-    live_count    = sum(1 for s in cad+usd if s.get("data_source") == "live_yahoo")
-    partial_count = sum(1 for s in cad+usd if s.get("data_source") == "partial_yahoo")
-    static_count  = sum(1 for s in cad+usd if s.get("data_source") == "static_seed")
+    live_count    = sum(1 for s in cad_results+usd_results if s.get("data_source") == "live_yahoo")
+    partial_count = sum(1 for s in cad_results+usd_results if s.get("data_source") == "partial_yahoo")
+    static_count  = sum(1 for s in cad_results+usd_results if s.get("data_source") == "static_seed")
     print(f"  live_yahoo: {live_count}  partial: {partial_count}  static: {static_count}", flush=True)
 
     # ── 4. Write output ────────────────────────────────────────────────────────
-    payload = dict(
-        generated_at = datetime.now(timezone.utc).isoformat(),
-        cad  = cad,
-        usd  = usd,
-        meta = dict(
-            horizons  = HORIZON_LABELS,
-            cap_tiers = {"mega": ">= $200B", "large": "$10B-$200B",
-                         "mid": "$2B-$10B", "small": "< $2B"},
-            engine_version = "v10",
-            universe = {
-                "cad_total": len(cad_tickers),
-                "nyse_loaded": len(nyse_tickers),
-                "nasdaq_loaded": len(nasdaq_tickers),
-                "usd_total_deduped": len(usd_tickers),
-                "grand_total": len(cad_tickers) + len(usd_tickers),
-            },
-            elapsed_minutes = round(elapsed / 60, 1),
-            note = "For informational purposes only. Not financial advice.",
-        )
+    _write_output(
+        cad_results, usd_results,
+        cad_tickers, nyse_tickers, nasdaq_tickers, usd_tickers,
+        start_ts, partial=is_partial
     )
 
-    out = os.path.abspath(OUT_PATH)
-    os.makedirs(os.path.dirname(out), exist_ok=True)
-    with open(out, "w") as f:
-        json.dump(payload, f, indent=2, default=str)
+    # Clean up checkpoint on clean (non-timed-out) completion
+    if not cad_timed_out and args.exchange in ("CAD", "ALL"):
+        p = _checkpoint_path("CAD")
+        if os.path.exists(p): os.remove(p)
+    if not usd_timed_out and args.exchange in ("USD", "ALL"):
+        p = _checkpoint_path("USD")
+        if os.path.exists(p): os.remove(p)
 
-    # Clean up checkpoint on successful completion
-    if os.path.exists(CHECKPOINT):
-        os.remove(CHECKPOINT)
+    print(f"\n  CAD BUYs: {sum(1 for s in cad_results if s.get('horizons',{}).get('short',{}).get('rating')=='BUY')}", flush=True)
+    print(f"  USD BUYs: {sum(1 for s in usd_results if s.get('horizons',{}).get('short',{}).get('rating')=='BUY')}", flush=True)
 
-    print(f"\nWrote {out}", flush=True)
-    print(f"  CAD BUYs: {sum(1 for s in cad if s['horizons']['short']['rating']=='BUY')}", flush=True)
-    print(f"  USD BUYs: {sum(1 for s in usd if s['horizons']['short']['rating']=='BUY')}", flush=True)
+    if cad_timed_out or usd_timed_out:
+        print("\n  NOTE: Soft deadline reached — output is PARTIAL."
+              " The next scheduled run will resume from the checkpoint.", flush=True)
 
 
 if __name__ == "__main__":
