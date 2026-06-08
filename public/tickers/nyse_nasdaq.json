@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-06-06T22:45:28.894139+00:00",
-  "count": 7117,
+  "generated_at": "2026-06-08T17:02:20.456792+00:00",
+  "count": 7130,
   "source": "nasdaq-trader-nasdaqlisted + nasdaq-trader-otherlisted + sec-edgar-fallback",
   "exchanges": [
     "NASDAQ",
@@ -1165,6 +1165,13 @@
       "cik": "1984060"
     },
     {
+      "ticker": "AESPU",
+      "name": "Aeon Acquisition I Corp.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2082526"
+    },
+    {
       "ticker": "AEVA",
       "name": "Aeva Technologies, Inc.",
       "exchange": "Nasdaq",
@@ -1709,6 +1716,20 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1667011"
+    },
+    {
+      "ticker": "AIQD",
+      "name": "BANK OF MONTREAL /CAN/",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "927971"
+    },
+    {
+      "ticker": "AIQU",
+      "name": "BANK OF MONTREAL /CAN/",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "927971"
     },
     {
       "ticker": "AIR",
@@ -3088,6 +3109,13 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1734005"
+    },
+    {
+      "ticker": "APMCU",
+      "name": "AmperCap Acquisition Co",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2101393"
     },
     {
       "ticker": "APO",
@@ -5177,7 +5205,7 @@
     },
     {
       "ticker": "BCAL",
-      "name": "California BanCorp CA",
+      "name": "California BanCorp \\ CA",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1795815"
@@ -7507,6 +7535,13 @@
       "cik": "2015034"
     },
     {
+      "ticker": "BTCK",
+      "name": "Teucrium Commodity Trust",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "1471824"
+    },
+    {
       "ticker": "BTCS",
       "name": "BTCS Inc.",
       "exchange": "Nasdaq",
@@ -7556,25 +7591,11 @@
       "cik": "1303523"
     },
     {
-      "ticker": "BTM",
-      "name": "Bitcoin Depot Inc.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1901799"
-    },
-    {
       "ticker": "BTMD",
       "name": "biote Corp.",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1819253"
-    },
-    {
-      "ticker": "BTMWW",
-      "name": "Bitcoin Depot Inc.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1901799"
     },
     {
       "ticker": "BTO",
@@ -7963,7 +7984,7 @@
     },
     {
       "ticker": "BYFC",
-      "name": "BROADWAY FINANCIAL CORP \\DE\\",
+      "name": "BROADWAY FINANCIAL CORP DE",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1001171"
@@ -15592,6 +15613,13 @@
       "cik": "2053641"
     },
     {
+      "ticker": "ETSS",
+      "name": "Energy Transition Special Opportunities",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "2085932"
+    },
+    {
       "ticker": "ETSY",
       "name": "ETSY INC",
       "exchange": "NYSE",
@@ -16367,13 +16395,6 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "2074697"
-    },
-    {
-      "ticker": "FCRX",
-      "name": "Crescent Capital BDC, Inc.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1633336"
     },
     {
       "ticker": "FCT",
@@ -18190,28 +18211,28 @@
     },
     {
       "ticker": "GAIN",
-      "name": "GLADSTONE INVESTMENT CORPORATIONDE",
+      "name": "GLADSTONE INVESTMENT CORPORATION\\DE",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1321741"
     },
     {
       "ticker": "GAING",
-      "name": "GLADSTONE INVESTMENT CORPORATIONDE",
+      "name": "GLADSTONE INVESTMENT CORPORATION\\DE",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1321741"
     },
     {
       "ticker": "GAINI",
-      "name": "GLADSTONE INVESTMENT CORPORATIONDE",
+      "name": "GLADSTONE INVESTMENT CORPORATION\\DE",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1321741"
     },
     {
       "ticker": "GAINZ",
-      "name": "GLADSTONE INVESTMENT CORPORATIONDE",
+      "name": "GLADSTONE INVESTMENT CORPORATION\\DE",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1321741"
@@ -18952,27 +18973,6 @@
       "cik": "1760233"
     },
     {
-      "ticker": "GIG",
-      "name": "Hadron Energy, Inc.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "2023730"
-    },
-    {
-      "ticker": "GIGGU",
-      "name": "Hadron Energy, Inc.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "2023730"
-    },
-    {
-      "ticker": "GIGGW",
-      "name": "Hadron Energy, Inc.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "2023730"
-    },
-    {
       "ticker": "GIGM",
       "name": "GIGAMEDIA Ltd",
       "exchange": "Nasdaq",
@@ -19205,14 +19205,14 @@
     },
     {
       "ticker": "GLIBA",
-      "name": "GCI Liberty, Inc.",
+      "name": "Liberty Capital Corp/NV",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "2057463"
     },
     {
       "ticker": "GLIBK",
-      "name": "GCI Liberty, Inc.",
+      "name": "Liberty Capital Corp/NV",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "2057463"
@@ -22074,6 +22074,13 @@
       "cik": "1682639"
     },
     {
+      "ticker": "HYPG",
+      "name": "Grayscale Hyperliquid Staking ETF",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2107730"
+    },
+    {
       "ticker": "HYPR",
       "name": "Hyperfine, Inc.",
       "exchange": "Nasdaq",
@@ -22093,13 +22100,6 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1057060"
-    },
-    {
-      "ticker": "IAC",
-      "name": "IAC Inc.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1800227"
     },
     {
       "ticker": "IACO",
@@ -23082,6 +23082,13 @@
       "cik": "1961847"
     },
     {
+      "ticker": "INIO",
+      "name": "INNIO Group Holding B.V.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2109150"
+    },
+    {
       "ticker": "INKT",
       "name": "MiNK Therapeutics, Inc.",
       "exchange": "Nasdaq",
@@ -23507,6 +23514,13 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1788230"
+    },
+    {
+      "ticker": "IPVVU",
+      "name": "InterPrivate Investment Partners V, Inc.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2105274"
     },
     {
       "ticker": "IPW",
@@ -24741,6 +24755,13 @@
       "cik": "1601046"
     },
     {
+      "ticker": "KEYYU",
+      "name": "Keystone Acquisition Corp.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2102771"
+    },
+    {
       "ticker": "KF",
       "name": "KOREA FUND INC",
       "exchange": "NYSE",
@@ -24833,14 +24854,14 @@
     },
     {
       "ticker": "KIDZ",
-      "name": "Classover Holdings, Inc.",
+      "name": "KIDZ AI Inc.",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "2022308"
     },
     {
       "ticker": "KIDZW",
-      "name": "Classover Holdings, Inc.",
+      "name": "KIDZ AI Inc.",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "2022308"
@@ -26162,6 +26183,13 @@
       "cik": "1547546"
     },
     {
+      "ticker": "LFTO",
+      "name": "Liftoff Mobile, Inc.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "1850351"
+    },
+    {
       "ticker": "LFUS",
       "name": "LITTELFUSE INC /DE",
       "exchange": "Nasdaq",
@@ -27056,6 +27084,13 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "887905"
+    },
+    {
+      "ticker": "LTGRU",
+      "name": "Long Table Growth Corp.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2104177"
     },
     {
       "ticker": "LTH",
@@ -31832,13 +31867,6 @@
       "cik": "1719406"
     },
     {
-      "ticker": "NRXPW",
-      "name": "NRX Pharmaceuticals, Inc.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1719406"
-    },
-    {
       "ticker": "NRXS",
       "name": "Neuraxis, INC",
       "exchange": "NYSE",
@@ -32971,6 +32999,20 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1587732"
+    },
+    {
+      "ticker": "OHAC",
+      "name": "Oceanhawk Acquisition Corp.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2090787"
+    },
+    {
+      "ticker": "OHACR",
+      "name": "Oceanhawk Acquisition Corp.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2090787"
     },
     {
       "ticker": "OHACU",
@@ -34464,6 +34506,13 @@
       "cik": "78814"
     },
     {
+      "ticker": "PBK",
+      "name": "POWERBANK Corp",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2011053"
+    },
+    {
       "ticker": "PBM",
       "name": "PSYENCE BIOMEDICAL LTD.",
       "exchange": "Nasdaq",
@@ -34800,7 +34849,28 @@
       "cik": "318300"
     },
     {
+      "ticker": "PECE",
+      "name": "Peace Acquisition Corp.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2088626"
+    },
+    {
+      "ticker": "PECER",
+      "name": "Peace Acquisition Corp.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2088626"
+    },
+    {
       "ticker": "PECEU",
+      "name": "Peace Acquisition Corp.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2088626"
+    },
+    {
+      "ticker": "PECEW",
       "name": "Peace Acquisition Corp.",
       "exchange": "Nasdaq",
       "sector": "",
@@ -34987,6 +35057,13 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1244183"
+    },
+    {
+      "ticker": "PFLA",
+      "name": "PennantPark Floating Rate Capital Ltd.",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "1504619"
     },
     {
       "ticker": "PFLT",
@@ -35983,6 +36060,13 @@
       "cik": "922224"
     },
     {
+      "ticker": "PPLI",
+      "name": "People Inc",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "1800227"
+    },
+    {
       "ticker": "PPLT",
       "name": "abrdn Platinum ETF Trust",
       "exchange": "NYSE",
@@ -36891,6 +36975,13 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1117297"
+    },
+    {
+      "ticker": "QNT",
+      "name": "Quantinuum Inc.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2110105"
     },
     {
       "ticker": "QNTM",
@@ -42178,6 +42269,13 @@
       "cik": "1840416"
     },
     {
+      "ticker": "SSMR",
+      "name": "Sunshine Silver Mining & Refining Co",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "2091017"
+    },
+    {
       "ticker": "SSNC",
       "name": "SS&C Technologies Holdings Inc",
       "exchange": "Nasdaq",
@@ -46043,7 +46141,7 @@
     },
     {
       "ticker": "USB",
-      "name": "US BANCORP DE",
+      "name": "US BANCORP \\DE\\",
       "exchange": "NYSE",
       "sector": "",
       "cik": "36104"
@@ -46078,7 +46176,7 @@
     },
     {
       "ticker": "USEG",
-      "name": "US ENERGY CORP",
+      "name": "BIG SKY INDUSTRIAL INC.",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "101594"
@@ -46092,13 +46190,6 @@
     },
     {
       "ticker": "USGO",
-      "name": "U.S. GoldMining Inc.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1947244"
-    },
-    {
-      "ticker": "USGOW",
       "name": "U.S. GoldMining Inc.",
       "exchange": "Nasdaq",
       "sector": "",

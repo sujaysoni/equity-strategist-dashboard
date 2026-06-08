@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-06-06T22:44:28.509938Z",
+  "generated_at": "2026-06-08T17:01:19.976245Z",
   "count": 2166,
-  "tsx_count": 751,
-  "tsxv_count": 1415,
+  "tsx_count": 752,
+  "tsxv_count": 1414,
   "tickers": [
     {
       "ticker": "AAA-P.V",
@@ -2370,7 +2370,7 @@
     },
     {
       "ticker": "CH.V",
-      "name": "Charbone Hydrogen Corporation",
+      "name": "Charbone Corporation",
       "exchange": "TSXV",
       "sector": ""
     },
@@ -4417,12 +4417,6 @@
     {
       "ticker": "FMS.V",
       "name": "Focus Graphite Inc.",
-      "exchange": "TSXV",
-      "sector": ""
-    },
-    {
-      "ticker": "FMT.V",
-      "name": "Fuerte Metals Corporation",
       "exchange": "TSXV",
       "sector": ""
     },
@@ -6917,9 +6911,9 @@
       "sector": ""
     },
     {
-      "ticker": "LUNR.V",
+      "ticker": "LUNR.TO",
       "name": "LunR Royalties Corp.",
-      "exchange": "TSXV",
+      "exchange": "TSX",
       "sector": ""
     },
     {
@@ -11126,6 +11120,12 @@
       "ticker": "TAL.TO",
       "name": "PetroTal Corp.",
       "exchange": "TSX",
+      "sector": ""
+    },
+    {
+      "ticker": "TALA.V",
+      "name": "Talamore Mining Corp.",
+      "exchange": "TSXV",
       "sector": ""
     },
     {
