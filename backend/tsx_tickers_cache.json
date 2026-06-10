@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-06-09T16:25:14.388715Z",
+  "generated_at": "2026-06-10T16:54:57.735745Z",
   "count": 2166,
-  "tsx_count": 752,
-  "tsxv_count": 1414,
+  "tsx_count": 753,
+  "tsxv_count": 1413,
   "tickers": [
     {
       "ticker": "AAA-P.V",
@@ -569,6 +569,12 @@
       "sector": ""
     },
     {
+      "ticker": "ALZI.V",
+      "name": "Alzai Health Corp.",
+      "exchange": "TSXV",
+      "sector": ""
+    },
+    {
       "ticker": "AMC.TO",
       "name": "Arizona Metals Corp.",
       "exchange": "TSX",
@@ -727,6 +733,12 @@
     {
       "ticker": "APS.TO",
       "name": "Aptose Biosciences Inc.",
+      "exchange": "TSX",
+      "sector": ""
+    },
+    {
+      "ticker": "APTX.TO",
+      "name": "Apotex Health Corp.",
       "exchange": "TSX",
       "sector": ""
     },
@@ -9947,12 +9959,6 @@
       "sector": ""
     },
     {
-      "ticker": "RV.V",
-      "name": "Pathfinder Ventures Inc.",
-      "exchange": "TSXV",
-      "sector": ""
-    },
-    {
       "ticker": "RVC-P.V",
       "name": "Ronin Ventures Corp.",
       "exchange": "TSXV",
@@ -12289,12 +12295,6 @@
     {
       "ticker": "VUX.V",
       "name": "Vital Energy Inc.",
-      "exchange": "TSXV",
-      "sector": ""
-    },
-    {
-      "ticker": "VVC.V",
-      "name": "VVC Exploration Corporation",
       "exchange": "TSXV",
       "sector": ""
     },
