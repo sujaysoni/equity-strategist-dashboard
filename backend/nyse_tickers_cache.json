@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-10T16:55:58.382669+00:00",
+  "generated_at": "2026-06-11T17:33:11.063163+00:00",
   "count": 3131,
   "exchange": "NYSE/NYSE-MKT/NYSE-ARCA",
   "source": "nasdaq-trader-otherlisted + sec-edgar-fallback",
@@ -7033,6 +7033,13 @@
       "cik": "1853860"
     },
     {
+      "ticker": "EROC",
+      "name": "ERock, Inc.",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "2110029"
+    },
+    {
       "ticker": "EROK",
       "name": "EagleRock Land, LLC",
       "exchange": "NYSE",
@@ -11695,7 +11702,7 @@
       "cik": "61004"
     },
     {
-      "ticker": "LGL-RW",
+      "ticker": "LGL-RI",
       "name": "LGL GROUP INC",
       "exchange": "NYSE",
       "sector": "",
@@ -12417,7 +12424,7 @@
     },
     {
       "ticker": "MFM",
-      "name": "MFS MUNICIPAL INCOME TRUST",
+      "name": "ABERDEEN MUNICIPAL INCOME FUND",
       "exchange": "NYSE",
       "sector": "",
       "cik": "801961"
@@ -14314,7 +14321,7 @@
     },
     {
       "ticker": "NVRI",
-      "name": "Enviri II Corp",
+      "name": "Enviri Corp",
       "exchange": "NYSE",
       "sector": "",
       "cik": "2104052"
@@ -14857,13 +14864,6 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1747777"
-    },
-    {
-      "ticker": "OTH",
-      "name": "NextBoat Inc.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "2067767"
     },
     {
       "ticker": "OTIS",
@@ -17548,7 +17548,7 @@
     },
     {
       "ticker": "SDRL",
-      "name": "Seadrill Ltd",
+      "name": "SEADRILL Ltd",
       "exchange": "NYSE",
       "sector": "",
       "cik": "1737706"
@@ -19542,6 +19542,13 @@
       "cik": "1389170"
     },
     {
+      "ticker": "TRLV",
+      "name": "Trulieve Cannabis Corp.",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "1754195"
+    },
+    {
       "ticker": "TRN",
       "name": "TRINITY INDUSTRIES INC",
       "exchange": "NYSE",
@@ -20333,13 +20340,6 @@
       "cik": "1739566"
     },
     {
-      "ticker": "UUP",
-      "name": "Invesco DB US Dollar Index Bullish Fund",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1383151"
-    },
-    {
       "ticker": "UUU",
       "name": "UNIVERSAL SAFETY PRODUCTS, INC.",
       "exchange": "NYSE",
@@ -20781,13 +20781,6 @@
       "cik": "895528"
     },
     {
-      "ticker": "VRE",
-      "name": "Veris Residential, Inc.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "924901"
-    },
-    {
       "ticker": "VRT",
       "name": "Vertiv Holdings Co",
       "exchange": "NYSE",
@@ -21192,6 +21185,13 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1165002"
+    },
+    {
+      "ticker": "WHK",
+      "name": "WhiteHawk Income Corp",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "1921603"
     },
     {
       "ticker": "WHR",

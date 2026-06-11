@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-10T16:54:57.735745Z",
+  "generated_at": "2026-06-11T17:32:10.667679Z",
   "count": 2166,
   "tsx_count": 753,
   "tsxv_count": 1413,
@@ -1033,6 +1033,12 @@
     {
       "ticker": "AURA.V",
       "name": "Auranova Resources Inc.",
+      "exchange": "TSXV",
+      "sector": ""
+    },
+    {
+      "ticker": "AURO.V",
+      "name": "Auro Metals Inc.",
       "exchange": "TSXV",
       "sector": ""
     },
@@ -6197,6 +6203,12 @@
       "sector": ""
     },
     {
+      "ticker": "JUN-A.V",
+      "name": "Juno International Corporation",
+      "exchange": "TSXV",
+      "sector": ""
+    },
+    {
       "ticker": "JVR-P.V",
       "name": "JVR Ventures Inc.",
       "exchange": "TSXV",
@@ -7910,12 +7922,6 @@
       "ticker": "NEXT.TO",
       "name": "NextSource Materials Inc.",
       "exchange": "TSX",
-      "sector": ""
-    },
-    {
-      "ticker": "NFD-A.V",
-      "name": "Northfield Capital Corporation",
-      "exchange": "TSXV",
       "sector": ""
     },
     {
@@ -11378,12 +11384,6 @@
       "ticker": "TIH.TO",
       "name": "Toromont Industries Ltd.",
       "exchange": "TSX",
-      "sector": ""
-    },
-    {
-      "ticker": "TIN.V",
-      "name": "Tincorp Metals Inc.",
-      "exchange": "TSXV",
       "sector": ""
     },
     {
