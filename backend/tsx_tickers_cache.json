@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-06-11T17:32:10.667679Z",
-  "count": 2166,
-  "tsx_count": 753,
+  "generated_at": "2026-06-12T16:38:14.284689Z",
+  "count": 2167,
+  "tsx_count": 754,
   "tsxv_count": 1413,
   "tickers": [
     {
@@ -4115,6 +4115,12 @@
       "sector": ""
     },
     {
+      "ticker": "EVNT.V",
+      "name": "Eventer Technologies Ltd.",
+      "exchange": "TSXV",
+      "sector": ""
+    },
+    {
       "ticker": "EVOC-P.V",
       "name": "Evocati Capital Resources Inc.",
       "exchange": "TSXV",
@@ -6631,12 +6637,6 @@
     {
       "ticker": "LCX.V",
       "name": "Lycos Energy Inc.",
-      "exchange": "TSXV",
-      "sector": ""
-    },
-    {
-      "ticker": "LDB-P.V",
-      "name": "LDB Capital Corp.",
       "exchange": "TSXV",
       "sector": ""
     },
@@ -10736,6 +10736,12 @@
       "ticker": "SPC.V",
       "name": "SPC Nickel Corp.",
       "exchange": "TSXV",
+      "sector": ""
+    },
+    {
+      "ticker": "SPCX.TO",
+      "name": "SpaceX CDR (CAD Hedged)",
+      "exchange": "TSX",
       "sector": ""
     },
     {
