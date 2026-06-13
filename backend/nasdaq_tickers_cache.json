@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-06-12T16:39:14.764712+00:00",
-  "count": 4300,
+  "generated_at": "2026-06-13T16:25:51.488166+00:00",
+  "count": 4307,
   "exchange": "NASDAQ",
   "source": "nasdaq-trader-nasdaqlisted + sec-edgar-fallback",
   "tickers": [
@@ -894,13 +894,6 @@
       "cik": "1771007"
     },
     {
-      "ticker": "AGAE",
-      "name": "All In FutureTech Alliance, Inc.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1708341"
-    },
-    {
       "ticker": "AGCC",
       "name": "Agencia Comercial Spirits Ltd.",
       "exchange": "Nasdaq",
@@ -1039,6 +1032,13 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "2096362"
+    },
+    {
+      "ticker": "AIBZ",
+      "name": "Bitzero Holdings Inc.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2100457"
     },
     {
       "ticker": "AIDX",
@@ -1769,13 +1769,6 @@
       "cik": "738214"
     },
     {
-      "ticker": "AMWD",
-      "name": "AMERICAN WOODMARK CORP",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "794619"
-    },
-    {
       "ticker": "AMZN",
       "name": "AMAZON COM INC",
       "exchange": "Nasdaq",
@@ -2068,6 +2061,20 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1781983"
+    },
+    {
+      "ticker": "APUR",
+      "name": "Aperture AC",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2093524"
+    },
+    {
+      "ticker": "APURR",
+      "name": "Aperture AC",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2093524"
     },
     {
       "ticker": "APURU",
@@ -4548,6 +4555,13 @@
       "cik": "10329"
     },
     {
+      "ticker": "BSIN",
+      "name": "BIG SKY INDUSTRIAL INC.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "101594"
+    },
+    {
       "ticker": "BSRR",
       "name": "SIERRA BANCORP",
       "exchange": "Nasdaq",
@@ -5669,21 +5683,21 @@
     },
     {
       "ticker": "CGCT",
-      "name": "Cartesian Growth Corp III",
+      "name": "Factorial Energy Inc.",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "2049662"
     },
     {
       "ticker": "CGCTU",
-      "name": "Cartesian Growth Corp III",
+      "name": "Factorial Energy Inc.",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "2049662"
     },
     {
       "ticker": "CGCTW",
-      "name": "Cartesian Growth Corp III",
+      "name": "Factorial Energy Inc.",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "2049662"
@@ -7299,13 +7313,6 @@
       "cik": "1290900"
     },
     {
-      "ticker": "CVGW",
-      "name": "CALAVO GROWERS INC",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1133470"
-    },
-    {
       "ticker": "CVKD",
       "name": "Cadrenal Therapeutics, Inc.",
       "exchange": "Nasdaq",
@@ -8741,6 +8748,13 @@
       "cik": "2013320"
     },
     {
+      "ticker": "ELOX",
+      "name": "Eloxx Pharmaceuticals, Inc.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "1035354"
+    },
+    {
       "ticker": "ELPW",
       "name": "Elong Power Holding Ltd.",
       "exchange": "Nasdaq",
@@ -8893,6 +8907,20 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1463101"
+    },
+    {
+      "ticker": "ENRD",
+      "name": "Einride AB",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2095096"
+    },
+    {
+      "ticker": "ENRDW",
+      "name": "Einride AB",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2095096"
     },
     {
       "ticker": "ENSC",
@@ -9427,6 +9455,13 @@
       "cik": "1086745"
     },
     {
+      "ticker": "FAC",
+      "name": "Factorial Energy Inc.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2049662"
+    },
+    {
       "ticker": "FACT",
       "name": "FACT II Acquisition Corp.",
       "exchange": "Nasdaq",
@@ -9446,6 +9481,13 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "2028935"
+    },
+    {
+      "ticker": "FACWW",
+      "name": "Factorial Energy Inc.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2049662"
     },
     {
       "ticker": "FAMI",
@@ -10421,6 +10463,13 @@
       "cik": "1691221"
     },
     {
+      "ticker": "FRTT",
+      "name": "Fort Technology Inc",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2092967"
+    },
+    {
       "ticker": "FRVO",
       "name": "Fervo Energy Co",
       "exchange": "Nasdaq",
@@ -11009,13 +11058,6 @@
       "cik": "1675033"
     },
     {
-      "ticker": "GECCO",
-      "name": "Great Elm Capital Corp.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1675033"
-    },
-    {
       "ticker": "GEG",
       "name": "Great Elm Group, Inc.",
       "exchange": "Nasdaq",
@@ -11528,6 +11570,20 @@
     },
     {
       "ticker": "GOOGL",
+      "name": "Alphabet Inc.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "1652044"
+    },
+    {
+      "ticker": "GOOGM",
+      "name": "Alphabet Inc.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "1652044"
+    },
+    {
+      "ticker": "GOOGN",
       "name": "Alphabet Inc.",
       "exchange": "Nasdaq",
       "sector": "",
@@ -12561,13 +12617,6 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1128361"
-    },
-    {
-      "ticker": "HOTH",
-      "name": "Rocket One Inc.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1711786"
     },
     {
       "ticker": "HOUR",
@@ -13705,7 +13754,7 @@
     },
     {
       "ticker": "INIO",
-      "name": "INNIO Group Holding B.V.",
+      "name": "INNIO N.V.",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "2109150"
@@ -14005,20 +14054,6 @@
       "cik": "1355839"
     },
     {
-      "ticker": "IPOD",
-      "name": "COLLECTIVE ACQUISITION CORP.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "2041047"
-    },
-    {
-      "ticker": "IPODW",
-      "name": "COLLECTIVE ACQUISITION CORP.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "2041047"
-    },
-    {
       "ticker": "IPSC",
       "name": "Century Therapeutics, Inc.",
       "exchange": "Nasdaq",
@@ -14157,6 +14192,13 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "842517"
+    },
+    {
+      "ticker": "ISNRU",
+      "name": "Snow Rothschild Acquisition Corp.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2123475"
     },
     {
       "ticker": "ISPC",
@@ -18639,7 +18681,21 @@
       "cik": "2043699"
     },
     {
+      "ticker": "NHIV",
+      "name": "NewHold Investment Corp IV",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2099767"
+    },
+    {
       "ticker": "NHIVU",
+      "name": "NewHold Investment Corp IV",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2099767"
+    },
+    {
+      "ticker": "NHIVW",
       "name": "NewHold Investment Corp IV",
       "exchange": "Nasdaq",
       "sector": "",
@@ -19669,13 +19725,6 @@
     },
     {
       "ticker": "OCTV",
-      "name": "Octave Intelligence plc",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "2083632"
-    },
-    {
-      "ticker": "OCTVV",
       "name": "Octave Intelligence plc",
       "exchange": "Nasdaq",
       "sector": "",
@@ -20786,6 +20835,13 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "2011053"
+    },
+    {
+      "ticker": "PBLS",
+      "name": "Parabilis Medicines, Inc.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "1657677"
     },
     {
       "ticker": "PBM",
@@ -24519,6 +24575,13 @@
       "cik": "1594805"
     },
     {
+      "ticker": "SHOTU",
+      "name": "RMG ML Sports Holdings",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2104879"
+    },
+    {
       "ticker": "SHPH",
       "name": "Shuttle Pharmaceuticals Holdings, Inc.",
       "exchange": "Nasdaq",
@@ -25784,20 +25847,6 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "929351"
-    },
-    {
-      "ticker": "STSS",
-      "name": "SkyAI, Inc.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1737995"
-    },
-    {
-      "ticker": "STSSW",
-      "name": "SkyAI, Inc.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1737995"
     },
     {
       "ticker": "STTK",
