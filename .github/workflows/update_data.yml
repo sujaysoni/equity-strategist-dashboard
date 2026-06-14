@@ -32,8 +32,8 @@ name: Update Stock Recommendations
 
 on:
   schedule:
-    - cron: '0 14 * * 1-5'   # 10:00 AM EDT  (UTC-4, summer)
-    - cron: '0 15 * * 1-5'   # 10:00 AM EST  (UTC-5, winter)
+    - cron: '0 14 * * *'   # 10:00 AM EDT  (UTC-4, summer) — runs every day
+    - cron: '0 15 * * *'   # 10:00 AM EST  (UTC-5, winter) — runs every day
   repository_dispatch:
     types: [refresh-analysis]
   workflow_dispatch:
