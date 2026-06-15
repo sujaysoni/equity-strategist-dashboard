@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-06-14T15:50:35.001325+00:00",
-  "count": 4307,
+  "generated_at": "2026-06-15T18:47:12.460893+00:00",
+  "count": 4311,
   "exchange": "NASDAQ",
   "source": "nasdaq-trader-nasdaqlisted + sec-edgar-fallback",
   "tickers": [
@@ -237,13 +237,6 @@
     },
     {
       "ticker": "ABVE",
-      "name": "Above Food Ingredients Inc.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1979484"
-    },
-    {
-      "ticker": "ABVEW",
       "name": "Above Food Ingredients Inc.",
       "exchange": "Nasdaq",
       "sector": "",
@@ -979,7 +972,7 @@
     },
     {
       "ticker": "AGNT",
-      "name": "eXp World Holdings, Inc.",
+      "name": "AGNT, Inc.",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1495932"
@@ -2896,6 +2889,13 @@
       "cik": "1832332"
     },
     {
+      "ticker": "AVAT",
+      "name": "Avalanche Treasury Corp",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2092446"
+    },
+    {
       "ticker": "AVAV",
       "name": "AeroVironment Inc",
       "exchange": "Nasdaq",
@@ -4399,6 +4399,20 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "2068577"
+    },
+    {
+      "ticker": "BREZ",
+      "name": "Breeze Acquisition Corp. II",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2095443"
+    },
+    {
+      "ticker": "BREZR",
+      "name": "Breeze Acquisition Corp. II",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2095443"
     },
     {
       "ticker": "BREZU",
@@ -8510,13 +8524,6 @@
       "cik": "1861974"
     },
     {
-      "ticker": "EDAP",
-      "name": "EDAP TMS SA",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1041934"
-    },
-    {
       "ticker": "EDBL",
       "name": "Edible Garden AG Inc",
       "exchange": "Nasdaq",
@@ -9805,13 +9812,6 @@
       "cik": "708955"
     },
     {
-      "ticker": "FFIC",
-      "name": "FLUSHING FINANCIAL CORP",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "923139"
-    },
-    {
       "ticker": "FFIN",
       "name": "FIRST FINANCIAL BANKSHARES INC",
       "exchange": "Nasdaq",
@@ -9999,13 +9999,6 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "798354"
-    },
-    {
-      "ticker": "FITB",
-      "name": "FIFTH THIRD BANCORP",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "35527"
     },
     {
       "ticker": "FITBI",
@@ -10370,6 +10363,13 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "723646"
+    },
+    {
+      "ticker": "FRBT",
+      "name": "Forbright, Inc.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "1925062"
     },
     {
       "ticker": "FRD",
@@ -10821,28 +10821,28 @@
     },
     {
       "ticker": "GAIN",
-      "name": "GLADSTONE INVESTMENT CORPORATION\\DE",
+      "name": "GLADSTONE INVESTMENT CORPORATIONDE",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1321741"
     },
     {
       "ticker": "GAING",
-      "name": "GLADSTONE INVESTMENT CORPORATION\\DE",
+      "name": "GLADSTONE INVESTMENT CORPORATIONDE",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1321741"
     },
     {
       "ticker": "GAINI",
-      "name": "GLADSTONE INVESTMENT CORPORATION\\DE",
+      "name": "GLADSTONE INVESTMENT CORPORATIONDE",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1321741"
     },
     {
       "ticker": "GAINZ",
-      "name": "GLADSTONE INVESTMENT CORPORATION\\DE",
+      "name": "GLADSTONE INVESTMENT CORPORATIONDE",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1321741"
@@ -14339,6 +14339,13 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1854572"
+    },
+    {
+      "ticker": "JABRU",
+      "name": "JAB Acquisition Corp I",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2128739"
     },
     {
       "ticker": "JACK",
@@ -20543,13 +20550,6 @@
       "cik": "1495222"
     },
     {
-      "ticker": "OXLCP",
-      "name": "Oxford Lane Capital Corp.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1495222"
-    },
-    {
       "ticker": "OXLCZ",
       "name": "Oxford Lane Capital Corp.",
       "exchange": "Nasdaq",
@@ -21566,7 +21566,7 @@
     },
     {
       "ticker": "PN",
-      "name": "Skycorp Solar Group Ltd",
+      "name": "PN Smart Energy Ltd",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "2001288"
@@ -24561,6 +24561,13 @@
       "cik": "1987240"
     },
     {
+      "ticker": "SHOE",
+      "name": "SHOE CARNIVAL INC",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "895447"
+    },
+    {
       "ticker": "SHOO",
       "name": "STEVEN MADDEN, LTD.",
       "exchange": "Nasdaq",
@@ -25315,6 +25322,13 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1291855"
+    },
+    {
+      "ticker": "SPCX",
+      "name": "SPACE EXPLORATION TECHNOLOGIES CORP",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "1181412"
     },
     {
       "ticker": "SPEG",
@@ -28556,6 +28570,20 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "875320"
+    },
+    {
+      "ticker": "VRXA",
+      "name": "Veraxa Biotech Holding AG",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2079109"
+    },
+    {
+      "ticker": "VRXAW",
+      "name": "Veraxa Biotech Holding AG",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2079109"
     },
     {
       "ticker": "VS",

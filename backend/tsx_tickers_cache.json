@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-06-14T15:49:34.522223Z",
+  "generated_at": "2026-06-15T18:46:12.005589Z",
   "count": 2167,
-  "tsx_count": 754,
-  "tsxv_count": 1413,
+  "tsx_count": 755,
+  "tsxv_count": 1412,
   "tickers": [
     {
       "ticker": "AAA-P.V",
@@ -5609,9 +5609,9 @@
       "sector": ""
     },
     {
-      "ticker": "HMMC.V",
+      "ticker": "HMMC.TO",
       "name": "Hemlo Mining Corp.",
-      "exchange": "TSXV",
+      "exchange": "TSX",
       "sector": ""
     },
     {
