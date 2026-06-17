@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-17T02:44:37.700498Z",
+  "generated_at": "2026-06-17T17:17:16.212162Z",
   "count": 2167,
   "tsx_count": 755,
   "tsxv_count": 1412,
@@ -968,12 +968,6 @@
       "ticker": "ATZ.TO",
       "name": "Aritzia Inc.",
       "exchange": "TSX",
-      "sector": ""
-    },
-    {
-      "ticker": "AU.V",
-      "name": "Aurion Resources Ltd.",
-      "exchange": "TSXV",
       "sector": ""
     },
     {
@@ -12151,6 +12145,12 @@
     {
       "ticker": "VLI.V",
       "name": "Vision Lithium Inc.",
+      "exchange": "TSXV",
+      "sector": ""
+    },
+    {
+      "ticker": "VLLC.V",
+      "name": "Argentina Metals Corp.",
       "exchange": "TSXV",
       "sector": ""
     },

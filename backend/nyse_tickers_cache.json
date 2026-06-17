@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-06-17T02:45:38.051748+00:00",
-  "count": 3131,
+  "generated_at": "2026-06-17T17:18:16.947564+00:00",
+  "count": 3130,
   "exchange": "NYSE/NYSE-MKT/NYSE-ARCA",
   "source": "nasdaq-trader-otherlisted + sec-edgar-fallback",
   "tickers": [
@@ -7717,6 +7717,13 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1553079"
+    },
+    {
+      "ticker": "FITB",
+      "name": "FIFTH THIRD BANCORP",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "35527"
     },
     {
       "ticker": "FIX",
@@ -19241,13 +19248,6 @@
       "cik": "1604522"
     },
     {
-      "ticker": "THR",
-      "name": "Thermon Group Holdings, Inc.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1489096"
-    },
-    {
       "ticker": "THW",
       "name": "abrdn World Healthcare Fund",
       "exchange": "NYSE",
@@ -20201,49 +20201,49 @@
     },
     {
       "ticker": "USB",
-      "name": "US BANCORP \\DE\\",
+      "name": "US BANCORP DE",
       "exchange": "NYSE",
       "sector": "",
       "cik": "36104"
     },
     {
       "ticker": "USB-PA",
-      "name": "US BANCORP \\DE\\",
+      "name": "US BANCORP DE",
       "exchange": "NYSE",
       "sector": "",
       "cik": "36104"
     },
     {
       "ticker": "USB-PH",
-      "name": "US BANCORP \\DE\\",
+      "name": "US BANCORP DE",
       "exchange": "NYSE",
       "sector": "",
       "cik": "36104"
     },
     {
       "ticker": "USB-PP",
-      "name": "US BANCORP \\DE\\",
+      "name": "US BANCORP DE",
       "exchange": "NYSE",
       "sector": "",
       "cik": "36104"
     },
     {
       "ticker": "USB-PQ",
-      "name": "US BANCORP \\DE\\",
+      "name": "US BANCORP DE",
       "exchange": "NYSE",
       "sector": "",
       "cik": "36104"
     },
     {
       "ticker": "USB-PR",
-      "name": "US BANCORP \\DE\\",
+      "name": "US BANCORP DE",
       "exchange": "NYSE",
       "sector": "",
       "cik": "36104"
     },
     {
       "ticker": "USB-PS",
-      "name": "US BANCORP \\DE\\",
+      "name": "US BANCORP DE",
       "exchange": "NYSE",
       "sector": "",
       "cik": "36104"
@@ -20795,13 +20795,6 @@
       "cik": "883237"
     },
     {
-      "ticker": "VSCO",
-      "name": "Victoria's Secret & Co.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1856437"
-    },
-    {
       "ticker": "VSH",
       "name": "VISHAY INTERTECHNOLOGY INC",
       "exchange": "NYSE",
@@ -21188,7 +21181,7 @@
     },
     {
       "ticker": "WHK",
-      "name": "WhiteHawk Income Corp",
+      "name": "WhiteHawk Minerals Corp.",
       "exchange": "NYSE",
       "sector": "",
       "cik": "1921603"
