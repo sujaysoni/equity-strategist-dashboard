@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-06-17T17:17:16.212162Z",
-  "count": 2167,
-  "tsx_count": 755,
+  "generated_at": "2026-06-18T16:56:58.281039Z",
+  "count": 2166,
+  "tsx_count": 754,
   "tsxv_count": 1412,
   "tickers": [
     {
@@ -9938,12 +9938,6 @@
       "ticker": "RUM.V",
       "name": "Rocky Mountain Liquor Inc.",
       "exchange": "TSXV",
-      "sector": ""
-    },
-    {
-      "ticker": "RUP.TO",
-      "name": "Rupert Resources Ltd.",
-      "exchange": "TSX",
       "sector": ""
     },
     {
