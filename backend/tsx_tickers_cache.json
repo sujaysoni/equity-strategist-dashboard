@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-06-18T16:56:58.281039Z",
-  "count": 2166,
+  "generated_at": "2026-06-19T17:18:06.159053Z",
+  "count": 2167,
   "tsx_count": 754,
-  "tsxv_count": 1412,
+  "tsxv_count": 1413,
   "tickers": [
     {
       "ticker": "AAA-P.V",
@@ -7778,6 +7778,12 @@
       "ticker": "NANO.TO",
       "name": "Nano One Materials Corp.",
       "exchange": "TSX",
+      "sector": ""
+    },
+    {
+      "ticker": "NAP.V",
+      "name": "Napoleon Resources Inc.",
+      "exchange": "TSXV",
       "sector": ""
     },
     {
