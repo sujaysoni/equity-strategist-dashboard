@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-06-21T16:31:00.621578+00:00",
-  "count": 4307,
+  "generated_at": "2026-06-22T18:14:26.628567+00:00",
+  "count": 4320,
   "exchange": "NASDAQ",
   "source": "nasdaq-trader-nasdaqlisted + sec-edgar-fallback",
   "tickers": [
@@ -234,20 +234,6 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1173313"
-    },
-    {
-      "ticker": "ABVE",
-      "name": "Above Food Ingredients Inc.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1979484"
-    },
-    {
-      "ticker": "ABVEW",
-      "name": "Above Food Ingredients Inc.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1979484"
     },
     {
       "ticker": "ABVX",
@@ -979,7 +965,7 @@
     },
     {
       "ticker": "AGNT",
-      "name": "eXp World Holdings, Inc.",
+      "name": "AGNT, Inc.",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1495932"
@@ -2896,6 +2882,13 @@
       "cik": "1832332"
     },
     {
+      "ticker": "AVAT",
+      "name": "Avalanche Treasury Corp",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2092446"
+    },
+    {
       "ticker": "AVAV",
       "name": "AeroVironment Inc",
       "exchange": "Nasdaq",
@@ -3807,10 +3800,17 @@
     },
     {
       "ticker": "BIRD",
-      "name": "Allbirds, Inc.",
+      "name": "Smartbird, Inc.",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1653909"
+    },
+    {
+      "ticker": "BITA",
+      "name": "iShares Bitcoin Premium Income ETF",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2089969"
     },
     {
       "ticker": "BIVI",
@@ -4401,6 +4401,20 @@
       "cik": "2068577"
     },
     {
+      "ticker": "BREZ",
+      "name": "Breeze Acquisition Corp. II",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2095443"
+    },
+    {
+      "ticker": "BREZR",
+      "name": "Breeze Acquisition Corp. II",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2095443"
+    },
+    {
       "ticker": "BREZU",
       "name": "Breeze Acquisition Corp. II",
       "exchange": "Nasdaq",
@@ -4903,6 +4917,13 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1841387"
+    },
+    {
+      "ticker": "CAES",
+      "name": "Cantor Equity Partners VII, Inc.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2087965"
     },
     {
       "ticker": "CAI",
@@ -5683,20 +5704,6 @@
     },
     {
       "ticker": "CGCT",
-      "name": "Factorial Energy Inc.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "2049662"
-    },
-    {
-      "ticker": "CGCTU",
-      "name": "Factorial Energy Inc.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "2049662"
-    },
-    {
-      "ticker": "CGCTW",
       "name": "Factorial Energy Inc.",
       "exchange": "Nasdaq",
       "sector": "",
@@ -7390,7 +7397,21 @@
       "cik": "1075736"
     },
     {
+      "ticker": "CXII",
+      "name": "Churchill Capital Corp XII",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2114227"
+    },
+    {
       "ticker": "CXIIU",
+      "name": "Churchill Capital Corp XII",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2114227"
+    },
+    {
+      "ticker": "CXIIW",
       "name": "Churchill Capital Corp XII",
       "exchange": "Nasdaq",
       "sector": "",
@@ -8508,13 +8529,6 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1861974"
-    },
-    {
-      "ticker": "EDAP",
-      "name": "EDAP TMS SA",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1041934"
     },
     {
       "ticker": "EDBL",
@@ -9805,13 +9819,6 @@
       "cik": "708955"
     },
     {
-      "ticker": "FFIC",
-      "name": "FLUSHING FINANCIAL CORP",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "923139"
-    },
-    {
       "ticker": "FFIN",
       "name": "FIRST FINANCIAL BANKSHARES INC",
       "exchange": "Nasdaq",
@@ -9994,18 +10001,18 @@
       "cik": "862831"
     },
     {
+      "ticker": "FISN",
+      "name": "DEEP FISSION, INC.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "1918102"
+    },
+    {
       "ticker": "FISV",
       "name": "FISERV INC",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "798354"
-    },
-    {
-      "ticker": "FITB",
-      "name": "FIFTH THIRD BANCORP",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "35527"
     },
     {
       "ticker": "FITBI",
@@ -10169,6 +10176,13 @@
       "cik": "1580560"
     },
     {
+      "ticker": "FLZH",
+      "name": "Flash Sports & Media Holdings, Inc.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "1706524"
+    },
+    {
       "ticker": "FMAC",
       "name": "Future Money Acquisition Corp",
       "exchange": "Nasdaq",
@@ -10295,13 +10309,6 @@
       "cik": "2060083"
     },
     {
-      "ticker": "FONR",
-      "name": "FONAR CORP",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "355019"
-    },
-    {
       "ticker": "FORM",
       "name": "FORMFACTOR INC",
       "exchange": "Nasdaq",
@@ -10370,6 +10377,13 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "723646"
+    },
+    {
+      "ticker": "FRBT",
+      "name": "Forbright, Inc.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "1925062"
     },
     {
       "ticker": "FRD",
@@ -10603,6 +10617,13 @@
       "cik": "1066923"
     },
     {
+      "ticker": "FTH",
+      "name": "Sensei Biotherapeutics, Inc.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "1829802"
+    },
+    {
       "ticker": "FTHAU",
       "name": "Forefront Tech Holdings Acquisition Corp",
       "exchange": "Nasdaq",
@@ -10821,28 +10842,28 @@
     },
     {
       "ticker": "GAIN",
-      "name": "GLADSTONE INVESTMENT CORPORATION\\DE",
+      "name": "GLADSTONE INVESTMENT CORPORATIONDE",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1321741"
     },
     {
       "ticker": "GAING",
-      "name": "GLADSTONE INVESTMENT CORPORATION\\DE",
+      "name": "GLADSTONE INVESTMENT CORPORATIONDE",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1321741"
     },
     {
       "ticker": "GAINI",
-      "name": "GLADSTONE INVESTMENT CORPORATION\\DE",
+      "name": "GLADSTONE INVESTMENT CORPORATIONDE",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1321741"
     },
     {
       "ticker": "GAINZ",
-      "name": "GLADSTONE INVESTMENT CORPORATION\\DE",
+      "name": "GLADSTONE INVESTMENT CORPORATIONDE",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1321741"
@@ -12605,6 +12626,20 @@
       "cik": "773840"
     },
     {
+      "ticker": "HONAV",
+      "name": "Honeywell Aerospace Inc.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2089271"
+    },
+    {
+      "ticker": "HONIV",
+      "name": "HONEYWELL INTERNATIONAL INC",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "773840"
+    },
+    {
       "ticker": "HOOD",
       "name": "Robinhood Markets, Inc.",
       "exchange": "Nasdaq",
@@ -13116,7 +13151,21 @@
       "cik": "2091176"
     },
     {
+      "ticker": "IACQ",
+      "name": "Irenic Acquisition Corp.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2122505"
+    },
+    {
       "ticker": "IACQU",
+      "name": "Irenic Acquisition Corp.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2122505"
+    },
+    {
+      "ticker": "IACQW",
       "name": "Irenic Acquisition Corp.",
       "exchange": "Nasdaq",
       "sector": "",
@@ -14341,6 +14390,13 @@
       "cik": "1854572"
     },
     {
+      "ticker": "JABRU",
+      "name": "JAB Acquisition Corp I",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2128739"
+    },
+    {
       "ticker": "JACK",
       "name": "JACK IN THE BOX INC",
       "exchange": "Nasdaq",
@@ -14663,11 +14719,25 @@
       "cik": "1348911"
     },
     {
+      "ticker": "KARD",
+      "name": "Kardigan, Inc.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2123613"
+    },
+    {
       "ticker": "KARO",
       "name": "Karooooo Ltd.",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1828102"
+    },
+    {
+      "ticker": "KAZR",
+      "name": "Skyline Builders Group Holding Ltd",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2031009"
     },
     {
       "ticker": "KBON",
@@ -15007,13 +15077,6 @@
     },
     {
       "ticker": "KPLT",
-      "name": "Katapult Holdings, Inc.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1785424"
-    },
-    {
-      "ticker": "KPLTW",
       "name": "Katapult Holdings, Inc.",
       "exchange": "Nasdaq",
       "sector": "",
@@ -15798,6 +15861,13 @@
     },
     {
       "ticker": "LILAK",
+      "name": "Liberty Latin America Ltd.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "1712184"
+    },
+    {
+      "ticker": "LILAP",
       "name": "Liberty Latin America Ltd.",
       "exchange": "Nasdaq",
       "sector": "",
@@ -19311,20 +19381,6 @@
       "cik": "1506492"
     },
     {
-      "ticker": "NVA",
-      "name": "Nova Minerals Ltd",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1852551"
-    },
-    {
-      "ticker": "NVAWW",
-      "name": "Nova Minerals Ltd",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1852551"
-    },
-    {
       "ticker": "NVAX",
       "name": "NOVAVAX INC",
       "exchange": "Nasdaq",
@@ -19501,13 +19557,6 @@
     },
     {
       "ticker": "NXPL",
-      "name": "NextPlat Corp",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1058307"
-    },
-    {
-      "ticker": "NXPLW",
       "name": "NextPlat Corp",
       "exchange": "Nasdaq",
       "sector": "",
@@ -20172,6 +20221,13 @@
       "cik": "1801169"
     },
     {
+      "ticker": "OPI",
+      "name": "OFFICE PROPERTIES INCOME TRUST",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "1456772"
+    },
+    {
       "ticker": "OPK",
       "name": "OPKO HEALTH, INC.",
       "exchange": "Nasdaq",
@@ -20355,14 +20411,14 @@
     },
     {
       "ticker": "OSRH",
-      "name": "OSR Holdings, Inc.",
+      "name": "OSR Health, Inc.",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1840425"
     },
     {
       "ticker": "OSRHW",
-      "name": "OSR Holdings, Inc.",
+      "name": "OSR Health, Inc.",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1840425"
@@ -20537,13 +20593,6 @@
     },
     {
       "ticker": "OXLCO",
-      "name": "Oxford Lane Capital Corp.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1495222"
-    },
-    {
-      "ticker": "OXLCP",
       "name": "Oxford Lane Capital Corp.",
       "exchange": "Nasdaq",
       "sector": "",
@@ -21566,7 +21615,7 @@
     },
     {
       "ticker": "PN",
-      "name": "Skycorp Solar Group Ltd",
+      "name": "PN Smart Energy Ltd",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "2001288"
@@ -24295,13 +24344,6 @@
       "cik": "1031235"
     },
     {
-      "ticker": "SELX",
-      "name": "Semilux International Ltd.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1990950"
-    },
-    {
       "ticker": "SENEA",
       "name": "Seneca Foods Corp",
       "exchange": "Nasdaq",
@@ -24561,6 +24603,13 @@
       "cik": "1987240"
     },
     {
+      "ticker": "SHOE",
+      "name": "SHOE CARNIVAL INC",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "895447"
+    },
+    {
       "ticker": "SHOO",
       "name": "STEVEN MADDEN, LTD.",
       "exchange": "Nasdaq",
@@ -24799,6 +24848,13 @@
       "cik": "1038074"
     },
     {
+      "ticker": "SLBT",
+      "name": "SL Science Holding Ltd",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2070534"
+    },
+    {
       "ticker": "SLDB",
       "name": "Solid Biosciences Inc.",
       "exchange": "Nasdaq",
@@ -24954,6 +25010,13 @@
     },
     {
       "ticker": "SMCI",
+      "name": "Super Micro Computer, Inc.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "1375365"
+    },
+    {
+      "ticker": "SMCIP",
       "name": "Super Micro Computer, Inc.",
       "exchange": "Nasdaq",
       "sector": "",
@@ -25315,6 +25378,13 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1291855"
+    },
+    {
+      "ticker": "SPCX",
+      "name": "SPACE EXPLORATION TECHNOLOGIES CORP",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "1181412"
     },
     {
       "ticker": "SPEG",
@@ -25945,13 +26015,6 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1392694"
-    },
-    {
-      "ticker": "SUUN",
-      "name": "POWERBANK Corp",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "2011053"
     },
     {
       "ticker": "SVA",
@@ -27480,6 +27543,13 @@
       "cik": "1860871"
     },
     {
+      "ticker": "TVIVU",
+      "name": "Texas Ventures Acquisition IV Corp",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2096755"
+    },
+    {
       "ticker": "TVRD",
       "name": "Tvardi Therapeutics, Inc.",
       "exchange": "Nasdaq",
@@ -27712,7 +27782,7 @@
     },
     {
       "ticker": "UGRO",
-      "name": "urban-gro, Inc.",
+      "name": "Flash Sports & Media Holdings, Inc.",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1706524"
@@ -27905,13 +27975,6 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1912847"
-    },
-    {
-      "ticker": "USEG",
-      "name": "BIG SKY INDUSTRIAL INC.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "101594"
     },
     {
       "ticker": "USGO",
@@ -28558,6 +28621,20 @@
       "cik": "875320"
     },
     {
+      "ticker": "VRXA",
+      "name": "Veraxa Biotech Holding AG",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2079109"
+    },
+    {
+      "ticker": "VRXAW",
+      "name": "Veraxa Biotech Holding AG",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2079109"
+    },
+    {
       "ticker": "VS",
       "name": "Versus Systems Inc.",
       "exchange": "Nasdaq",
@@ -29053,6 +29130,13 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1096275"
+    },
+    {
+      "ticker": "WLCOU",
+      "name": "Wilco 63 Corp",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2101470"
     },
     {
       "ticker": "WLDN",
@@ -29816,6 +29900,13 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1868395"
+    },
+    {
+      "ticker": "YICCU",
+      "name": "Yorkville International Capital Corp.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2130386"
     },
     {
       "ticker": "YJ",

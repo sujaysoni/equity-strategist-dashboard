@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-06-21T16:31:00.605805+00:00",
-  "count": 3131,
+  "generated_at": "2026-06-22T18:14:26.613066+00:00",
+  "count": 3132,
   "exchange": "NYSE/NYSE-MKT/NYSE-ARCA",
   "source": "nasdaq-trader-otherlisted + sec-edgar-fallback",
   "tickers": [
@@ -1867,13 +1867,6 @@
       "cik": "1439124"
     },
     {
-      "ticker": "AXIA-P",
-      "name": "AXIA Energia S.A.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1439124"
-    },
-    {
       "ticker": "AXIL",
       "name": "Axil Brands, Inc.",
       "exchange": "NYSE",
@@ -3027,6 +3020,13 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1832871"
+    },
+    {
+      "ticker": "BMNP",
+      "name": "BITMINE IMMERSION TECHNOLOGIES, INC.",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "1829311"
     },
     {
       "ticker": "BMNR",
@@ -4618,13 +4618,6 @@
       "cik": "1666291"
     },
     {
-      "ticker": "CMU",
-      "name": "MFS HIGH YIELD MUNICIPAL TRUST",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "809844"
-    },
-    {
       "ticker": "CNA",
       "name": "CNA FINANCIAL CORP",
       "exchange": "NYSE",
@@ -5157,11 +5150,25 @@
       "cik": "1793229"
     },
     {
+      "ticker": "CTGG",
+      "name": "QWEST CORP",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "68622"
+    },
+    {
       "ticker": "CTGO",
       "name": "Contango Silver & Gold Inc.",
       "exchange": "NYSE",
       "sector": "",
       "cik": "1502377"
+    },
+    {
+      "ticker": "CTHH",
+      "name": "QWEST CORP",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "68622"
     },
     {
       "ticker": "CTM",
@@ -5400,13 +5407,6 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "845606"
-    },
-    {
-      "ticker": "CXH",
-      "name": "MFS INVESTMENT GRADE MUNICIPAL TRUST",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "847411"
     },
     {
       "ticker": "CXM",
@@ -7481,6 +7481,13 @@
       "cik": "886206"
     },
     {
+      "ticker": "FCBM",
+      "name": "First Carolina Financial Services, Inc.",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "1531193"
+    },
+    {
       "ticker": "FCF",
       "name": "FIRST COMMONWEALTH FINANCIAL CORP /PA/",
       "exchange": "NYSE",
@@ -7524,7 +7531,7 @@
     },
     {
       "ticker": "FDP",
-      "name": "FRESH DEL MONTE PRODUCE INC",
+      "name": "DEL MONTE CORP",
       "exchange": "NYSE",
       "sector": "",
       "cik": "1047340"
@@ -7717,6 +7724,13 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1553079"
+    },
+    {
+      "ticker": "FITB",
+      "name": "FIFTH THIRD BANCORP",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "35527"
     },
     {
       "ticker": "FIX",
@@ -10818,13 +10832,6 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1472215"
-    },
-    {
-      "ticker": "JMG",
-      "name": "JM Group Ltd",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "2049717"
     },
     {
       "ticker": "JMIA",
@@ -14292,6 +14299,20 @@
       "cik": "1450445"
     },
     {
+      "ticker": "NVA",
+      "name": "Nova Minerals Ltd",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "1852551"
+    },
+    {
+      "ticker": "NVA-WT",
+      "name": "Nova Minerals Ltd",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "1852551"
+    },
+    {
       "ticker": "NVG",
       "name": "Nuveen AMT-Free Municipal Credit Income Fund",
       "exchange": "NYSE",
@@ -15685,6 +15706,13 @@
       "cik": "1690842"
     },
     {
+      "ticker": "PLUN",
+      "name": "Plutonian Acquisition Corp. II",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "2065661"
+    },
+    {
       "ticker": "PLX",
       "name": "Protalix BioTherapeutics, Inc.",
       "exchange": "NYSE",
@@ -16953,6 +16981,13 @@
     },
     {
       "ticker": "RQI",
+      "name": "COHEN & STEERS QUALITY INCOME REALTY FUND INC",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "1157842"
+    },
+    {
+      "ticker": "RQI-RW",
       "name": "COHEN & STEERS QUALITY INCOME REALTY FUND INC",
       "exchange": "NYSE",
       "sector": "",
@@ -18912,13 +18947,6 @@
       "cik": "1781730"
     },
     {
-      "ticker": "TCGL",
-      "name": "TechCreate Group Ltd.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "2047190"
-    },
-    {
       "ticker": "TCI",
       "name": "TRANSCONTINENTAL REALTY INVESTORS INC",
       "exchange": "NYSE",
@@ -19239,13 +19267,6 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1604522"
-    },
-    {
-      "ticker": "THR",
-      "name": "Thermon Group Holdings, Inc.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1489096"
     },
     {
       "ticker": "THW",
@@ -19829,13 +19850,6 @@
       "cik": "1268533"
     },
     {
-      "ticker": "TYG-RI",
-      "name": "TORTOISE ENERGY INFRASTRUCTURE CORP",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1268533"
-    },
-    {
       "ticker": "TYL",
       "name": "TYLER TECHNOLOGIES INC",
       "exchange": "NYSE",
@@ -20201,49 +20215,49 @@
     },
     {
       "ticker": "USB",
-      "name": "US BANCORP \\DE\\",
+      "name": "US BANCORP DE",
       "exchange": "NYSE",
       "sector": "",
       "cik": "36104"
     },
     {
       "ticker": "USB-PA",
-      "name": "US BANCORP \\DE\\",
+      "name": "US BANCORP DE",
       "exchange": "NYSE",
       "sector": "",
       "cik": "36104"
     },
     {
       "ticker": "USB-PH",
-      "name": "US BANCORP \\DE\\",
+      "name": "US BANCORP DE",
       "exchange": "NYSE",
       "sector": "",
       "cik": "36104"
     },
     {
       "ticker": "USB-PP",
-      "name": "US BANCORP \\DE\\",
+      "name": "US BANCORP DE",
       "exchange": "NYSE",
       "sector": "",
       "cik": "36104"
     },
     {
       "ticker": "USB-PQ",
-      "name": "US BANCORP \\DE\\",
+      "name": "US BANCORP DE",
       "exchange": "NYSE",
       "sector": "",
       "cik": "36104"
     },
     {
       "ticker": "USB-PR",
-      "name": "US BANCORP \\DE\\",
+      "name": "US BANCORP DE",
       "exchange": "NYSE",
       "sector": "",
       "cik": "36104"
     },
     {
       "ticker": "USB-PS",
-      "name": "US BANCORP \\DE\\",
+      "name": "US BANCORP DE",
       "exchange": "NYSE",
       "sector": "",
       "cik": "36104"
@@ -20795,13 +20809,6 @@
       "cik": "883237"
     },
     {
-      "ticker": "VSCO",
-      "name": "Victoria's Secret & Co.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1856437"
-    },
-    {
       "ticker": "VSH",
       "name": "VISHAY INTERTECHNOLOGY INC",
       "exchange": "NYSE",
@@ -21188,7 +21195,7 @@
     },
     {
       "ticker": "WHK",
-      "name": "WhiteHawk Income Corp",
+      "name": "WhiteHawk Minerals Corp.",
       "exchange": "NYSE",
       "sector": "",
       "cik": "1921603"

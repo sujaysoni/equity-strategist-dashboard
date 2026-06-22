@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-21T16:30:00.198568Z",
+  "generated_at": "2026-06-22T18:13:26.157769Z",
   "count": 2167,
   "tsx_count": 754,
   "tsxv_count": 1413,
@@ -2113,12 +2113,6 @@
     {
       "ticker": "CBR.V",
       "name": "Cabral Gold Inc.",
-      "exchange": "TSXV",
-      "sector": ""
-    },
-    {
-      "ticker": "CBV.V",
-      "name": "Cobra Venture Corporation",
       "exchange": "TSXV",
       "sector": ""
     },
@@ -7374,7 +7368,7 @@
     },
     {
       "ticker": "MIVO.V",
-      "name": "Miivo Holdings Corp.",
+      "name": "Miivo AI Inc",
       "exchange": "TSXV",
       "sector": ""
     },
@@ -9751,6 +9745,12 @@
     {
       "ticker": "ROAR.V",
       "name": "Lion Rock Resources Inc.",
+      "exchange": "TSXV",
+      "sector": ""
+    },
+    {
+      "ticker": "ROB.V",
+      "name": "Robinson Energy Limited",
       "exchange": "TSXV",
       "sector": ""
     },
