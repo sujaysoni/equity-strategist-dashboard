@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-06-22T18:13:26.157769Z",
+  "generated_at": "2026-06-23T16:27:49.952280Z",
   "count": 2167,
-  "tsx_count": 754,
-  "tsxv_count": 1413,
+  "tsx_count": 755,
+  "tsxv_count": 1412,
   "tickers": [
     {
       "ticker": "AAA-P.V",
@@ -2192,12 +2192,6 @@
       "ticker": "CCS-PR-C.TO",
       "name": "Co-operators General Insurance Company",
       "exchange": "TSX",
-      "sector": ""
-    },
-    {
-      "ticker": "CCZ-P.V",
-      "name": "Chablis Capital Corp.",
-      "exchange": "TSXV",
       "sector": ""
     },
     {
@@ -7967,9 +7961,9 @@
       "sector": ""
     },
     {
-      "ticker": "NICU.V",
+      "ticker": "NICU.TO",
       "name": "Magna Mining Inc.",
-      "exchange": "TSXV",
+      "exchange": "TSX",
       "sector": ""
     },
     {
@@ -8023,6 +8017,12 @@
     {
       "ticker": "NLII-P.V",
       "name": "NL2 Capital Inc.",
+      "exchange": "TSXV",
+      "sector": ""
+    },
+    {
+      "ticker": "NMB.V",
+      "name": "NorthMin Corporation",
       "exchange": "TSXV",
       "sector": ""
     },
