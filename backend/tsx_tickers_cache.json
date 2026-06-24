@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-06-23T16:27:49.952280Z",
-  "count": 2167,
-  "tsx_count": 755,
+  "generated_at": "2026-06-24T16:21:05.404147Z",
+  "count": 2168,
+  "tsx_count": 756,
   "tsxv_count": 1412,
   "tickers": [
     {
@@ -2390,6 +2390,12 @@
       "ticker": "CHII-P.V",
       "name": "Chicane Capital II Corp.",
       "exchange": "TSXV",
+      "sector": ""
+    },
+    {
+      "ticker": "CHLT.TO",
+      "name": "Custom Health Holdings Inc.",
+      "exchange": "TSX",
       "sector": ""
     },
     {
