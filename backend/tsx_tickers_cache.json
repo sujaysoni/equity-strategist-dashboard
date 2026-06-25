@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-06-24T16:21:05.404147Z",
-  "count": 2168,
+  "generated_at": "2026-06-25T16:23:58.502065Z",
+  "count": 2169,
   "tsx_count": 756,
-  "tsxv_count": 1412,
+  "tsxv_count": 1413,
   "tickers": [
     {
       "ticker": "AAA-P.V",
@@ -7334,6 +7334,12 @@
       "ticker": "MIC-PR-A.TO",
       "name": "Sagen MI Canada Inc.",
       "exchange": "TSX",
+      "sector": ""
+    },
+    {
+      "ticker": "MILE.V",
+      "name": "Twenty Mile Metals Inc.",
+      "exchange": "TSXV",
       "sector": ""
     },
     {
