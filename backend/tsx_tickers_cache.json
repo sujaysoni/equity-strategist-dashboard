@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-06-25T16:23:58.502065Z",
+  "generated_at": "2026-06-26T16:16:23.754604Z",
   "count": 2169,
-  "tsx_count": 756,
-  "tsxv_count": 1413,
+  "tsx_count": 755,
+  "tsxv_count": 1414,
   "tickers": [
     {
       "ticker": "AAA-P.V",
@@ -841,12 +841,6 @@
     {
       "ticker": "ARX.TO",
       "name": "ARC Resources Ltd.",
-      "exchange": "TSX",
-      "sector": ""
-    },
-    {
-      "ticker": "ASCU.TO",
-      "name": "Arizona Sonoran Copper Company Inc.",
       "exchange": "TSX",
       "sector": ""
     },
@@ -10639,6 +10633,12 @@
     {
       "ticker": "SMRV.V",
       "name": "Smooth Rock Ventures Corp.",
+      "exchange": "TSXV",
+      "sector": ""
+    },
+    {
+      "ticker": "SMWE.V",
+      "name": "Smartwell Technology Corp.",
       "exchange": "TSXV",
       "sector": ""
     },
