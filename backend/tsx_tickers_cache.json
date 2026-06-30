@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-06-29T17:11:55.804925Z",
-  "count": 2168,
-  "tsx_count": 754,
+  "generated_at": "2026-06-30T16:29:08.346535Z",
+  "count": 2169,
+  "tsx_count": 755,
   "tsxv_count": 1414,
   "tickers": [
     {
@@ -5615,6 +5615,12 @@
       "sector": ""
     },
     {
+      "ticker": "HONA.TO",
+      "name": "Honeywell Aerospace CDR (CAD Hedged)",
+      "exchange": "TSX",
+      "sector": ""
+    },
+    {
       "ticker": "HOOD.TO",
       "name": "Robinhood CDR (CAD Hedged)",
       "exchange": "TSX",
@@ -6990,7 +6996,7 @@
     },
     {
       "ticker": "MAI.V",
-      "name": "Minera Alamos Inc.",
+      "name": "Mining Americas Inc.",
       "exchange": "TSXV",
       "sector": ""
     },
@@ -12594,7 +12600,7 @@
     },
     {
       "ticker": "WOLF.V",
-      "name": "Grey Wolf Animal Health Corp.",
+      "name": "Grey Wolf Health Corp.",
       "exchange": "TSXV",
       "sector": ""
     },
