@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-07-01T11:19:46.143865+00:00",
-  "count": 3132,
+  "generated_at": "2026-07-01T16:37:08.754002+00:00",
+  "count": 3138,
   "exchange": "NYSE/NYSE-MKT/NYSE-ARCA",
   "source": "nasdaq-trader-otherlisted + sec-edgar-fallback",
   "tickers": [
@@ -17,6 +17,13 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1675149"
+    },
+    {
+      "ticker": "AAC-UN",
+      "name": "Ares Acquisition Corp III",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "2128115"
     },
     {
       "ticker": "AADX",
@@ -678,7 +685,7 @@
     },
     {
       "ticker": "AIB",
-      "name": "BlockchAIn Digital Infrastructure, Inc.",
+      "name": "AIB Data Centers Inc.",
       "exchange": "NYSE",
       "sector": "",
       "cik": "2070542"
@@ -4710,7 +4717,7 @@
     },
     {
       "ticker": "CNQ",
-      "name": "CANADIAN NATURAL RESOURCES LTD",
+      "name": "CANADIAN NATURAL RESOURCES Ltd",
       "exchange": "NYSE",
       "sector": "",
       "cik": "1017413"
@@ -5269,6 +5276,13 @@
       "cik": "1792781"
     },
     {
+      "ticker": "CUX",
+      "name": "CopperTech Metals Inc.",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "2093018"
+    },
+    {
       "ticker": "CUZ",
       "name": "COUSINS PROPERTIES INC",
       "exchange": "NYSE",
@@ -5400,13 +5414,6 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1076378"
-    },
-    {
-      "ticker": "CXE",
-      "name": "MFS HIGH INCOME MUNICIPAL TRUST",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "845606"
     },
     {
       "ticker": "CXM",
@@ -5941,6 +5948,13 @@
       "cik": "1565381"
     },
     {
+      "ticker": "DMC",
+      "name": "DEL MONTE CORP",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "1047340"
+    },
+    {
       "ticker": "DMO",
       "name": "Western Asset Mortgage Opportunity Fund Inc.",
       "exchange": "NYSE",
@@ -6023,6 +6037,13 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1751788"
+    },
+    {
+      "ticker": "DPC",
+      "name": "DPC Holdings Ltd",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "2107018"
     },
     {
       "ticker": "DPG",
@@ -7712,6 +7733,13 @@
       "cik": "1691445"
     },
     {
+      "ticker": "FIRY",
+      "name": "Firy Inc.",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "1801661"
+    },
+    {
       "ticker": "FIS",
       "name": "Fidelity National Information Services, Inc.",
       "exchange": "NYSE",
@@ -8732,6 +8760,13 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "320335"
+    },
+    {
+      "ticker": "GLAS",
+      "name": "Glass House Brands Inc.",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "1848731"
     },
     {
       "ticker": "GLD",
@@ -11464,13 +11499,6 @@
       "cik": "1835830"
     },
     {
-      "ticker": "KW",
-      "name": "Kennedy-Wilson Holdings, Inc.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1408100"
-    },
-    {
       "ticker": "KWR",
       "name": "QUAKER CHEMICAL CORP",
       "exchange": "NYSE",
@@ -11563,7 +11591,7 @@
     },
     {
       "ticker": "LC",
-      "name": "LendingClub Corp",
+      "name": "Happen, Inc.",
       "exchange": "NYSE",
       "sector": "",
       "cik": "1409970"
@@ -11632,13 +11660,6 @@
       "cik": "2087450"
     },
     {
-      "ticker": "LEGT",
-      "name": "Legato Merger Corp. III",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "2002038"
-    },
-    {
       "ticker": "LEN",
       "name": "LENNAR CORP /NEW/",
       "exchange": "NYSE",
@@ -11703,13 +11724,6 @@
     },
     {
       "ticker": "LGL",
-      "name": "LGL GROUP INC",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "61004"
-    },
-    {
-      "ticker": "LGL-RI",
       "name": "LGL GROUP INC",
       "exchange": "NYSE",
       "sector": "",
@@ -12746,7 +12760,7 @@
     },
     {
       "ticker": "MMT",
-      "name": "MFS MULTIMARKET INCOME TRUST",
+      "name": "ABERDEEN MULTI-MARKET INCOME FUND",
       "exchange": "NYSE",
       "sector": "",
       "cik": "809173"
@@ -13177,6 +13191,13 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1582554"
+    },
+    {
+      "ticker": "MTNE",
+      "name": "CH4 Natural Solutions Corp",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "2044817"
     },
     {
       "ticker": "MTR",
@@ -14300,14 +14321,14 @@
     },
     {
       "ticker": "NVA",
-      "name": "Nova Minerals Ltd",
+      "name": "Nova Minerals Corp",
       "exchange": "NYSE",
       "sector": "",
       "cik": "1852551"
     },
     {
       "ticker": "NVA-WT",
-      "name": "Nova Minerals Ltd",
+      "name": "Nova Minerals Corp",
       "exchange": "NYSE",
       "sector": "",
       "cik": "1852551"
@@ -14878,6 +14899,13 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1795091"
+    },
+    {
+      "ticker": "OTAI",
+      "name": "Starlink AI Acquisition Corp",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "2094076"
     },
     {
       "ticker": "OTF",
@@ -15748,13 +15776,6 @@
       "cik": "844790"
     },
     {
-      "ticker": "PMNT",
-      "name": "Perfect Moment Ltd.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1849221"
-    },
-    {
       "ticker": "PMO",
       "name": "PUTNAM MUNICIPAL OPPORTUNITIES TRUST",
       "exchange": "NYSE",
@@ -16313,6 +16334,13 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1015820"
+    },
+    {
+      "ticker": "QLEP",
+      "name": "Quantum Leap Acquisition Corp",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "2102155"
     },
     {
       "ticker": "QNC",
@@ -16987,7 +17015,7 @@
       "cik": "1157842"
     },
     {
-      "ticker": "RQI-RW",
+      "ticker": "RQI-RI",
       "name": "COHEN & STEERS QUALITY INCOME REALTY FUND INC",
       "exchange": "NYSE",
       "sector": "",
@@ -17188,13 +17216,6 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1481582"
-    },
-    {
-      "ticker": "RZB",
-      "name": "REINSURANCE GROUP OF AMERICA INC",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "898174"
     },
     {
       "ticker": "RZC",
@@ -17834,6 +17855,13 @@
       "cik": "887153"
     },
     {
+      "ticker": "SIND",
+      "name": "Sinda Ltd.",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "2096861"
+    },
+    {
       "ticker": "SITC",
       "name": "SITE Centers Corp.",
       "exchange": "NYSE",
@@ -17884,7 +17912,7 @@
     },
     {
       "ticker": "SKLZ",
-      "name": "Skillz Inc.",
+      "name": "Firy Inc.",
       "exchange": "NYSE",
       "sector": "",
       "cik": "1801661"
@@ -18493,7 +18521,7 @@
     },
     {
       "ticker": "SRXH",
-      "name": "SRx Health Solutions, Inc.",
+      "name": "SRX Global Inc.",
       "exchange": "NYSE",
       "sector": "",
       "cik": "1471727"
@@ -19186,7 +19214,7 @@
     },
     {
       "ticker": "TGB",
-      "name": "TASEKO MINES LTD",
+      "name": "Trekor Metals Ltd",
       "exchange": "NYSE",
       "sector": "",
       "cik": "878518"
@@ -19508,6 +19536,13 @@
     },
     {
       "ticker": "TPTA",
+      "name": "Terra Property Trust, Inc.",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "1674356"
+    },
+    {
+      "ticker": "TPTS",
       "name": "Terra Property Trust, Inc.",
       "exchange": "NYSE",
       "sector": "",
@@ -20592,6 +20627,13 @@
       "cik": "1973062"
     },
     {
+      "ticker": "VII-UN",
+      "name": "Viking Acquisition Corp. II",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "2139246"
+    },
+    {
       "ticker": "VIK",
       "name": "Viking Holdings Ltd",
       "exchange": "NYSE",
@@ -20775,7 +20817,7 @@
     },
     {
       "ticker": "VOYG",
-      "name": "Voyager Technologies, Inc./DE",
+      "name": "Voyager Technologies, Inc./TX",
       "exchange": "NYSE",
       "sector": "",
       "cik": "1788060"
@@ -21545,7 +21587,7 @@
     },
     {
       "ticker": "XFLT",
-      "name": "XAI Octagon Floating Rate & Alternative Income Trust",
+      "name": "XAI Floating Rate & Alternative Income Trust",
       "exchange": "NYSE",
       "sector": "",
       "cik": "1703079"
