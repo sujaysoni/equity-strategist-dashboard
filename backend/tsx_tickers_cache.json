@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-07-02T16:11:29.219735Z",
+  "generated_at": "2026-07-03T15:53:10.790228Z",
   "count": 2169,
-  "tsx_count": 755,
-  "tsxv_count": 1414,
+  "tsx_count": 756,
+  "tsxv_count": 1413,
   "tickers": [
     {
       "ticker": "AAA-P.V",
@@ -618,7 +618,7 @@
     },
     {
       "ticker": "AMX.V",
-      "name": "Amex Exploration Inc.",
+      "name": "Amex Gold Mining Inc.",
       "exchange": "TSXV",
       "sector": ""
     },
@@ -3498,7 +3498,7 @@
     },
     {
       "ticker": "DSV.TO",
-      "name": "Discovery Silver Corp.",
+      "name": "Discovery Mining Ltd.",
       "exchange": "TSX",
       "sector": ""
     },
@@ -6995,9 +6995,9 @@
       "sector": ""
     },
     {
-      "ticker": "MAI.V",
+      "ticker": "MAI.TO",
       "name": "Mining Americas Inc.",
-      "exchange": "TSXV",
+      "exchange": "TSX",
       "sector": ""
     },
     {

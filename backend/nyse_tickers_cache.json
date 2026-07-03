@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-07-02T16:12:29.718468+00:00",
-  "count": 3138,
+  "generated_at": "2026-07-03T15:54:11.272711+00:00",
+  "count": 3136,
   "exchange": "NYSE/NYSE-MKT/NYSE-ARCA",
   "source": "nasdaq-trader-otherlisted + sec-edgar-fallback",
   "tickers": [
@@ -2918,7 +2918,7 @@
     },
     {
       "ticker": "BLD",
-      "name": "TopBuild Corp",
+      "name": "QXO Insulation, LLC",
       "exchange": "NYSE",
       "sector": "",
       "cik": "1633931"
@@ -4275,13 +4275,6 @@
       "cik": "936395"
     },
     {
-      "ticker": "CIF",
-      "name": "MFS INTERMEDIATE HIGH INCOME FUND",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "833021"
-    },
-    {
       "ticker": "CIG",
       "name": "ENERGY CO OF MINAS GERAIS",
       "exchange": "NYSE",
@@ -5274,13 +5267,6 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1792781"
-    },
-    {
-      "ticker": "CUX",
-      "name": "CopperTech Metals Inc.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "2093018"
     },
     {
       "ticker": "CUZ",
@@ -10814,7 +10800,7 @@
     },
     {
       "ticker": "JHG",
-      "name": "JANUS HENDERSON GROUP PLC",
+      "name": "Janus Henderson Group Ltc.",
       "exchange": "NYSE",
       "sector": "",
       "cik": "1274173"
@@ -11590,13 +11576,6 @@
       "cik": "1694028"
     },
     {
-      "ticker": "LC",
-      "name": "Happen, Inc.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1409970"
-    },
-    {
       "ticker": "LCII",
       "name": "LCI INDUSTRIES",
       "exchange": "NYSE",
@@ -12199,6 +12178,13 @@
       "cik": "1941365"
     },
     {
+      "ticker": "MBGL",
+      "name": "Mobility Global Inc.",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "2090312"
+    },
+    {
       "ticker": "MBI",
       "name": "MBIA INC",
       "exchange": "NYSE",
@@ -12253,13 +12239,6 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1059556"
-    },
-    {
-      "ticker": "MCR",
-      "name": "MFS CHARTER INCOME TRUST",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "851170"
     },
     {
       "ticker": "MCRP",
@@ -17624,6 +17603,13 @@
       "cik": "88121"
     },
     {
+      "ticker": "SECZ",
+      "name": "Securitize Holdings, Inc.",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "2094496"
+    },
+    {
       "ticker": "SEG",
       "name": "Seaport Entertainment Group Inc.",
       "exchange": "NYSE",
@@ -17909,13 +17895,6 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1774675"
-    },
-    {
-      "ticker": "SKLZ",
-      "name": "Firy Inc.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1801661"
     },
     {
       "ticker": "SKM",
@@ -18973,6 +18952,13 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1781730"
+    },
+    {
+      "ticker": "TCGL",
+      "name": "TechCreate Group Ltd.",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "2047190"
     },
     {
       "ticker": "TCI",

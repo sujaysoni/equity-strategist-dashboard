@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-07-02T16:12:29.735434+00:00",
-  "count": 4314,
+  "generated_at": "2026-07-03T15:54:11.291576+00:00",
+  "count": 4329,
   "exchange": "NASDAQ",
   "source": "nasdaq-trader-nasdaqlisted + sec-edgar-fallback",
   "tickers": [
@@ -789,7 +789,28 @@
       "cik": "1853044"
     },
     {
+      "ticker": "AESP",
+      "name": "Aeon Acquisition I Corp.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2082526"
+    },
+    {
+      "ticker": "AESPR",
+      "name": "Aeon Acquisition I Corp.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2082526"
+    },
+    {
       "ticker": "AESPU",
+      "name": "Aeon Acquisition I Corp.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2082526"
+    },
+    {
+      "ticker": "AESPW",
       "name": "Aeon Acquisition I Corp.",
       "exchange": "Nasdaq",
       "sector": "",
@@ -1707,7 +1728,7 @@
     },
     {
       "ticker": "AMRN",
-      "name": "AMARIN CORP PLCUK",
+      "name": "AMARIN CORP PLC\\UK",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "897448"
@@ -4569,6 +4590,13 @@
       "cik": "101594"
     },
     {
+      "ticker": "BSP",
+      "name": "Bending Spoons S.p.A.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2004711"
+    },
+    {
       "ticker": "BSRR",
       "name": "SIERRA BANCORP",
       "exchange": "Nasdaq",
@@ -5116,10 +5144,10 @@
     },
     {
       "ticker": "CBAT",
-      "name": "CBAK Energy Technology, Inc.",
+      "name": "CBAK Energy Technology Ltd",
       "exchange": "Nasdaq",
       "sector": "",
-      "cik": "1117171"
+      "cik": "2086841"
     },
     {
       "ticker": "CBC",
@@ -11933,6 +11961,20 @@
       "cik": "2072404"
     },
     {
+      "ticker": "GSRV",
+      "name": "GSR V Acquisition Corp.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2111762"
+    },
+    {
+      "ticker": "GSRVR",
+      "name": "GSR V Acquisition Corp.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2111762"
+    },
+    {
       "ticker": "GSRVU",
       "name": "GSR V Acquisition Corp.",
       "exchange": "Nasdaq",
@@ -12624,6 +12666,13 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1828588"
+    },
+    {
+      "ticker": "HODO",
+      "name": "Brag House Holdings, Inc.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "1903595"
     },
     {
       "ticker": "HOFT",
@@ -14166,6 +14215,20 @@
       "cik": "1722608"
     },
     {
+      "ticker": "IQMX",
+      "name": "IQM Quantum Computers Oyj",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2113060"
+    },
+    {
+      "ticker": "IQMXW",
+      "name": "IQM Quantum Computers Oyj",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2113060"
+    },
+    {
       "ticker": "IQST",
       "name": "iQSTEL Inc",
       "exchange": "Nasdaq",
@@ -14297,6 +14360,13 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1602658"
+    },
+    {
+      "ticker": "ITG",
+      "name": "ITG, Inc./DE/",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2110117"
     },
     {
       "ticker": "ITHA",
@@ -15895,6 +15965,13 @@
       "cik": "1712184"
     },
     {
+      "ticker": "LIME",
+      "name": "Neutron Holdings, Inc.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "1699963"
+    },
+    {
       "ticker": "LIMN",
       "name": "Liminatus Pharma, Inc.",
       "exchange": "Nasdaq",
@@ -17328,6 +17405,13 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1337068"
+    },
+    {
+      "ticker": "MIACU",
+      "name": "Meridian3 Industrials Acquisition Corp",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2136530"
     },
     {
       "ticker": "MIDD",
@@ -19134,6 +19218,20 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "932696"
+    },
+    {
+      "ticker": "NSLR",
+      "name": "SURO CAPITAL CORP.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "1509470"
+    },
+    {
+      "ticker": "NSLRL",
+      "name": "SURO CAPITAL CORP.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "1509470"
     },
     {
       "ticker": "NSPR",
@@ -23673,14 +23771,14 @@
     },
     {
       "ticker": "RUSHA",
-      "name": "RUSH ENTERPRISES INC TX",
+      "name": "RUSH ENTERPRISES INC \\TX\\",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1012019"
     },
     {
       "ticker": "RUSHB",
-      "name": "RUSH ENTERPRISES INC TX",
+      "name": "RUSH ENTERPRISES INC \\TX\\",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1012019"
@@ -28115,6 +28213,13 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1930510"
+    },
+    {
+      "ticker": "VCRE",
+      "name": "Vicore Pharma Holding AB",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2124403"
     },
     {
       "ticker": "VCTR",
