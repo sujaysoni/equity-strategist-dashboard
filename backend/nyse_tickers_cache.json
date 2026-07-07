@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-07-06T16:53:14.973311+00:00",
-  "count": 3136,
+  "generated_at": "2026-07-07T16:40:15.004306+00:00",
+  "count": 3134,
   "exchange": "NYSE/NYSE-MKT/NYSE-ARCA",
   "source": "nasdaq-trader-otherlisted + sec-edgar-fallback",
   "tickers": [
@@ -4849,6 +4849,13 @@
       "cik": "2045473"
     },
     {
+      "ticker": "COPR",
+      "name": "Idaho Copper Corp",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "1263364"
+    },
+    {
       "ticker": "COR",
       "name": "Cencora, Inc.",
       "exchange": "NYSE",
@@ -5358,13 +5365,6 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "26324"
-    },
-    {
-      "ticker": "CWAN",
-      "name": "Clearwater Analytics Holdings, Inc.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1866368"
     },
     {
       "ticker": "CWEN",
@@ -9357,13 +9357,6 @@
       "cik": "1819438"
     },
     {
-      "ticker": "GWH-WT",
-      "name": "ESS Tech, Inc.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1819438"
-    },
-    {
       "ticker": "GWRE",
       "name": "Guidewire Software, Inc.",
       "exchange": "NYSE",
@@ -10800,7 +10793,7 @@
     },
     {
       "ticker": "JHG",
-      "name": "Janus Henderson Group Ltc.",
+      "name": "Janus Henderson Group Ltd.",
       "exchange": "NYSE",
       "sector": "",
       "cik": "1274173"
@@ -15914,13 +15907,6 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1658566"
-    },
-    {
-      "ticker": "PRA",
-      "name": "PROASSURANCE CORP",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1127703"
     },
     {
       "ticker": "PRG",

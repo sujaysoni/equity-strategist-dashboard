@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-07-06T16:53:14.990553+00:00",
-  "count": 4329,
+  "generated_at": "2026-07-07T16:40:15.021311+00:00",
+  "count": 4326,
   "exchange": "NASDAQ",
   "source": "nasdaq-trader-nasdaqlisted + sec-edgar-fallback",
   "tickers": [
@@ -2729,7 +2729,7 @@
     },
     {
       "ticker": "ATLN",
-      "name": "ATLANTIC INTERNATIONAL CORP.",
+      "name": "CIRCLE8 GROUP INC",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1605888"
@@ -4829,7 +4829,7 @@
     },
     {
       "ticker": "BYFC",
-      "name": "BROADWAY FINANCIAL CORP DE",
+      "name": "BROADWAY FINANCIAL CORP \\DE\\",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1001171"
@@ -6431,13 +6431,6 @@
       "cik": "1729427"
     },
     {
-      "ticker": "CNTA",
-      "name": "Centessa Pharmaceuticals plc",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1847903"
-    },
-    {
       "ticker": "CNTB",
       "name": "Connect Biopharma Holdings Ltd",
       "exchange": "Nasdaq",
@@ -7724,13 +7717,6 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1919776"
-    },
-    {
-      "ticker": "DEVS",
-      "name": "DevvStream Corp.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1854480"
     },
     {
       "ticker": "DFDV",
@@ -9043,6 +9029,13 @@
     },
     {
       "ticker": "EOSE",
+      "name": "Eos Energy Enterprises, Inc.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "1805077"
+    },
+    {
+      "ticker": "EOSER",
       "name": "Eos Energy Enterprises, Inc.",
       "exchange": "Nasdaq",
       "sector": "",
@@ -12087,7 +12080,21 @@
       "cik": "1735707"
     },
     {
+      "ticker": "GUAC",
+      "name": "Berto Acquisition Corp. II",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2081515"
+    },
+    {
       "ticker": "GUACU",
+      "name": "Berto Acquisition Corp. II",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2081515"
+    },
+    {
+      "ticker": "GUACW",
       "name": "Berto Acquisition Corp. II",
       "exchange": "Nasdaq",
       "sector": "",
@@ -13389,7 +13396,21 @@
       "cik": "883984"
     },
     {
+      "ticker": "IDAC",
+      "name": "Iron Dome Acquisition I Corp.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2090441"
+    },
+    {
       "ticker": "IDACU",
+      "name": "Iron Dome Acquisition I Corp.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2090441"
+    },
+    {
+      "ticker": "IDACW",
       "name": "Iron Dome Acquisition I Corp.",
       "exchange": "Nasdaq",
       "sector": "",
@@ -16229,27 +16250,6 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1032975"
-    },
-    {
-      "ticker": "LOKV",
-      "name": "Teamshares Inc",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "2048951"
-    },
-    {
-      "ticker": "LOKVU",
-      "name": "Teamshares Inc",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "2048951"
-    },
-    {
-      "ticker": "LOKVW",
-      "name": "Teamshares Inc",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "2048951"
     },
     {
       "ticker": "LONA",
@@ -20040,7 +20040,7 @@
     },
     {
       "ticker": "OLED",
-      "name": "UNIVERSAL DISPLAY CORP PA",
+      "name": "UNIVERSAL DISPLAY CORP \\PA\\",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1005284"
@@ -20375,13 +20375,6 @@
       "cik": "1802457"
     },
     {
-      "ticker": "ORGNW",
-      "name": "Origin Materials, Inc.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1802457"
-    },
-    {
       "ticker": "ORGO",
       "name": "Organogenesis Holdings Inc.",
       "exchange": "Nasdaq",
@@ -20422,13 +20415,6 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "2044523"
-    },
-    {
-      "ticker": "ORIS",
-      "name": "ORIENTAL RISE HOLDINGS Ltd",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1964664"
     },
     {
       "ticker": "ORKA",
@@ -22160,7 +22146,21 @@
       "cik": "1095981"
     },
     {
+      "ticker": "PTAC",
+      "name": "Patriot Acquisition Corp./CI",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2099095"
+    },
+    {
       "ticker": "PTACU",
+      "name": "Patriot Acquisition Corp./CI",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2099095"
+    },
+    {
+      "ticker": "PTACW",
       "name": "Patriot Acquisition Corp./CI",
       "exchange": "Nasdaq",
       "sector": "",
@@ -24064,13 +24064,6 @@
       "cik": "1874315"
     },
     {
-      "ticker": "SATS",
-      "name": "EchoStar CORP",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1415404"
-    },
-    {
       "ticker": "SBAC",
       "name": "SBA COMMUNICATIONS CORP",
       "exchange": "Nasdaq",
@@ -25154,13 +25147,6 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1886894"
-    },
-    {
-      "ticker": "SNBR",
-      "name": "Sleep Number Corp",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "827187"
     },
     {
       "ticker": "SND",
@@ -26396,13 +26382,6 @@
     },
     {
       "ticker": "TALK",
-      "name": "Talkspace, Inc.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1803901"
-    },
-    {
-      "ticker": "TALKW",
       "name": "Talkspace, Inc.",
       "exchange": "Nasdaq",
       "sector": "",
@@ -28615,7 +28594,7 @@
     },
     {
       "ticker": "VRDN",
-      "name": "Viridian Therapeutics, Inc.DE",
+      "name": "Viridian Therapeutics, Inc.\\DE",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1590750"
