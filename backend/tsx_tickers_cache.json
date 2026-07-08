@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-07-07T16:39:14.563491Z",
-  "count": 2164,
-  "tsx_count": 754,
-  "tsxv_count": 1410,
+  "generated_at": "2026-07-08T16:08:11.818797Z",
+  "count": 2162,
+  "tsx_count": 753,
+  "tsxv_count": 1409,
   "tickers": [
     {
       "ticker": "AAA-P.V",
@@ -4644,7 +4644,7 @@
     },
     {
       "ticker": "FVL.TO",
-      "name": "Freegold Ventures Limited",
+      "name": "Freegold Limited",
       "exchange": "TSX",
       "sector": ""
     },
@@ -5983,12 +5983,6 @@
     {
       "ticker": "IS.TO",
       "name": "Infrastructure Dividend Split Corp.",
-      "exchange": "TSX",
-      "sector": ""
-    },
-    {
-      "ticker": "ISC.TO",
-      "name": "Information Services Corporation",
       "exchange": "TSX",
       "sector": ""
     },
@@ -10921,12 +10915,6 @@
     {
       "ticker": "STRM.V",
       "name": "Storm Exploration Inc.",
-      "exchange": "TSXV",
-      "sector": ""
-    },
-    {
-      "ticker": "STRR.V",
-      "name": "Star Royalties Ltd.",
       "exchange": "TSXV",
       "sector": ""
     },
