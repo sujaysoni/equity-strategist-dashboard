@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-07-08T16:08:11.818797Z",
-  "count": 2162,
+  "generated_at": "2026-07-09T16:27:21.929558Z",
+  "count": 2163,
   "tsx_count": 753,
-  "tsxv_count": 1409,
+  "tsxv_count": 1410,
   "tickers": [
     {
       "ticker": "AAA-P.V",
@@ -476,6 +476,12 @@
       "ticker": "ALC.TO",
       "name": "Algoma Central Corporation",
       "exchange": "TSX",
+      "sector": ""
+    },
+    {
+      "ticker": "ALCH.V",
+      "name": "Alchemy Labs Inc.",
+      "exchange": "TSXV",
       "sector": ""
     },
     {

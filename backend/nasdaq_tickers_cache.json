@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-07-08T16:09:12.182880+00:00",
-  "count": 4326,
+  "generated_at": "2026-07-09T16:28:22.559893+00:00",
+  "count": 4339,
   "exchange": "NASDAQ",
   "source": "nasdaq-trader-nasdaqlisted + sec-edgar-fallback",
   "tickers": [
@@ -1524,7 +1524,28 @@
       "cik": "2025774"
     },
     {
+      "ticker": "ALPX",
+      "name": "Alpex Acquisition Corp",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2125551"
+    },
+    {
+      "ticker": "ALPXR",
+      "name": "Alpex Acquisition Corp",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2125551"
+    },
+    {
       "ticker": "ALPXU",
+      "name": "Alpex Acquisition Corp",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2125551"
+    },
+    {
+      "ticker": "ALPXW",
       "name": "Alpex Acquisition Corp",
       "exchange": "Nasdaq",
       "sector": "",
@@ -3358,6 +3379,13 @@
       "cik": "1228454"
     },
     {
+      "ticker": "BCCQU",
+      "name": "Bleichroeder Acquisition Corp. III",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2128045"
+    },
+    {
       "ticker": "BCDA",
       "name": "BioCardia, Inc.",
       "exchange": "Nasdaq",
@@ -3923,6 +3951,13 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1701605"
+    },
+    {
+      "ticker": "BKYI",
+      "name": "BIO KEY INTERNATIONAL INC",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "1019034"
     },
     {
       "ticker": "BL",
@@ -6079,6 +6114,13 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1862150"
+    },
+    {
+      "ticker": "CIRC",
+      "name": "CIRCLE8 GROUP INC",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "1605888"
     },
     {
       "ticker": "CISO",
@@ -9742,6 +9784,13 @@
       "cik": "1098151"
     },
     {
+      "ticker": "FDMMU",
+      "name": "Freedom Metals Acquisition Corp.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2129659"
+    },
+    {
       "ticker": "FDMT",
       "name": "4D Molecular Therapeutics, Inc.",
       "exchange": "Nasdaq",
@@ -10841,11 +10890,32 @@
       "cik": "1789940"
     },
     {
+      "ticker": "FXAC",
+      "name": "FortuneX Acquisition Corp",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2121703"
+    },
+    {
       "ticker": "FXACU",
       "name": "FortuneX Acquisition Corp",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "2121703"
+    },
+    {
+      "ticker": "FXACW",
+      "name": "FortuneX Acquisition Corp",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2121703"
+    },
+    {
+      "ticker": "FXHO",
+      "name": "UTime Ltd",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "1789299"
     },
     {
       "ticker": "FXNC",
@@ -12676,7 +12746,7 @@
     },
     {
       "ticker": "HODO",
-      "name": "Brag House Holdings, Inc.",
+      "name": "House of Doge Inc.",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1903595"
@@ -17316,6 +17386,13 @@
       "cik": "1000209"
     },
     {
+      "ticker": "MFP",
+      "name": "Midera Food Processing, Inc.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2088281"
+    },
+    {
       "ticker": "MFPVV",
       "name": "Midera Food Processing, Inc.",
       "exchange": "Nasdaq",
@@ -17982,7 +18059,7 @@
     },
     {
       "ticker": "MRX",
-      "name": "Marex Group plc",
+      "name": "Marex Group Ltd",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1997464"
@@ -18959,6 +19036,13 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1787400"
+    },
+    {
+      "ticker": "NMAD",
+      "name": "LIXTE BIOTECHNOLOGY HOLDINGS, INC.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "1335105"
     },
     {
       "ticker": "NMFC",
@@ -26480,7 +26564,7 @@
     },
     {
       "ticker": "TBH",
-      "name": "Brag House Holdings, Inc.",
+      "name": "House of Doge Inc.",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1903595"
@@ -27380,6 +27464,13 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1371285"
+    },
+    {
+      "ticker": "TRUU",
+      "name": "Charlie's Holdings, Inc.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "1134765"
     },
     {
       "ticker": "TRVG",

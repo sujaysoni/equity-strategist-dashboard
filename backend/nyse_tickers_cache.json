@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-07-08T16:09:12.167406+00:00",
-  "count": 3134,
+  "generated_at": "2026-07-09T16:28:22.544408+00:00",
+  "count": 3135,
   "exchange": "NYSE/NYSE-MKT/NYSE-ARCA",
   "source": "nasdaq-trader-otherlisted + sec-edgar-fallback",
   "tickers": [
@@ -17590,7 +17590,7 @@
     },
     {
       "ticker": "SECZ",
-      "name": "Securitize Holdings, Inc.",
+      "name": "Securitize Corp.",
       "exchange": "NYSE",
       "sector": "",
       "cik": "2094496"
@@ -18903,6 +18903,13 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "24545"
+    },
+    {
+      "ticker": "TARX",
+      "name": "Tarsier Pharma Ltd.",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "2102720"
     },
     {
       "ticker": "TBB",
@@ -21580,10 +21587,10 @@
     },
     {
       "ticker": "XOM",
-      "name": "EXXON MOBIL CORP",
+      "name": "ExxonMobil Holdings Corp",
       "exchange": "NYSE",
       "sector": "",
-      "cik": "34088"
+      "cik": "2115436"
     },
     {
       "ticker": "XPER",
