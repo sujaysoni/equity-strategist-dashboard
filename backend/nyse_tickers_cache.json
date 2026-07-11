@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-07-10T16:25:44.032634+00:00",
-  "count": 3135,
+  "generated_at": "2026-07-11T14:53:17.700300+00:00",
+  "count": 3131,
   "exchange": "NYSE/NYSE-MKT/NYSE-ARCA",
   "source": "nasdaq-trader-otherlisted + sec-edgar-fallback",
   "tickers": [
@@ -7535,13 +7535,6 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "831259"
-    },
-    {
-      "ticker": "FDP",
-      "name": "DEL MONTE CORP",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1047340"
     },
     {
       "ticker": "FDS",
@@ -18905,13 +18898,6 @@
       "cik": "24545"
     },
     {
-      "ticker": "TARX",
-      "name": "Tarsier Pharma Ltd.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "2102720"
-    },
-    {
       "ticker": "TBB",
       "name": "AT&T INC.",
       "exchange": "NYSE",
@@ -19046,13 +19032,6 @@
     },
     {
       "ticker": "TE",
-      "name": "T1 Energy Inc.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1992243"
-    },
-    {
-      "ticker": "TE-WT",
       "name": "T1 Energy Inc.",
       "exchange": "NYSE",
       "sector": "",
@@ -19512,13 +19491,6 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1116132"
-    },
-    {
-      "ticker": "TPTA",
-      "name": "Terra Property Trust, Inc.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1674356"
     },
     {
       "ticker": "TPTS",

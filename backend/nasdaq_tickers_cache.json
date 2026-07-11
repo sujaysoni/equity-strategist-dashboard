@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-07-10T16:25:44.049434+00:00",
-  "count": 4339,
+  "generated_at": "2026-07-11T14:53:17.716340+00:00",
+  "count": 4337,
   "exchange": "NASDAQ",
   "source": "nasdaq-trader-nasdaqlisted + sec-edgar-fallback",
   "tickers": [
@@ -5311,6 +5311,13 @@
       "cik": "1662579"
     },
     {
+      "ticker": "CCCTU",
+      "name": "Columbus Circle Capital Corp III",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2123471"
+    },
+    {
       "ticker": "CCD",
       "name": "Calamos Dynamic Convertible & Income Fund",
       "exchange": "Nasdaq",
@@ -5661,6 +5668,13 @@
       "cik": "2034267"
     },
     {
+      "ticker": "CEPL",
+      "name": "Capstone Energy Plus, Inc.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "1009759"
+    },
+    {
       "ticker": "CEPO",
       "name": "Cantor Equity Partners I, Inc.",
       "exchange": "Nasdaq",
@@ -5984,7 +5998,7 @@
     },
     {
       "ticker": "CHRN",
-      "name": "ChronoScale Corp",
+      "name": "ChronoScale Holdings Corp",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1549084"
@@ -12717,13 +12731,6 @@
       "cik": "1145255"
     },
     {
-      "ticker": "HNNAZ",
-      "name": "HENNESSY ADVISORS INC",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1145255"
-    },
-    {
       "ticker": "HNRG",
       "name": "HALLADOR ENERGY CO",
       "exchange": "Nasdaq",
@@ -12785,20 +12792,6 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "2089271"
-    },
-    {
-      "ticker": "HONAV",
-      "name": "Honeywell Aerospace Inc.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "2089271"
-    },
-    {
-      "ticker": "HONIV",
-      "name": "HONEYWELL INTERNATIONAL INC",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "773840"
     },
     {
       "ticker": "HOOD",
@@ -17974,6 +17967,13 @@
       "cik": "1750735"
     },
     {
+      "ticker": "MRCOU",
+      "name": "Mercator Acquisition Corp.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2106436"
+    },
+    {
       "ticker": "MRCY",
       "name": "MERCURY SYSTEMS INC",
       "exchange": "Nasdaq",
@@ -19115,13 +19115,6 @@
       "cik": "1865631"
     },
     {
-      "ticker": "NNAVW",
-      "name": "NEXTNAV INC.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1865631"
-    },
-    {
       "ticker": "NNBR",
       "name": "NN INC",
       "exchange": "Nasdaq",
@@ -19305,14 +19298,14 @@
     },
     {
       "ticker": "NSLR",
-      "name": "SURO CAPITAL CORP.",
+      "name": "Neostellar Capital Corp.",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1509470"
     },
     {
       "ticker": "NSLRL",
-      "name": "SURO CAPITAL CORP.",
+      "name": "Neostellar Capital Corp.",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1509470"
@@ -21703,6 +21696,13 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "2075320"
+    },
+    {
+      "ticker": "PMA",
+      "name": "Ming Shing Group Holdings Ltd",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "1956166"
     },
     {
       "ticker": "PMAX",
@@ -25815,14 +25815,14 @@
     },
     {
       "ticker": "SSSS",
-      "name": "SURO CAPITAL CORP.",
+      "name": "Neostellar Capital Corp.",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1509470"
     },
     {
       "ticker": "SSSSL",
-      "name": "SURO CAPITAL CORP.",
+      "name": "Neostellar Capital Corp.",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1509470"
@@ -26571,13 +26571,6 @@
     },
     {
       "ticker": "TBLA",
-      "name": "Taboola.com Ltd.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1840502"
-    },
-    {
-      "ticker": "TBLAW",
       "name": "Taboola.com Ltd.",
       "exchange": "Nasdaq",
       "sector": "",
@@ -27464,13 +27457,6 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1371285"
-    },
-    {
-      "ticker": "TRUU",
-      "name": "Charlie's Holdings, Inc.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1134765"
     },
     {
       "ticker": "TRVG",
