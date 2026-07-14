@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-13T16:42:02.433128Z",
+  "generated_at": "2026-07-14T16:25:35.153691Z",
   "count": 2163,
   "tsx_count": 753,
   "tsxv_count": 1410,
@@ -919,6 +919,12 @@
     {
       "ticker": "ATLH-P.V",
       "name": "Atlantic Horizon Capital Corp.",
+      "exchange": "TSXV",
+      "sector": ""
+    },
+    {
+      "ticker": "ATOI.V",
+      "name": "Asiatel Outsourcing Inc.",
       "exchange": "TSXV",
       "sector": ""
     },
@@ -5303,12 +5309,6 @@
       "sector": ""
     },
     {
-      "ticker": "GUG.V",
-      "name": "Gungnir Resources Inc.",
-      "exchange": "TSXV",
-      "sector": ""
-    },
-    {
       "ticker": "GUN.V",
       "name": "Gunpoint Exploration Ltd.",
       "exchange": "TSXV",
@@ -7843,12 +7843,6 @@
     {
       "ticker": "NED.V",
       "name": "New Destiny Mining Corp.",
-      "exchange": "TSXV",
-      "sector": ""
-    },
-    {
-      "ticker": "NEME-P.V",
-      "name": "New Media Capital 2.0 Inc.",
       "exchange": "TSXV",
       "sector": ""
     },
@@ -11162,6 +11156,12 @@
       "ticker": "TC.TO",
       "name": "Tucows Inc.",
       "exchange": "TSX",
+      "sector": ""
+    },
+    {
+      "ticker": "TCCM.V",
+      "name": "Three Crowns Critical Metals Inc.",
+      "exchange": "TSXV",
       "sector": ""
     },
     {
