@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-07-14T22:21:06.677314+00:00",
-  "count": 3131,
+  "generated_at": "2026-07-15T16:20:21.947355+00:00",
+  "count": 3126,
   "exchange": "NYSE/NYSE-MKT/NYSE-ARCA",
   "source": "nasdaq-trader-otherlisted + sec-edgar-fallback",
   "tickers": [
@@ -2915,13 +2915,6 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1860742"
-    },
-    {
-      "ticker": "BLD",
-      "name": "QXO Insulation, LLC",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1633931"
     },
     {
       "ticker": "BLDR",
@@ -10785,13 +10778,6 @@
       "cik": "1615905"
     },
     {
-      "ticker": "JHG",
-      "name": "Janus Henderson Group Ltd.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1274173"
-    },
-    {
       "ticker": "JHI",
       "name": "JOHN HANCOCK INVESTORS TRUST",
       "exchange": "NYSE",
@@ -12431,7 +12417,7 @@
     },
     {
       "ticker": "MGF",
-      "name": "MFS GOVERNMENT MARKETS INCOME TRUST",
+      "name": "ABERDEEN GOVERNMENT MARKETS INCOME FUND",
       "exchange": "NYSE",
       "sector": "",
       "cik": "811922"
@@ -12564,7 +12550,7 @@
     },
     {
       "ticker": "MIN",
-      "name": "MFS INTERMEDIATE INCOME TRUST",
+      "name": "ABERDEEN INTERMEDIATE INCOME FUND",
       "exchange": "NYSE",
       "sector": "",
       "cik": "826735"
@@ -17603,13 +17589,6 @@
       "cik": "1697500"
     },
     {
-      "ticker": "SEM",
-      "name": "SELECT MEDICAL HOLDINGS CORP",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1320414"
-    },
-    {
       "ticker": "SER",
       "name": "Serina Therapeutics, Inc.",
       "exchange": "NYSE",
@@ -17804,13 +17783,6 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1512920"
-    },
-    {
-      "ticker": "SILA",
-      "name": "Sila Realty Trust, Inc.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1567925"
     },
     {
       "ticker": "SIM",
@@ -18553,13 +18525,6 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1757898"
-    },
-    {
-      "ticker": "STEL",
-      "name": "Stellar Bancorp, Inc.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1473844"
     },
     {
       "ticker": "STEM",

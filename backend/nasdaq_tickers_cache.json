@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-14T22:21:06.692723+00:00",
+  "generated_at": "2026-07-15T16:20:21.963424+00:00",
   "count": 4337,
   "exchange": "NASDAQ",
   "source": "nasdaq-trader-nasdaqlisted + sec-edgar-fallback",
@@ -2749,13 +2749,6 @@
       "cik": "1464343"
     },
     {
-      "ticker": "ATLN",
-      "name": "CIRCLE8 GROUP INC",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1605888"
-    },
-    {
       "ticker": "ATLO",
       "name": "AMES NATIONAL CORP",
       "exchange": "Nasdaq",
@@ -3118,6 +3111,13 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1959726"
+    },
+    {
+      "ticker": "AZIO",
+      "name": "AZIO AI HOLDINGS, INC.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "1563568"
     },
     {
       "ticker": "AZTA",
@@ -4485,7 +4485,21 @@
       "cik": "14177"
     },
     {
+      "ticker": "BRKH",
+      "name": "Burtech Acquisition Corp II",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2098707"
+    },
+    {
       "ticker": "BRKHU",
+      "name": "Burtech Acquisition Corp II",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2098707"
+    },
+    {
+      "ticker": "BRKHW",
       "name": "Burtech Acquisition Corp II",
       "exchange": "Nasdaq",
       "sector": "",
@@ -5687,13 +5701,6 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "2089536"
-    },
-    {
-      "ticker": "CEPT",
-      "name": "Cantor Equity Partners II, Inc.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "2034269"
     },
     {
       "ticker": "CEPV",
@@ -9364,13 +9371,6 @@
       "cik": "1821159"
     },
     {
-      "ticker": "EVGOW",
-      "name": "EVgo Inc.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1821159"
-    },
-    {
       "ticker": "EVLV",
       "name": "Evolv Technologies Holdings, Inc.",
       "exchange": "Nasdaq",
@@ -9421,7 +9421,7 @@
     },
     {
       "ticker": "EVTV",
-      "name": "Envirotech Vehicles, Inc.",
+      "name": "AZIO AI HOLDINGS, INC.",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1563568"
@@ -11308,6 +11308,20 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1709048"
+    },
+    {
+      "ticker": "GFUZ",
+      "name": "Spring Valley Acquisition Corp. III",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2074850"
+    },
+    {
+      "ticker": "GFUZW",
+      "name": "Spring Valley Acquisition Corp. III",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2074850"
     },
     {
       "ticker": "GGAL",
@@ -14754,6 +14768,13 @@
       "cik": "1710482"
     },
     {
+      "ticker": "JONEU",
+      "name": "Jones Ventures INTL Acquisition1 Corp",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2129056"
+    },
+    {
       "ticker": "JOUT",
       "name": "JOHNSON OUTDOORS INC",
       "exchange": "Nasdaq",
@@ -16141,7 +16162,7 @@
     },
     {
       "ticker": "LIXT",
-      "name": "LIXTE BIOTECHNOLOGY HOLDINGS, INC.",
+      "name": "NOMAD POWER SOLUTIONS, INC.",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1335105"
@@ -19003,13 +19024,6 @@
       "cik": "1462223"
     },
     {
-      "ticker": "NIXXW",
-      "name": "Nixxy, Inc.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1462223"
-    },
-    {
       "ticker": "NKLR",
       "name": "Terra Innovatum Global N.V.",
       "exchange": "Nasdaq",
@@ -19039,7 +19053,7 @@
     },
     {
       "ticker": "NMAD",
-      "name": "LIXTE BIOTECHNOLOGY HOLDINGS, INC.",
+      "name": "NOMAD POWER SOLUTIONS, INC.",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1335105"
@@ -20443,13 +20457,6 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1892492"
-    },
-    {
-      "ticker": "ORGN",
-      "name": "Origin Materials, Inc.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1802457"
     },
     {
       "ticker": "ORGO",
@@ -22727,32 +22734,18 @@
       "cik": "797542"
     },
     {
-      "ticker": "RAAQ",
-      "name": "Real Asset Acquisition Corp.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "2052161"
-    },
-    {
-      "ticker": "RAAQU",
-      "name": "Real Asset Acquisition Corp.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "2052161"
-    },
-    {
-      "ticker": "RAAQW",
-      "name": "Real Asset Acquisition Corp.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "2052161"
-    },
-    {
       "ticker": "RACC",
       "name": "Research Alliance Corp III",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "2118032"
+    },
+    {
+      "ticker": "RACD",
+      "name": "Research Alliance Corp IV",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2137777"
     },
     {
       "ticker": "RADX",
@@ -24904,6 +24897,20 @@
       "cik": "1753673"
     },
     {
+      "ticker": "SKHY",
+      "name": "SK hynix Inc.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2120882"
+    },
+    {
+      "ticker": "SKHYV",
+      "name": "SK hynix Inc.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2120882"
+    },
+    {
       "ticker": "SKIN",
       "name": "SkinHealth Systems Inc.",
       "exchange": "Nasdaq",
@@ -25814,20 +25821,6 @@
       "cik": "921638"
     },
     {
-      "ticker": "SSSS",
-      "name": "Neostellar Capital Corp.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1509470"
-    },
-    {
-      "ticker": "SSSSL",
-      "name": "Neostellar Capital Corp.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1509470"
-    },
-    {
       "ticker": "SSTI",
       "name": "SOUNDTHINKING, INC.",
       "exchange": "Nasdaq",
@@ -26561,13 +26554,6 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1493761"
-    },
-    {
-      "ticker": "TBH",
-      "name": "House of Doge Inc.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1903595"
     },
     {
       "ticker": "TBLA",
@@ -27662,7 +27648,21 @@
       "cik": "1860871"
     },
     {
+      "ticker": "TVIV",
+      "name": "Texas Ventures Acquisition IV Corp",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2096755"
+    },
+    {
       "ticker": "TVIVU",
+      "name": "Texas Ventures Acquisition IV Corp",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2096755"
+    },
+    {
+      "ticker": "TVIVW",
       "name": "Texas Ventures Acquisition IV Corp",
       "exchange": "Nasdaq",
       "sector": "",
@@ -28430,13 +28430,6 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1972234"
-    },
-    {
-      "ticker": "VIASP",
-      "name": "Via Renewables, Inc.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1606268"
     },
     {
       "ticker": "VIAV",
@@ -29510,13 +29503,6 @@
       "cik": "2053927"
     },
     {
-      "ticker": "WTO",
-      "name": "UTime Ltd",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1789299"
-    },
-    {
       "ticker": "WTW",
       "name": "WILLIS TOWERS WATSON PLC",
       "exchange": "Nasdaq",
@@ -30021,7 +30007,21 @@
       "cik": "1868395"
     },
     {
+      "ticker": "YICC",
+      "name": "Yorkville International Capital Corp.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2130386"
+    },
+    {
       "ticker": "YICCU",
+      "name": "Yorkville International Capital Corp.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2130386"
+    },
+    {
+      "ticker": "YICCW",
       "name": "Yorkville International Capital Corp.",
       "exchange": "Nasdaq",
       "sector": "",
