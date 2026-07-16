@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-07-15T16:20:21.947355+00:00",
-  "count": 3126,
+  "generated_at": "2026-07-16T15:46:13.634280+00:00",
+  "count": 3128,
   "exchange": "NYSE/NYSE-MKT/NYSE-ARCA",
   "source": "nasdaq-trader-otherlisted + sec-edgar-fallback",
   "tickers": [
@@ -5099,6 +5099,13 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "790051"
+    },
+    {
+      "ticker": "CSQR",
+      "name": "Csquare, Inc.",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "2105398"
     },
     {
       "ticker": "CSR",
@@ -18520,6 +18527,13 @@
       "cik": "94344"
     },
     {
+      "ticker": "STDN",
+      "name": "Standard Nuclear, Inc.",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "2086716"
+    },
+    {
       "ticker": "STE",
       "name": "STERIS plc",
       "exchange": "NYSE",
@@ -21566,10 +21580,10 @@
     },
     {
       "ticker": "XPRO",
-      "name": "EXPRO GROUP HOLDINGS N.V.",
+      "name": "Expro Ltd",
       "exchange": "NYSE",
       "sector": "",
-      "cik": "1575828"
+      "cik": "2126198"
     },
     {
       "ticker": "XRN",

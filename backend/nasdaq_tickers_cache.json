@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-07-15T16:20:21.963424+00:00",
-  "count": 4337,
+  "generated_at": "2026-07-16T15:46:13.650646+00:00",
+  "count": 4338,
   "exchange": "NASDAQ",
   "source": "nasdaq-trader-nasdaqlisted + sec-edgar-fallback",
   "tickers": [
@@ -9427,6 +9427,13 @@
       "cik": "1563568"
     },
     {
+      "ticker": "EWAVU",
+      "name": "East West Ave Acquisition Corp.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2100704"
+    },
+    {
       "ticker": "EWBC",
       "name": "EAST WEST BANCORP INC",
       "exchange": "Nasdaq",
@@ -10954,28 +10961,28 @@
     },
     {
       "ticker": "GAIN",
-      "name": "GLADSTONE INVESTMENT CORPORATIONDE",
+      "name": "GLADSTONE INVESTMENT CORPORATION\\DE",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1321741"
     },
     {
       "ticker": "GAING",
-      "name": "GLADSTONE INVESTMENT CORPORATIONDE",
+      "name": "GLADSTONE INVESTMENT CORPORATION\\DE",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1321741"
     },
     {
       "ticker": "GAINI",
-      "name": "GLADSTONE INVESTMENT CORPORATIONDE",
+      "name": "GLADSTONE INVESTMENT CORPORATION\\DE",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1321741"
     },
     {
       "ticker": "GAINZ",
-      "name": "GLADSTONE INVESTMENT CORPORATIONDE",
+      "name": "GLADSTONE INVESTMENT CORPORATION\\DE",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1321741"
@@ -11311,14 +11318,14 @@
     },
     {
       "ticker": "GFUZ",
-      "name": "Spring Valley Acquisition Corp. III",
+      "name": "General Fusion Group Ltd.",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "2074850"
     },
     {
       "ticker": "GFUZW",
-      "name": "Spring Valley Acquisition Corp. III",
+      "name": "General Fusion Group Ltd.",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "2074850"
@@ -26137,21 +26144,21 @@
     },
     {
       "ticker": "SVAC",
-      "name": "Spring Valley Acquisition Corp. III",
+      "name": "General Fusion Group Ltd.",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "2074850"
     },
     {
       "ticker": "SVACU",
-      "name": "Spring Valley Acquisition Corp. III",
+      "name": "General Fusion Group Ltd.",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "2074850"
     },
     {
       "ticker": "SVACW",
-      "name": "Spring Valley Acquisition Corp. III",
+      "name": "General Fusion Group Ltd.",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "2074850"

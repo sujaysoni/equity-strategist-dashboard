@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-15T16:19:21.463410Z",
+  "generated_at": "2026-07-16T15:45:13.042024Z",
   "count": 2163,
   "tsx_count": 753,
   "tsxv_count": 1410,
@@ -7925,6 +7925,12 @@
       "sector": ""
     },
     {
+      "ticker": "NICE.V",
+      "name": "Ni-Co Energy Inc.",
+      "exchange": "TSXV",
+      "sector": ""
+    },
+    {
       "ticker": "NICN.V",
       "name": "NICAN Limited",
       "exchange": "TSXV",
@@ -8857,12 +8863,6 @@
     {
       "ticker": "PGZ.V",
       "name": "Pan Global Resources Inc.",
-      "exchange": "TSXV",
-      "sector": ""
-    },
-    {
-      "ticker": "PHA.V",
-      "name": "Premier Health of America Inc.",
       "exchange": "TSXV",
       "sector": ""
     },
