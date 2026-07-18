@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-07-17T15:13:41.525213+00:00",
-  "count": 4338,
+  "generated_at": "2026-07-18T14:52:15.112178+00:00",
+  "count": 4335,
   "exchange": "NASDAQ",
   "source": "nasdaq-trader-nasdaqlisted + sec-edgar-fallback",
   "tickers": [
@@ -1613,6 +1613,13 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1677077"
+    },
+    {
+      "ticker": "AMACU",
+      "name": "AMR Resources Acquisition Corp.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2110119"
     },
     {
       "ticker": "AMAL",
@@ -3230,27 +3237,6 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1958140"
-    },
-    {
-      "ticker": "BAYA",
-      "name": "Bayview Acquisition Corp",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1969475"
-    },
-    {
-      "ticker": "BAYAR",
-      "name": "Bayview Acquisition Corp",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1969475"
-    },
-    {
-      "ticker": "BAYAU",
-      "name": "Bayview Acquisition Corp",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1969475"
     },
     {
       "ticker": "BBCP",
@@ -8174,6 +8160,13 @@
       "cik": "1786286"
     },
     {
+      "ticker": "DPU",
+      "name": "Top KingWin Ltd",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "1938865"
+    },
+    {
       "ticker": "DPZ",
       "name": "DOMINOS PIZZA INC",
       "exchange": "Nasdaq",
@@ -9425,13 +9418,6 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1563568"
-    },
-    {
-      "ticker": "EWAVU",
-      "name": "East West Ave Acquisition Corp.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "2100704"
     },
     {
       "ticker": "EWBC",
@@ -16168,13 +16154,6 @@
       "cik": "1639691"
     },
     {
-      "ticker": "LIXT",
-      "name": "NOMAD POWER SOLUTIONS, INC.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1335105"
-    },
-    {
       "ticker": "LKFN",
       "name": "LAKELAND FINANCIAL CORP",
       "exchange": "Nasdaq",
@@ -17414,13 +17393,6 @@
       "cik": "2088281"
     },
     {
-      "ticker": "MFPVV",
-      "name": "Midera Food Processing, Inc.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "2088281"
-    },
-    {
       "ticker": "MGEE",
       "name": "MGE ENERGY INC",
       "exchange": "Nasdaq",
@@ -17513,13 +17485,6 @@
     },
     {
       "ticker": "MIDD",
-      "name": "MIDDLEBY Corp",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "769520"
-    },
-    {
-      "ticker": "MIDDV",
       "name": "MIDDLEBY Corp",
       "exchange": "Nasdaq",
       "sector": "",
@@ -19984,7 +19949,7 @@
     },
     {
       "ticker": "ODVWZ",
-      "name": "Osisko Development Corp.",
+      "name": "Osisko Gold Group Inc.",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1431852"
@@ -22314,13 +22279,6 @@
       "cik": "911216"
     },
     {
-      "ticker": "PTNM",
-      "name": "Pitanium Ltd",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "2046573"
-    },
-    {
       "ticker": "PTON",
       "name": "PELOTON INTERACTIVE, INC.",
       "exchange": "Nasdaq",
@@ -22543,6 +22501,13 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "709283"
+    },
+    {
+      "ticker": "QMLS",
+      "name": "QumulusAI, Inc.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2084026"
     },
     {
       "ticker": "QMMM",
@@ -23089,13 +23054,6 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1995116"
-    },
-    {
-      "ticker": "REE",
-      "name": "REE Automotive Ltd.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1843588"
     },
     {
       "ticker": "REFI",
@@ -24762,6 +24720,20 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1594805"
+    },
+    {
+      "ticker": "SHOT",
+      "name": "RMG ML Sports Holdings",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2104879"
+    },
+    {
+      "ticker": "SHOTR",
+      "name": "RMG ML Sports Holdings",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2104879"
     },
     {
       "ticker": "SHOTU",
@@ -28936,13 +28908,6 @@
       "cik": "1716770"
     },
     {
-      "ticker": "WAI",
-      "name": "Top KingWin Ltd",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1938865"
-    },
-    {
       "ticker": "WALD",
       "name": "Waldencast plc",
       "exchange": "Nasdaq",
@@ -30082,6 +30047,20 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1821468"
+    },
+    {
+      "ticker": "YSAG",
+      "name": "Texas Precious Metals Trust",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2087989"
+    },
+    {
+      "ticker": "YSAU",
+      "name": "Texas Precious Metals Trust",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2087989"
     },
     {
       "ticker": "YSWY",

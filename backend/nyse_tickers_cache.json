@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-07-17T15:13:41.508682+00:00",
-  "count": 3128,
+  "generated_at": "2026-07-18T14:52:15.103395+00:00",
+  "count": 3129,
   "exchange": "NYSE/NYSE-MKT/NYSE-ARCA",
   "source": "nasdaq-trader-otherlisted + sec-edgar-fallback",
   "tickers": [
@@ -5736,6 +5736,13 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "29534"
+    },
+    {
+      "ticker": "DGAC",
+      "name": "DISCIPLINED GROWTH ACQUISITION Corp",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "2111038"
     },
     {
       "ticker": "DGP",
@@ -14503,7 +14510,7 @@
     },
     {
       "ticker": "ODV",
-      "name": "Osisko Development Corp.",
+      "name": "Osisko Gold Group Inc.",
       "exchange": "NYSE",
       "sector": "",
       "cik": "1431852"
@@ -16966,13 +16973,6 @@
       "cik": "1157842"
     },
     {
-      "ticker": "RQI-RI",
-      "name": "COHEN & STEERS QUALITY INCOME REALTY FUND INC",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1157842"
-    },
-    {
       "ticker": "RRC",
       "name": "RANGE RESOURCES CORP",
       "exchange": "NYSE",
@@ -19288,6 +19288,13 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1071321"
+    },
+    {
+      "ticker": "TKNZ",
+      "name": "T. Rowe Price Active Crypto ETF",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "2089855"
     },
     {
       "ticker": "TKO",
