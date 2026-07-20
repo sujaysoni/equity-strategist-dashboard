@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-07-19T14:54:44.087244Z",
-  "count": 2163,
-  "tsx_count": 753,
+  "generated_at": "2026-07-20T15:59:17.562180Z",
+  "count": 2162,
+  "tsx_count": 752,
   "tsxv_count": 1410,
   "tickers": [
     {
@@ -7223,12 +7223,6 @@
       "sector": ""
     },
     {
-      "ticker": "MEX.V",
-      "name": "Mexican Gold Mining Corp.",
-      "exchange": "TSXV",
-      "sector": ""
-    },
-    {
       "ticker": "MFA-P.V",
       "name": "Mayfair Acquisition Corp.",
       "exchange": "TSXV",
@@ -7526,12 +7520,6 @@
       "ticker": "MPV-P.V",
       "name": "Matchpoint Ventures Corp.",
       "exchange": "TSXV",
-      "sector": ""
-    },
-    {
-      "ticker": "MPVD.TO",
-      "name": "Mountain Province Diamonds Inc.",
-      "exchange": "TSX",
       "sector": ""
     },
     {
@@ -8387,12 +8375,6 @@
       "sector": ""
     },
     {
-      "ticker": "ODV.V",
-      "name": "Osisko Development Corp.",
-      "exchange": "TSXV",
-      "sector": ""
-    },
-    {
       "ticker": "OGC.TO",
       "name": "OceanaGold Corporation",
       "exchange": "TSX",
@@ -8402,6 +8384,12 @@
       "ticker": "OGD.TO",
       "name": "Orbit Garant Drilling Inc.",
       "exchange": "TSX",
+      "sector": ""
+    },
+    {
+      "ticker": "OGG.V",
+      "name": "Osisko Gold Group Inc.",
+      "exchange": "TSXV",
       "sector": ""
     },
     {
@@ -9205,6 +9193,12 @@
     {
       "ticker": "PUR.V",
       "name": "Premier American Uranium Inc.",
+      "exchange": "TSXV",
+      "sector": ""
+    },
+    {
+      "ticker": "PURO.V",
+      "name": "Platauro Metals Corp.",
       "exchange": "TSXV",
       "sector": ""
     },
