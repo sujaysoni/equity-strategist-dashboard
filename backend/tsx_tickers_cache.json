@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-07-20T15:59:17.562180Z",
-  "count": 2162,
+  "generated_at": "2026-07-21T15:42:52.302521Z",
+  "count": 2161,
   "tsx_count": 752,
-  "tsxv_count": 1410,
+  "tsxv_count": 1409,
   "tickers": [
     {
       "ticker": "AAA-P.V",
@@ -8345,6 +8345,12 @@
       "sector": ""
     },
     {
+      "ticker": "OCAL.V",
+      "name": "OCAL Financial Inc.",
+      "exchange": "TSXV",
+      "sector": ""
+    },
+    {
       "ticker": "OCAP-P.V",
       "name": "Ocean Shore Capital Corp.",
       "exchange": "TSXV",
@@ -9925,12 +9931,6 @@
     {
       "ticker": "RUSH.V",
       "name": "Carolina Rush Corporation",
-      "exchange": "TSXV",
-      "sector": ""
-    },
-    {
-      "ticker": "RVC-P.V",
-      "name": "Ronin Ventures Corp.",
       "exchange": "TSXV",
       "sector": ""
     },
@@ -11941,12 +11941,6 @@
     {
       "ticker": "VAU.V",
       "name": "Viva Gold Corp.",
-      "exchange": "TSXV",
-      "sector": ""
-    },
-    {
-      "ticker": "VAX.V",
-      "name": "Vantex Resources Ltd.",
       "exchange": "TSXV",
       "sector": ""
     },
