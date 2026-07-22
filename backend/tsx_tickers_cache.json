@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-21T15:42:52.302521Z",
+  "generated_at": "2026-07-22T15:40:41.219018Z",
   "count": 2161,
   "tsx_count": 752,
   "tsxv_count": 1409,
@@ -4865,12 +4865,6 @@
       "sector": ""
     },
     {
-      "ticker": "GGA.V",
-      "name": "Goldgroup Mining Inc.",
-      "exchange": "TSXV",
-      "sector": ""
-    },
-    {
       "ticker": "GGAU.V",
       "name": "Galactic Gold Corp.",
       "exchange": "TSXV",
@@ -4885,12 +4879,6 @@
     {
       "ticker": "GGI.V",
       "name": "Garibaldi Resources Corp.",
-      "exchange": "TSXV",
-      "sector": ""
-    },
-    {
-      "ticker": "GGL.V",
-      "name": "GGL Resources Corp.",
       "exchange": "TSXV",
       "sector": ""
     },
@@ -5054,6 +5042,12 @@
       "ticker": "GOOS.TO",
       "name": "Canada Goose Holdings Inc.",
       "exchange": "TSX",
+      "sector": ""
+    },
+    {
+      "ticker": "GORO.V",
+      "name": "Goldgroup Mining Inc.",
+      "exchange": "TSXV",
       "sector": ""
     },
     {
@@ -5935,6 +5929,12 @@
     {
       "ticker": "INX.V",
       "name": "Intouch Insight Ltd.",
+      "exchange": "TSXV",
+      "sector": ""
+    },
+    {
+      "ticker": "INXS.V",
+      "name": "Goldinxs Mining Corp.",
       "exchange": "TSXV",
       "sector": ""
     },
