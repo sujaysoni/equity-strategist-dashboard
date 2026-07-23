@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-07-22T15:40:41.219018Z",
-  "count": 2161,
+  "generated_at": "2026-07-23T16:26:15.630730Z",
+  "count": 2162,
   "tsx_count": 752,
-  "tsxv_count": 1409,
+  "tsxv_count": 1410,
   "tickers": [
     {
       "ticker": "AAA-P.V",
@@ -4879,6 +4879,12 @@
     {
       "ticker": "GGI.V",
       "name": "Garibaldi Resources Corp.",
+      "exchange": "TSXV",
+      "sector": ""
+    },
+    {
+      "ticker": "GGL.V",
+      "name": "GGL Resources Corp.",
       "exchange": "TSXV",
       "sector": ""
     },
