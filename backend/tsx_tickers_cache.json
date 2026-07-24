@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-07-23T16:26:15.630730Z",
+  "generated_at": "2026-07-24T15:25:01.887682Z",
   "count": 2162,
-  "tsx_count": 752,
-  "tsxv_count": 1410,
+  "tsx_count": 753,
+  "tsxv_count": 1409,
   "tickers": [
     {
       "ticker": "AAA-P.V",
@@ -1976,6 +1976,12 @@
       "ticker": "CAD.V",
       "name": "Colonial Coal International Corp.",
       "exchange": "TSXV",
+      "sector": ""
+    },
+    {
+      "ticker": "CADY.TO",
+      "name": "Cadillac Mines Corporation",
+      "exchange": "TSX",
       "sector": ""
     },
     {
@@ -4795,12 +4801,6 @@
     {
       "ticker": "GEMG.V",
       "name": "Gemdale Gold Inc.",
-      "exchange": "TSXV",
-      "sector": ""
-    },
-    {
-      "ticker": "GEN.V",
-      "name": "Generation Uranium Inc.",
       "exchange": "TSXV",
       "sector": ""
     },
