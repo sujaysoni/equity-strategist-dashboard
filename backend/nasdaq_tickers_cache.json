@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-07-24T15:26:02.243469+00:00",
-  "count": 4335,
+  "generated_at": "2026-07-25T15:02:31.244470+00:00",
+  "count": 4341,
   "exchange": "NASDAQ",
   "source": "nasdaq-trader-nasdaqlisted + sec-edgar-fallback",
   "tickers": [
@@ -2043,7 +2043,7 @@
     },
     {
       "ticker": "APM",
-      "name": "Aptorum Group Ltd",
+      "name": "Niki BioSolutions, Inc.",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1734005"
@@ -3792,11 +3792,25 @@
       "cik": "1712762"
     },
     {
+      "ticker": "BID",
+      "name": "Tribeca Strategic Acquisition Corp.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2094919"
+    },
+    {
       "ticker": "BIDU",
       "name": "Baidu, Inc.",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1329099"
+    },
+    {
+      "ticker": "BIDWR",
+      "name": "Tribeca Strategic Acquisition Corp.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2094919"
     },
     {
       "ticker": "BIDWU",
@@ -4184,13 +4198,6 @@
       "cik": "1838163"
     },
     {
-      "ticker": "BNBX",
-      "name": "BNB PLUS CORP.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "744452"
-    },
-    {
       "ticker": "BNC",
       "name": "CEA Industries Inc.",
       "exchange": "Nasdaq",
@@ -4555,6 +4562,13 @@
       "cik": "2076163"
     },
     {
+      "ticker": "BRTMU",
+      "name": "B&R Technology Merger Corp.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2131350"
+    },
+    {
       "ticker": "BRTX",
       "name": "BioRestorative Therapies, Inc.",
       "exchange": "Nasdaq",
@@ -4854,6 +4868,13 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1847590"
+    },
+    {
+      "ticker": "BXBL",
+      "name": "FG Merger II Corp.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "1906364"
     },
     {
       "ticker": "BYAH",
@@ -6093,6 +6114,13 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "913353"
+    },
+    {
+      "ticker": "CIGL",
+      "name": "Concorde International Group Ltd.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2001794"
     },
     {
       "ticker": "CIIT",
@@ -7367,6 +7395,13 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "2025942"
+    },
+    {
+      "ticker": "CUVL",
+      "name": "Clinuvel Pharmaceuticals Ltd",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "1290877"
     },
     {
       "ticker": "CV",
@@ -9987,13 +10022,6 @@
       "cik": "1989930"
     },
     {
-      "ticker": "FGMC",
-      "name": "FG Merger II Corp.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1906364"
-    },
-    {
       "ticker": "FGMCR",
       "name": "FG Merger II Corp.",
       "exchange": "Nasdaq",
@@ -10503,6 +10531,13 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1690080"
+    },
+    {
+      "ticker": "FRNM",
+      "name": "Freenome, Inc.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2017526"
     },
     {
       "ticker": "FROG",
@@ -11871,14 +11906,14 @@
     },
     {
       "ticker": "GREE",
-      "name": "Greenidge Generation Holdings Inc.",
+      "name": "Vulcan Infrastructure & Power Inc.",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1844971"
     },
     {
       "ticker": "GREEL",
-      "name": "Greenidge Generation Holdings Inc.",
+      "name": "Vulcan Infrastructure & Power Inc.",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1844971"
@@ -12708,6 +12743,13 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1855557"
+    },
+    {
+      "ticker": "HLTH",
+      "name": "Cue Health Inc.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "1628945"
     },
     {
       "ticker": "HLXC",
@@ -17358,6 +17400,13 @@
       "cik": "2087361"
     },
     {
+      "ticker": "MF",
+      "name": "MindForge Inc.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "1888525"
+    },
+    {
       "ticker": "MFI",
       "name": "mF International Ltd",
       "exchange": "Nasdaq",
@@ -17933,7 +17982,7 @@
     },
     {
       "ticker": "MPWR",
-      "name": "MONOLITHIC POWER SYSTEMS INC",
+      "name": "MONOLITHIC POWER SYSTEMS, INC.",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1280452"
@@ -18133,13 +18182,6 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1050446"
-    },
-    {
-      "ticker": "MSW",
-      "name": "Ming Shing Group Holdings Ltd",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1956166"
     },
     {
       "ticker": "MTC",
@@ -18952,6 +18994,13 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1526475"
+    },
+    {
+      "ticker": "NIKI",
+      "name": "Niki BioSolutions, Inc.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "1734005"
     },
     {
       "ticker": "NIOBW",
@@ -20011,6 +20060,13 @@
       "cik": "1487918"
     },
     {
+      "ticker": "OGGWZ",
+      "name": "Osisko Gold Group Inc.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "1431852"
+    },
+    {
       "ticker": "OGI",
       "name": "ORGANIGRAM GLOBAL INC.",
       "exchange": "Nasdaq",
@@ -20128,13 +20184,6 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1023994"
-    },
-    {
-      "ticker": "OLPX",
-      "name": "OLAPLEX HOLDINGS, INC.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1868726"
     },
     {
       "ticker": "OM",
@@ -21104,7 +21153,7 @@
     },
     {
       "ticker": "PCSC",
-      "name": "Perceptive Capital Solutions Corp",
+      "name": "Freenome, Inc.",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "2017526"
@@ -26556,13 +26605,6 @@
       "cik": "1583107"
     },
     {
-      "ticker": "TBRG",
-      "name": "TruBridge, Inc.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1169445"
-    },
-    {
       "ticker": "TC",
       "name": "Token Cat Ltd",
       "exchange": "Nasdaq",
@@ -27796,7 +27838,7 @@
     },
     {
       "ticker": "UBXG",
-      "name": "U-BX Technology Ltd.",
+      "name": "MindForge Inc.",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1888525"

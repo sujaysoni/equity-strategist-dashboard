@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-07-24T15:26:02.226318+00:00",
-  "count": 3129,
+  "generated_at": "2026-07-25T15:02:31.228857+00:00",
+  "count": 3131,
   "exchange": "NYSE/NYSE-MKT/NYSE-ARCA",
   "source": "nasdaq-trader-otherlisted + sec-edgar-fallback",
   "tickers": [
@@ -14565,6 +14565,13 @@
       "cik": "1174940"
     },
     {
+      "ticker": "OGG",
+      "name": "Osisko Gold Group Inc.",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "1431852"
+    },
+    {
       "ticker": "OGN",
       "name": "Organon & Co.",
       "exchange": "NYSE",
@@ -18912,13 +18919,6 @@
       "cik": "1781730"
     },
     {
-      "ticker": "TCGL",
-      "name": "TechCreate Group Ltd.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "2047190"
-    },
-    {
       "ticker": "TCI",
       "name": "TRANSCONTINENTAL REALTY INVESTORS INC",
       "exchange": "NYSE",
@@ -19179,7 +19179,7 @@
     },
     {
       "ticker": "TGLS",
-      "name": "Tecnoglass Inc.",
+      "name": "Tecnoglass Holdings Inc.",
       "exchange": "NYSE",
       "sector": "",
       "cik": "1534675"
@@ -20187,49 +20187,49 @@
     },
     {
       "ticker": "USB",
-      "name": "US BANCORP DE",
+      "name": "US BANCORP \\DE\\",
       "exchange": "NYSE",
       "sector": "",
       "cik": "36104"
     },
     {
       "ticker": "USB-PA",
-      "name": "US BANCORP DE",
+      "name": "US BANCORP \\DE\\",
       "exchange": "NYSE",
       "sector": "",
       "cik": "36104"
     },
     {
       "ticker": "USB-PH",
-      "name": "US BANCORP DE",
+      "name": "US BANCORP \\DE\\",
       "exchange": "NYSE",
       "sector": "",
       "cik": "36104"
     },
     {
       "ticker": "USB-PP",
-      "name": "US BANCORP DE",
+      "name": "US BANCORP \\DE\\",
       "exchange": "NYSE",
       "sector": "",
       "cik": "36104"
     },
     {
       "ticker": "USB-PQ",
-      "name": "US BANCORP DE",
+      "name": "US BANCORP \\DE\\",
       "exchange": "NYSE",
       "sector": "",
       "cik": "36104"
     },
     {
       "ticker": "USB-PR",
-      "name": "US BANCORP DE",
+      "name": "US BANCORP \\DE\\",
       "exchange": "NYSE",
       "sector": "",
       "cik": "36104"
     },
     {
       "ticker": "USB-PS",
-      "name": "US BANCORP DE",
+      "name": "US BANCORP \\DE\\",
       "exchange": "NYSE",
       "sector": "",
       "cik": "36104"
@@ -20564,7 +20564,21 @@
       "cik": "1973062"
     },
     {
+      "ticker": "VII",
+      "name": "Viking Acquisition Corp. II",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "2139246"
+    },
+    {
       "ticker": "VII-UN",
+      "name": "Viking Acquisition Corp. II",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "2139246"
+    },
+    {
+      "ticker": "VII-WT",
       "name": "Viking Acquisition Corp. II",
       "exchange": "NYSE",
       "sector": "",
