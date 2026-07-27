@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-07-26T15:05:19.925324+00:00",
-  "count": 3132,
+  "generated_at": "2026-07-27T16:31:47.376608+00:00",
+  "count": 3131,
   "exchange": "NYSE/NYSE-MKT/NYSE-ARCA",
   "source": "nasdaq-trader-otherlisted + sec-edgar-fallback",
   "tickers": [
@@ -3720,6 +3720,13 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "16058"
+    },
+    {
+      "ticker": "CAE",
+      "name": "CAE INC",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "1173382"
     },
     {
       "ticker": "CAF",
@@ -9022,10 +9029,10 @@
     },
     {
       "ticker": "GORO",
-      "name": "Goldgroup Mining Inc.",
+      "name": "GOLD RESOURCE CORP",
       "exchange": "NYSE",
       "sector": "",
-      "cik": "1515964"
+      "cik": "1160791"
     },
     {
       "ticker": "GOTU",
@@ -15742,7 +15749,7 @@
     },
     {
       "ticker": "PMO",
-      "name": "FRANKLIN MUNICIPAL OPPORTUNITIES TRUST",
+      "name": "PUTNAM MUNICIPAL OPPORTUNITIES TRUST",
       "exchange": "NYSE",
       "sector": "",
       "cik": "900422"
@@ -16106,20 +16113,6 @@
     },
     {
       "ticker": "PSA-PS",
-      "name": "Public Storage",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1393311"
-    },
-    {
-      "ticker": "PSA-PT",
-      "name": "Public Storage",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1393311"
-    },
-    {
-      "ticker": "PSA-PU",
       "name": "Public Storage",
       "exchange": "NYSE",
       "sector": "",
@@ -18926,13 +18919,6 @@
       "cik": "1781730"
     },
     {
-      "ticker": "TCGL",
-      "name": "TechCreate Group Ltd.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "2047190"
-    },
-    {
       "ticker": "TCI",
       "name": "TRANSCONTINENTAL REALTY INVESTORS INC",
       "exchange": "NYSE",
@@ -20506,6 +20492,13 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "103379"
+    },
+    {
+      "ticker": "VFL",
+      "name": "abrdn National Municipal Income Fund",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "895574"
     },
     {
       "ticker": "VG",
