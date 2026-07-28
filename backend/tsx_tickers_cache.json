@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-07-27T16:30:46.911832Z",
-  "count": 2163,
-  "tsx_count": 754,
-  "tsxv_count": 1409,
+  "generated_at": "2026-07-28T16:10:57.373923Z",
+  "count": 2165,
+  "tsx_count": 755,
+  "tsxv_count": 1410,
   "tickers": [
     {
       "ticker": "AAA-P.V",
@@ -5999,6 +5999,12 @@
       "sector": ""
     },
     {
+      "ticker": "IRR.V",
+      "name": "Irruptive Metals Corp.",
+      "exchange": "TSXV",
+      "sector": ""
+    },
+    {
       "ticker": "IS.TO",
       "name": "Infrastructure Dividend Split Corp.",
       "exchange": "TSX",
@@ -8690,6 +8696,12 @@
       "ticker": "PBM.V",
       "name": "Pacific Bay Minerals Ltd.",
       "exchange": "TSXV",
+      "sector": ""
+    },
+    {
+      "ticker": "PBY.TO",
+      "name": "Lysander-Canso Credit Income ActivETF",
+      "exchange": "TSX",
       "sector": ""
     },
     {
