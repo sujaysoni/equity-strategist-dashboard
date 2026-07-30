@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-07-29T15:50:27.892190+00:00",
-  "count": 3131,
+  "generated_at": "2026-07-30T15:59:42.292247+00:00",
+  "count": 3132,
   "exchange": "NYSE/NYSE-MKT/NYSE-ARCA",
   "source": "nasdaq-trader-otherlisted + sec-edgar-fallback",
   "tickers": [
@@ -3519,6 +3519,13 @@
       "cik": "1579298"
     },
     {
+      "ticker": "BURU",
+      "name": "Nuburu, Inc.",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "1814215"
+    },
+    {
       "ticker": "BV",
       "name": "BrightView Holdings, Inc.",
       "exchange": "NYSE",
@@ -6452,6 +6459,13 @@
       "cik": "791718"
     },
     {
+      "ticker": "EEX",
+      "name": "Emerald Holding, Inc.",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "1579214"
+    },
+    {
       "ticker": "EFC",
       "name": "Ellington Financial Inc.",
       "exchange": "NYSE",
@@ -8111,13 +8125,6 @@
       "cik": "928054"
     },
     {
-      "ticker": "FTRA",
-      "name": "FutureCorp Space Acquisition 1",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "2131853"
-    },
-    {
       "ticker": "FTS",
       "name": "Fortis Inc.",
       "exchange": "NYSE",
@@ -9278,6 +9285,13 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1718512"
+    },
+    {
+      "ticker": "GTLS",
+      "name": "CHART INDUSTRIES INC",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "892553"
     },
     {
       "ticker": "GTN",
@@ -16280,6 +16294,13 @@
       "cik": "2058873"
     },
     {
+      "ticker": "QBTS",
+      "name": "D-Wave Quantum Inc.",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "1907982"
+    },
+    {
       "ticker": "QGEN",
       "name": "QIAGEN N.V.",
       "exchange": "NYSE",
@@ -19528,13 +19549,6 @@
       "cik": "1389170"
     },
     {
-      "ticker": "TRIN",
-      "name": "Trinity Capital Inc.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1786108"
-    },
-    {
       "ticker": "TRLV",
       "name": "Trulieve Cannabis Corp.",
       "exchange": "NYSE",
@@ -19549,25 +19563,11 @@
       "cik": "99780"
     },
     {
-      "ticker": "TRNI",
-      "name": "Trinity Capital Inc.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1786108"
-    },
-    {
       "ticker": "TRNO",
       "name": "Terreno Realty Corp",
       "exchange": "NYSE",
       "sector": "",
       "cik": "1476150"
-    },
-    {
-      "ticker": "TRNZ",
-      "name": "Trinity Capital Inc.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1786108"
     },
     {
       "ticker": "TROX",
@@ -20201,49 +20201,49 @@
     },
     {
       "ticker": "USB",
-      "name": "US BANCORP DE",
+      "name": "US BANCORP \\DE\\",
       "exchange": "NYSE",
       "sector": "",
       "cik": "36104"
     },
     {
       "ticker": "USB-PA",
-      "name": "US BANCORP DE",
+      "name": "US BANCORP \\DE\\",
       "exchange": "NYSE",
       "sector": "",
       "cik": "36104"
     },
     {
       "ticker": "USB-PH",
-      "name": "US BANCORP DE",
+      "name": "US BANCORP \\DE\\",
       "exchange": "NYSE",
       "sector": "",
       "cik": "36104"
     },
     {
       "ticker": "USB-PP",
-      "name": "US BANCORP DE",
+      "name": "US BANCORP \\DE\\",
       "exchange": "NYSE",
       "sector": "",
       "cik": "36104"
     },
     {
       "ticker": "USB-PQ",
-      "name": "US BANCORP DE",
+      "name": "US BANCORP \\DE\\",
       "exchange": "NYSE",
       "sector": "",
       "cik": "36104"
     },
     {
       "ticker": "USB-PR",
-      "name": "US BANCORP DE",
+      "name": "US BANCORP \\DE\\",
       "exchange": "NYSE",
       "sector": "",
       "cik": "36104"
     },
     {
       "ticker": "USB-PS",
-      "name": "US BANCORP DE",
+      "name": "US BANCORP \\DE\\",
       "exchange": "NYSE",
       "sector": "",
       "cik": "36104"
@@ -21430,6 +21430,13 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "105016"
+    },
+    {
+      "ticker": "WSR",
+      "name": "Whitestone REIT",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "1175535"
     },
     {
       "ticker": "WST",
