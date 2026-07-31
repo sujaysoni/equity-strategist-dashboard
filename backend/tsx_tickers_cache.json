@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-07-30T15:58:41.685773Z",
+  "generated_at": "2026-07-31T16:01:35.940944Z",
   "count": 2164,
-  "tsx_count": 754,
-  "tsxv_count": 1410,
+  "tsx_count": 753,
+  "tsxv_count": 1411,
   "tickers": [
     {
       "ticker": "AAA-P.V",
@@ -1607,12 +1607,6 @@
       "sector": ""
     },
     {
-      "ticker": "BMET.V",
-      "name": "Bemetals Corp.",
-      "exchange": "TSXV",
-      "sector": ""
-    },
-    {
       "ticker": "BMM.V",
       "name": "Black Mammoth Metals Corporation",
       "exchange": "TSXV",
@@ -1915,6 +1909,12 @@
     {
       "ticker": "BUFF.V",
       "name": "Buffalo Potash Corporation",
+      "exchange": "TSXV",
+      "sector": ""
+    },
+    {
+      "ticker": "BUSH-P.V",
+      "name": "Bushido Capital Corp.",
       "exchange": "TSXV",
       "sector": ""
     },
@@ -5297,12 +5297,6 @@
       "sector": ""
     },
     {
-      "ticker": "GTWO.TO",
-      "name": "G2 Goldfields Inc.",
-      "exchange": "TSX",
-      "sector": ""
-    },
-    {
       "ticker": "GUD.TO",
       "name": "Knight Therapeutics Inc.",
       "exchange": "TSX",
@@ -6859,6 +6853,12 @@
     {
       "ticker": "LTH.V",
       "name": "Lithium Ionic Corp.",
+      "exchange": "TSXV",
+      "sector": ""
+    },
+    {
+      "ticker": "LTNG.V",
+      "name": "Lightning Resource Corp.",
       "exchange": "TSXV",
       "sector": ""
     },
