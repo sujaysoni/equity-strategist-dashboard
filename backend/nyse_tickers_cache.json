@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-08-03T16:24:29.643682+00:00",
-  "count": 3131,
+  "generated_at": "2026-08-04T16:11:51.257508+00:00",
+  "count": 3132,
   "exchange": "NYSE/NYSE-MKT/NYSE-ARCA",
   "source": "nasdaq-trader-otherlisted + sec-edgar-fallback",
   "tickers": [
@@ -2953,7 +2953,7 @@
     },
     {
       "ticker": "BLX",
-      "name": "FOREIGN TRADE BANK OF LATIN AMERICA, INC.",
+      "name": "BLADEX, INC.",
       "exchange": "NYSE",
       "sector": "",
       "cik": "890541"
@@ -3519,13 +3519,6 @@
       "cik": "1579298"
     },
     {
-      "ticker": "BURU",
-      "name": "Nuburu, Inc.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1814215"
-    },
-    {
       "ticker": "BV",
       "name": "BrightView Holdings, Inc.",
       "exchange": "NYSE",
@@ -3720,13 +3713,6 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "16058"
-    },
-    {
-      "ticker": "CAE",
-      "name": "CAE INC",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1173382"
     },
     {
       "ticker": "CAF",
@@ -6466,13 +6452,6 @@
       "cik": "791718"
     },
     {
-      "ticker": "EEX",
-      "name": "Emerald Holding, Inc.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1579214"
-    },
-    {
       "ticker": "EFC",
       "name": "Ellington Financial Inc.",
       "exchange": "NYSE",
@@ -8132,6 +8111,13 @@
       "cik": "928054"
     },
     {
+      "ticker": "FTRA",
+      "name": "FutureCorp Space Acquisition 1",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "2131853"
+    },
+    {
       "ticker": "FTS",
       "name": "Fortis Inc.",
       "exchange": "NYSE",
@@ -9029,10 +9015,10 @@
     },
     {
       "ticker": "GORO",
-      "name": "GOLD RESOURCE CORP",
+      "name": "Goldgroup Mining Inc.",
       "exchange": "NYSE",
       "sector": "",
-      "cik": "1160791"
+      "cik": "1515964"
     },
     {
       "ticker": "GOTU",
@@ -9288,17 +9274,10 @@
     },
     {
       "ticker": "GTES",
-      "name": "Gates Industrial Corp plc",
+      "name": "Gates Industrial Corp Ltd.",
       "exchange": "NYSE",
       "sector": "",
       "cik": "1718512"
-    },
-    {
-      "ticker": "GTLS",
-      "name": "CHART INDUSTRIES INC",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "892553"
     },
     {
       "ticker": "GTN",
@@ -10316,6 +10295,13 @@
       "cik": "921582"
     },
     {
+      "ticker": "IMC",
+      "name": "IMC Rare Earths Ltd",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "2098395"
+    },
+    {
       "ticker": "IMO",
       "name": "IMPERIAL OIL LTD",
       "exchange": "NYSE",
@@ -10848,6 +10834,13 @@
       "cik": "1756708"
     },
     {
+      "ticker": "JMKE",
+      "name": "Jersey Mike's Subs Inc.",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "2127043"
+    },
+    {
       "ticker": "JMM",
       "name": "Nuveen Multi-Market Income Fund",
       "exchange": "NYSE",
@@ -11329,13 +11322,6 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1315257"
-    },
-    {
-      "ticker": "KORE",
-      "name": "KORE Group Holdings, Inc.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1855457"
     },
     {
       "ticker": "KOS",
@@ -13067,6 +13053,20 @@
       "cik": "32621"
     },
     {
+      "ticker": "MSOL",
+      "name": "Morgan Stanley Solana Trust",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "2103547"
+    },
+    {
+      "ticker": "MSSE",
+      "name": "Morgan Stanley Ethereum Trust",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "2103976"
+    },
+    {
       "ticker": "MT",
       "name": "ArcelorMittal",
       "exchange": "NYSE",
@@ -13110,6 +13110,13 @@
     },
     {
       "ticker": "MTB-PK",
+      "name": "M&T BANK CORP",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "36270"
+    },
+    {
+      "ticker": "MTB-PL",
       "name": "M&T BANK CORP",
       "exchange": "NYSE",
       "sector": "",
@@ -13215,6 +13222,13 @@
     },
     {
       "ticker": "MUA",
+      "name": "BLACKROCK MUNIASSETS FUND, INC.",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "901243"
+    },
+    {
+      "ticker": "MUA-RW",
       "name": "BLACKROCK MUNIASSETS FUND, INC.",
       "exchange": "NYSE",
       "sector": "",
@@ -14166,27 +14180,6 @@
       "cik": "1933567"
     },
     {
-      "ticker": "NSA",
-      "name": "National Storage Affiliates Trust",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1618563"
-    },
-    {
-      "ticker": "NSA-PA",
-      "name": "National Storage Affiliates Trust",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1618563"
-    },
-    {
-      "ticker": "NSA-PB",
-      "name": "National Storage Affiliates Trust",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1618563"
-    },
-    {
       "ticker": "NSC",
       "name": "NORFOLK SOUTHERN CORP",
       "exchange": "NYSE",
@@ -14502,18 +14495,18 @@
       "cik": "1370946"
     },
     {
+      "ticker": "OCAC",
+      "name": "Ocean Capital Acquisition Corp",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "1926314"
+    },
+    {
       "ticker": "ODC",
       "name": "Oil-Dri Corp of America",
       "exchange": "NYSE",
       "sector": "",
       "cik": "74046"
-    },
-    {
-      "ticker": "ODV",
-      "name": "Osisko Gold Group Inc.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1431852"
     },
     {
       "ticker": "OEC",
@@ -15749,7 +15742,7 @@
     },
     {
       "ticker": "PMO",
-      "name": "PUTNAM MUNICIPAL OPPORTUNITIES TRUST",
+      "name": "FRANKLIN MUNICIPAL OPPORTUNITIES TRUST",
       "exchange": "NYSE",
       "sector": "",
       "cik": "900422"
@@ -15896,7 +15889,7 @@
     },
     {
       "ticker": "PPT",
-      "name": "PUTNAM PREMIER INCOME TRUST",
+      "name": "FRANKLIN PREMIER INCOME TRUST",
       "exchange": "NYSE",
       "sector": "",
       "cik": "827773"
@@ -16119,6 +16112,20 @@
       "cik": "1393311"
     },
     {
+      "ticker": "PSA-PT",
+      "name": "Public Storage",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "1393311"
+    },
+    {
+      "ticker": "PSA-PU",
+      "name": "Public Storage",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "1393311"
+    },
+    {
       "ticker": "PSBD",
       "name": "Palmer Square Capital BDC Inc.",
       "exchange": "NYSE",
@@ -16285,13 +16292,6 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "2058873"
-    },
-    {
-      "ticker": "QBTS",
-      "name": "D-Wave Quantum Inc.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1907982"
     },
     {
       "ticker": "QGEN",
@@ -16551,6 +16551,13 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1140215"
+    },
+    {
+      "ticker": "REF",
+      "name": "Reformation Inc.",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "1787117"
     },
     {
       "ticker": "REI",
@@ -17888,13 +17895,6 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1823587"
-    },
-    {
-      "ticker": "SLAI",
-      "name": "SOLAI Ltd",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1517496"
     },
     {
       "ticker": "SLB",
@@ -19409,6 +19409,13 @@
       "cik": "794170"
     },
     {
+      "ticker": "TONT",
+      "name": "Graf Global Corp.",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "1897463"
+    },
+    {
       "ticker": "TOON",
       "name": "Kartoon Studios, Inc.",
       "exchange": "NYSE",
@@ -19535,6 +19542,13 @@
       "cik": "1389170"
     },
     {
+      "ticker": "TRIN",
+      "name": "Trinity Capital Inc.",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "1786108"
+    },
+    {
       "ticker": "TRLV",
       "name": "Trulieve Cannabis Corp.",
       "exchange": "NYSE",
@@ -19549,11 +19563,25 @@
       "cik": "99780"
     },
     {
+      "ticker": "TRNI",
+      "name": "Trinity Capital Inc.",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "1786108"
+    },
+    {
       "ticker": "TRNO",
       "name": "Terreno Realty Corp",
       "exchange": "NYSE",
       "sector": "",
       "cik": "1476150"
+    },
+    {
+      "ticker": "TRNZ",
+      "name": "Trinity Capital Inc.",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "1786108"
     },
     {
       "ticker": "TROX",
@@ -20187,49 +20215,49 @@
     },
     {
       "ticker": "USB",
-      "name": "US BANCORP \\DE\\",
+      "name": "US BANCORP DE",
       "exchange": "NYSE",
       "sector": "",
       "cik": "36104"
     },
     {
       "ticker": "USB-PA",
-      "name": "US BANCORP \\DE\\",
+      "name": "US BANCORP DE",
       "exchange": "NYSE",
       "sector": "",
       "cik": "36104"
     },
     {
       "ticker": "USB-PH",
-      "name": "US BANCORP \\DE\\",
+      "name": "US BANCORP DE",
       "exchange": "NYSE",
       "sector": "",
       "cik": "36104"
     },
     {
       "ticker": "USB-PP",
-      "name": "US BANCORP \\DE\\",
+      "name": "US BANCORP DE",
       "exchange": "NYSE",
       "sector": "",
       "cik": "36104"
     },
     {
       "ticker": "USB-PQ",
-      "name": "US BANCORP \\DE\\",
+      "name": "US BANCORP DE",
       "exchange": "NYSE",
       "sector": "",
       "cik": "36104"
     },
     {
       "ticker": "USB-PR",
-      "name": "US BANCORP \\DE\\",
+      "name": "US BANCORP DE",
       "exchange": "NYSE",
       "sector": "",
       "cik": "36104"
     },
     {
       "ticker": "USB-PS",
-      "name": "US BANCORP \\DE\\",
+      "name": "US BANCORP DE",
       "exchange": "NYSE",
       "sector": "",
       "cik": "36104"
@@ -20494,13 +20522,6 @@
       "cik": "103379"
     },
     {
-      "ticker": "VFL",
-      "name": "abrdn National Municipal Income Fund",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "895574"
-    },
-    {
       "ticker": "VG",
       "name": "Venture Global, Inc.",
       "exchange": "NYSE",
@@ -20635,13 +20656,6 @@
     },
     {
       "ticker": "VLN",
-      "name": "Valens Semiconductor Ltd.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1863006"
-    },
-    {
-      "ticker": "VLN-WT",
       "name": "Valens Semiconductor Ltd.",
       "exchange": "NYSE",
       "sector": "",
@@ -21423,13 +21437,6 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "105016"
-    },
-    {
-      "ticker": "WSR",
-      "name": "Whitestone REIT",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1175535"
     },
     {
       "ticker": "WST",

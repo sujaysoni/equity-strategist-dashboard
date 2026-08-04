@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-08-03T16:24:29.660918+00:00",
-  "count": 4341,
+  "generated_at": "2026-08-04T16:11:51.272191+00:00",
+  "count": 4339,
   "exchange": "NASDAQ",
   "source": "nasdaq-trader-nasdaqlisted + sec-edgar-fallback",
   "tickers": [
@@ -768,13 +768,6 @@
       "cik": "1823584"
     },
     {
-      "ticker": "AEP",
-      "name": "AMERICAN ELECTRIC POWER CO INC",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "4904"
-    },
-    {
       "ticker": "AERT",
       "name": "Aeries Technology, Inc.",
       "exchange": "Nasdaq",
@@ -1272,13 +1265,6 @@
       "cik": "1725332"
     },
     {
-      "ticker": "ALBT",
-      "name": "Avalon GloboCare Corp.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1630212"
-    },
-    {
       "ticker": "ALCO",
       "name": "ALICO, INC.",
       "exchange": "Nasdaq",
@@ -1727,13 +1713,6 @@
       "cik": "1518461"
     },
     {
-      "ticker": "AMPGR",
-      "name": "AmpliTech Group, Inc.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1518461"
-    },
-    {
       "ticker": "AMPGZ",
       "name": "AmpliTech Group, Inc.",
       "exchange": "Nasdaq",
@@ -1756,7 +1735,7 @@
     },
     {
       "ticker": "AMRN",
-      "name": "AMARIN CORP PLC\\UK",
+      "name": "AMARIN CORP PLCUK",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "897448"
@@ -2042,13 +2021,6 @@
       "cik": "1944885"
     },
     {
-      "ticker": "APM",
-      "name": "Niki BioSolutions, Inc.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1734005"
-    },
-    {
       "ticker": "APMC",
       "name": "AmperCap Acquisition Co",
       "exchange": "Nasdaq",
@@ -2068,6 +2040,13 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "2101393"
+    },
+    {
+      "ticker": "APMD",
+      "name": "Apnimed, Inc.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "1745648"
     },
     {
       "ticker": "APOG",
@@ -3365,7 +3344,21 @@
       "cik": "1228454"
     },
     {
+      "ticker": "BCCQ",
+      "name": "Bleichroeder Acquisition Corp. III",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2128045"
+    },
+    {
       "ticker": "BCCQU",
+      "name": "Bleichroeder Acquisition Corp. III",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2128045"
+    },
+    {
+      "ticker": "BCCQW",
       "name": "Bleichroeder Acquisition Corp. III",
       "exchange": "Nasdaq",
       "sector": "",
@@ -3839,6 +3832,20 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1709941"
+    },
+    {
+      "ticker": "BIOT",
+      "name": "INSTINCT BIO TECHNICAL CO HOLDINGS INC.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2072188"
+    },
+    {
+      "ticker": "BIOTW",
+      "name": "INSTINCT BIO TECHNICAL CO HOLDINGS INC.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2072188"
     },
     {
       "ticker": "BIOX",
@@ -4871,7 +4878,7 @@
     },
     {
       "ticker": "BXBL",
-      "name": "FG Merger II Corp.",
+      "name": "BOXABL Inc.",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1906364"
@@ -4994,6 +5001,13 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1841387"
+    },
+    {
+      "ticker": "CAE",
+      "name": "CAE INC",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "1173382"
     },
     {
       "ticker": "CAES",
@@ -5192,6 +5206,13 @@
       "cik": "726958"
     },
     {
+      "ticker": "CATLU",
+      "name": "Catalyst Acquisition Corp.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2104391"
+    },
+    {
       "ticker": "CATY",
       "name": "CATHAY GENERAL BANCORP",
       "exchange": "Nasdaq",
@@ -5332,7 +5353,21 @@
       "cik": "1662579"
     },
     {
+      "ticker": "CCCT",
+      "name": "Columbus Circle Capital Corp III",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2123471"
+    },
+    {
       "ticker": "CCCTU",
+      "name": "Columbus Circle Capital Corp III",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2123471"
+    },
+    {
+      "ticker": "CCCTW",
       "name": "Columbus Circle Capital Corp III",
       "exchange": "Nasdaq",
       "sector": "",
@@ -5449,13 +5484,6 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1158324"
-    },
-    {
-      "ticker": "CCRN",
-      "name": "CROSS COUNTRY HEALTHCARE INC",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1141103"
     },
     {
       "ticker": "CCSI",
@@ -5634,13 +5662,6 @@
     },
     {
       "ticker": "CELU",
-      "name": "Celularity Inc",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1752828"
-    },
-    {
-      "ticker": "CELUW",
       "name": "Celularity Inc",
       "exchange": "Nasdaq",
       "sector": "",
@@ -5948,6 +5969,13 @@
       "cik": "1517175"
     },
     {
+      "ticker": "CHGA",
+      "name": "Change Agents Corporation.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "1630212"
+    },
+    {
       "ticker": "CHI",
       "name": "CALAMOS CONVERTIBLE OPPORTUNITIES & INCOME FUND",
       "exchange": "Nasdaq",
@@ -6194,10 +6222,10 @@
     },
     {
       "ticker": "CLBK",
-      "name": "Columbia Financial, Inc.",
+      "name": "Columbia Financial, Inc./MD/",
       "exchange": "Nasdaq",
       "sector": "",
-      "cik": "1723596"
+      "cik": "2115119"
     },
     {
       "ticker": "CLBT",
@@ -6802,13 +6830,6 @@
       "cik": "900075"
     },
     {
-      "ticker": "CPRX",
-      "name": "CATALYST PHARMACEUTICALS, INC.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1369568"
-    },
-    {
       "ticker": "CPSH",
       "name": "CPS TECHNOLOGIES CORP/DE/",
       "exchange": "Nasdaq",
@@ -6954,13 +6975,6 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "2003977"
-    },
-    {
-      "ticker": "CREG",
-      "name": "Smart Powerr Corp.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "721693"
     },
     {
       "ticker": "CRESY",
@@ -9000,13 +9014,6 @@
       "cik": "1829794"
     },
     {
-      "ticker": "EMPG",
-      "name": "Empro Group Inc.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "2005569"
-    },
-    {
       "ticker": "ENGN",
       "name": "enGene Therapeutics Inc.",
       "exchange": "Nasdaq",
@@ -9120,13 +9127,6 @@
     },
     {
       "ticker": "EOSE",
-      "name": "Eos Energy Enterprises, Inc.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1805077"
-    },
-    {
-      "ticker": "EOSER",
       "name": "Eos Energy Enterprises, Inc.",
       "exchange": "Nasdaq",
       "sector": "",
@@ -9266,13 +9266,6 @@
       "cik": "1357971"
     },
     {
-      "ticker": "ESPR",
-      "name": "Esperion Therapeutics, Inc.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1434868"
-    },
-    {
       "ticker": "ESQ",
       "name": "Esquire Financial Holdings, Inc.",
       "exchange": "Nasdaq",
@@ -9406,13 +9399,6 @@
       "cik": "1805385"
     },
     {
-      "ticker": "EVLVW",
-      "name": "Evolv Technologies Holdings, Inc.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1805385"
-    },
-    {
       "ticker": "EVO",
       "name": "Evotec SE",
       "exchange": "Nasdaq",
@@ -9448,11 +9434,11 @@
       "cik": "1711269"
     },
     {
-      "ticker": "EVTV",
-      "name": "AZIO AI HOLDINGS, INC.",
+      "ticker": "EWAVU",
+      "name": "East West Ave Acquisition Corp.",
       "exchange": "Nasdaq",
       "sector": "",
-      "cik": "1563568"
+      "cik": "2100704"
     },
     {
       "ticker": "EWBC",
@@ -9938,13 +9924,6 @@
       "cik": "1805521"
     },
     {
-      "ticker": "FFAIW",
-      "name": "FARADAY FUTURE INTELLIGENT ELECTRIC INC.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1805521"
-    },
-    {
       "ticker": "FFBC",
       "name": "FIRST FINANCIAL BANCORP /OH/",
       "exchange": "Nasdaq",
@@ -10020,20 +9999,6 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1989930"
-    },
-    {
-      "ticker": "FGMCR",
-      "name": "FG Merger II Corp.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1906364"
-    },
-    {
-      "ticker": "FGMCU",
-      "name": "FG Merger II Corp.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1906364"
     },
     {
       "ticker": "FGNX",
@@ -10890,7 +10855,28 @@
       "cik": "2010653"
     },
     {
+      "ticker": "FWAC",
+      "name": "Futurewave Acquisition Corp",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2116105"
+    },
+    {
+      "ticker": "FWACR",
+      "name": "Futurewave Acquisition Corp",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2116105"
+    },
+    {
       "ticker": "FWACU",
+      "name": "Futurewave Acquisition Corp",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2116105"
+    },
+    {
+      "ticker": "FWACW",
       "name": "Futurewave Acquisition Corp",
       "exchange": "Nasdaq",
       "sector": "",
@@ -11014,13 +11000,6 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1133416"
-    },
-    {
-      "ticker": "GAMB",
-      "name": "Gambling.com Group Ltd",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1839799"
     },
     {
       "ticker": "GAME",
@@ -11982,6 +11961,13 @@
       "cik": "1903145"
     },
     {
+      "ticker": "GRSD",
+      "name": "GRANDSTAND Ltd",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "1839799"
+    },
+    {
       "ticker": "GRVY",
       "name": "GRAVITY Co., Ltd.",
       "exchange": "Nasdaq",
@@ -12274,6 +12260,13 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1895618"
+    },
+    {
+      "ticker": "GYGY",
+      "name": "Game Your Game Inc.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2111846"
     },
     {
       "ticker": "GYRE",
@@ -12743,13 +12736,6 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1855557"
-    },
-    {
-      "ticker": "HLTH",
-      "name": "Cue Health Inc.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1628945"
     },
     {
       "ticker": "HLXC",
@@ -14166,6 +14152,13 @@
       "cik": "1835654"
     },
     {
+      "ticker": "IOND",
+      "name": "Ionic Digital Inc.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2007691"
+    },
+    {
       "ticker": "IONR",
       "name": "ioneer Ltd",
       "exchange": "Nasdaq",
@@ -14313,7 +14306,21 @@
       "cik": "1788230"
     },
     {
+      "ticker": "IPVV",
+      "name": "InterPrivate Investment Partners V, Inc.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2105274"
+    },
+    {
       "ticker": "IPVVU",
+      "name": "InterPrivate Investment Partners V, Inc.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2105274"
+    },
+    {
+      "ticker": "IPVVW",
       "name": "InterPrivate Investment Partners V, Inc.",
       "exchange": "Nasdaq",
       "sector": "",
@@ -14453,7 +14460,21 @@
       "cik": "842517"
     },
     {
+      "ticker": "ISNR",
+      "name": "Snow Rothschild Acquisition Corp.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2123475"
+    },
+    {
       "ticker": "ISNRU",
+      "name": "Snow Rothschild Acquisition Corp.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2123475"
+    },
+    {
+      "ticker": "ISNRW",
       "name": "Snow Rothschild Acquisition Corp.",
       "exchange": "Nasdaq",
       "sector": "",
@@ -16266,13 +16287,6 @@
       "cik": "1606163"
     },
     {
-      "ticker": "LMFA",
-      "name": "LM FUNDING AMERICA, INC.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1640384"
-    },
-    {
       "ticker": "LMNR",
       "name": "Limoneira CO",
       "exchange": "Nasdaq",
@@ -16602,7 +16616,21 @@
       "cik": "1084554"
     },
     {
+      "ticker": "LTGR",
+      "name": "Long Table Growth Corp.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2104177"
+    },
+    {
       "ticker": "LTGRU",
+      "name": "Long Table Growth Corp.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2104177"
+    },
+    {
+      "ticker": "LTGRW",
       "name": "Long Table Growth Corp.",
       "exchange": "Nasdaq",
       "sector": "",
@@ -16938,27 +16966,6 @@
       "cik": "1610590"
     },
     {
-      "ticker": "MBAV",
-      "name": "M3-Brigade Acquisition V Corp.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "2016072"
-    },
-    {
-      "ticker": "MBAVU",
-      "name": "M3-Brigade Acquisition V Corp.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "2016072"
-    },
-    {
-      "ticker": "MBAVW",
-      "name": "M3-Brigade Acquisition V Corp.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "2016072"
-    },
-    {
       "ticker": "MBBC",
       "name": "Marathon Bancorp, Inc. /MD/",
       "exchange": "Nasdaq",
@@ -17279,6 +17286,13 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1668397"
+    },
+    {
+      "ticker": "MEDS",
+      "name": "DataMeds AI, Inc.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2030763"
     },
     {
       "ticker": "MEGL",
@@ -18184,6 +18198,13 @@
       "cik": "1050446"
     },
     {
+      "ticker": "MTAKU",
+      "name": "Market Technology Acquisition Corp",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2133136"
+    },
+    {
       "ticker": "MTC",
       "name": "MMTEC, INC.",
       "exchange": "Nasdaq",
@@ -18297,13 +18318,6 @@
     },
     {
       "ticker": "MVST",
-      "name": "Microvast Holdings, Inc.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1760689"
-    },
-    {
-      "ticker": "MVSTW",
       "name": "Microvast Holdings, Inc.",
       "exchange": "Nasdaq",
       "sector": "",
@@ -18653,6 +18667,34 @@
       "cik": "1902733"
     },
     {
+      "ticker": "NCO",
+      "name": "Southern Cross Acquisition I Corp.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2116230"
+    },
+    {
+      "ticker": "NCOOR",
+      "name": "Southern Cross Acquisition I Corp.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2116230"
+    },
+    {
+      "ticker": "NCOOU",
+      "name": "Southern Cross Acquisition I Corp.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2116230"
+    },
+    {
+      "ticker": "NCOOW",
+      "name": "Southern Cross Acquisition I Corp.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2116230"
+    },
+    {
       "ticker": "NCPL",
       "name": "Netcapital Inc.",
       "exchange": "Nasdaq",
@@ -18875,13 +18917,6 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1612720"
-    },
-    {
-      "ticker": "NFBK",
-      "name": "Northfield Bancorp, Inc.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1493225"
     },
     {
       "ticker": "NFE",
@@ -19556,13 +19591,6 @@
       "cik": "1479681"
     },
     {
-      "ticker": "NUVL",
-      "name": "Nuvalent, Inc.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1861560"
-    },
-    {
       "ticker": "NUWE",
       "name": "Nuwellis, Inc.",
       "exchange": "Nasdaq",
@@ -19638,13 +19666,6 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1821769"
-    },
-    {
-      "ticker": "NVVE",
-      "name": "Nuvve Holding Corp.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1836875"
     },
     {
       "ticker": "NVX",
@@ -19997,13 +20018,6 @@
       "cik": "1882782"
     },
     {
-      "ticker": "ODVWZ",
-      "name": "Osisko Gold Group Inc.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1431852"
-    },
-    {
       "ticker": "ODYS",
       "name": "Odysight.ai Inc.",
       "exchange": "Nasdaq",
@@ -20159,7 +20173,7 @@
     },
     {
       "ticker": "OLED",
-      "name": "UNIVERSAL DISPLAY CORP \\PA\\",
+      "name": "UNIVERSAL DISPLAY CORP PA",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1005284"
@@ -21040,6 +21054,13 @@
       "cik": "723531"
     },
     {
+      "ticker": "PBAM",
+      "name": "Private Bancorp of America, Inc.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "1705284"
+    },
+    {
       "ticker": "PBFS",
       "name": "Pioneer Bancorp, Inc./MD",
       "exchange": "Nasdaq",
@@ -21150,13 +21171,6 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1533743"
-    },
-    {
-      "ticker": "PCSC",
-      "name": "Freenome, Inc.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "2017526"
     },
     {
       "ticker": "PCT",
@@ -21598,6 +21612,13 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1041859"
+    },
+    {
+      "ticker": "PLCIU",
+      "name": "Pelican Acquisition II Corp",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2122392"
     },
     {
       "ticker": "PLMK",
@@ -22398,6 +22419,13 @@
       "cik": "1583648"
     },
     {
+      "ticker": "PWCM",
+      "name": "POWERCOMPUTE, INC.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "1640384"
+    },
+    {
       "ticker": "PWP",
       "name": "Perella Weinberg Partners",
       "exchange": "Nasdaq",
@@ -22473,6 +22501,13 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "2083217"
+    },
+    {
+      "ticker": "QBTS",
+      "name": "D-Wave Quantum Inc.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "1907982"
     },
     {
       "ticker": "QCLS",
@@ -22665,13 +22700,6 @@
     },
     {
       "ticker": "QTEX",
-      "name": "QTREX Quantum Ltd.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1837493"
-    },
-    {
-      "ticker": "QTEXW",
       "name": "QTREX Quantum Ltd.",
       "exchange": "Nasdaq",
       "sector": "",
@@ -24351,6 +24379,13 @@
       "cik": "918965"
     },
     {
+      "ticker": "SCTX",
+      "name": "Scribe Therapeutics, Inc.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "1853921"
+    },
+    {
       "ticker": "SCWO",
       "name": "374Water Inc.",
       "exchange": "Nasdaq",
@@ -24659,13 +24694,6 @@
       "cik": "1778922"
     },
     {
-      "ticker": "SGRP",
-      "name": "SPAR Group, Inc.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1004989"
-    },
-    {
       "ticker": "SGRY",
       "name": "Surgery Partners, Inc.",
       "exchange": "Nasdaq",
@@ -24932,13 +24960,6 @@
       "cik": "2120882"
     },
     {
-      "ticker": "SKHYV",
-      "name": "SK hynix Inc.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "2120882"
-    },
-    {
       "ticker": "SKIN",
       "name": "SkinHealth Systems Inc.",
       "exchange": "Nasdaq",
@@ -24989,7 +25010,7 @@
     },
     {
       "ticker": "SKYT",
-      "name": "SkyWater Technology, Inc",
+      "name": "SkyWater Technology, LLC",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1819974"
@@ -26164,27 +26185,6 @@
       "cik": "1084201"
     },
     {
-      "ticker": "SVAC",
-      "name": "General Fusion Group Ltd.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "2074850"
-    },
-    {
-      "ticker": "SVACU",
-      "name": "General Fusion Group Ltd.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "2074850"
-    },
-    {
-      "ticker": "SVACW",
-      "name": "General Fusion Group Ltd.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "2074850"
-    },
-    {
       "ticker": "SVAQ",
       "name": "Silicon Valley Acquisition Corp.",
       "exchange": "Nasdaq",
@@ -27347,13 +27347,6 @@
       "cik": "888721"
     },
     {
-      "ticker": "TRIN",
-      "name": "Trinity Capital Inc.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1786108"
-    },
-    {
       "ticker": "TRINI",
       "name": "Trinity Capital Inc.",
       "exchange": "Nasdaq",
@@ -27837,13 +27830,6 @@
       "cik": "729986"
     },
     {
-      "ticker": "UBXG",
-      "name": "MindForge Inc.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1888525"
-    },
-    {
       "ticker": "UCAR",
       "name": "U Power Ltd",
       "exchange": "Nasdaq",
@@ -28079,7 +28065,7 @@
       "name": "Uranium Royalty Corp.",
       "exchange": "Nasdaq",
       "sector": "",
-      "cik": "1711570"
+      "cik": "2143673"
     },
     {
       "ticker": "USAR",
@@ -28481,6 +28467,13 @@
       "cik": "1742770"
     },
     {
+      "ticker": "VIP",
+      "name": "Vulcan Infrastructure & Power Inc.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "1844971"
+    },
+    {
       "ticker": "VIR",
       "name": "Vir Biotechnology, Inc.",
       "exchange": "Nasdaq",
@@ -28542,6 +28535,27 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "103595"
+    },
+    {
+      "ticker": "VLOS",
+      "name": "Velos Acquisition I Corp.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2016072"
+    },
+    {
+      "ticker": "VLOSU",
+      "name": "Velos Acquisition I Corp.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2016072"
+    },
+    {
+      "ticker": "VLOSW",
+      "name": "Velos Acquisition I Corp.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2016072"
     },
     {
       "ticker": "VLY",
@@ -28916,7 +28930,7 @@
     },
     {
       "ticker": "VYNE",
-      "name": "VYNE Therapeutics Inc.",
+      "name": "Yarrow Bioscience, Inc.",
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1566044"
@@ -29132,21 +29146,7 @@
       "cik": "1603923"
     },
     {
-      "ticker": "WGRX",
-      "name": "Wellgistics Health, Inc.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "2030763"
-    },
-    {
       "ticker": "WGS",
-      "name": "GeneDx Holdings Corp.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "1818331"
-    },
-    {
-      "ticker": "WGSWW",
       "name": "GeneDx Holdings Corp.",
       "exchange": "Nasdaq",
       "sector": "",
@@ -29734,6 +29734,13 @@
       "cik": "2030954"
     },
     {
+      "ticker": "XIIIU",
+      "name": "Churchill Capital Corp XIII",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "2114229"
+    },
+    {
       "ticker": "XLO",
       "name": "Xilio Therapeutics, Inc.",
       "exchange": "Nasdaq",
@@ -29774,27 +29781,6 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1510593"
-    },
-    {
-      "ticker": "XOMA",
-      "name": "XOMA Royalty Corp",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "791908"
-    },
-    {
-      "ticker": "XOMAO",
-      "name": "XOMA Royalty Corp",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "791908"
-    },
-    {
-      "ticker": "XOMAP",
-      "name": "XOMA Royalty Corp",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "791908"
     },
     {
       "ticker": "XOS",
@@ -29937,6 +29923,13 @@
       "cik": "1964946"
     },
     {
+      "ticker": "YARW",
+      "name": "Yarrow Bioscience, Inc.",
+      "exchange": "Nasdaq",
+      "sector": "",
+      "cik": "1566044"
+    },
+    {
       "ticker": "YB",
       "name": "Yuanbao Inc.",
       "exchange": "Nasdaq",
@@ -30061,13 +30054,6 @@
       "exchange": "Nasdaq",
       "sector": "",
       "cik": "1991605"
-    },
-    {
-      "ticker": "YOOV",
-      "name": "Concorde International Group Ltd.",
-      "exchange": "Nasdaq",
-      "sector": "",
-      "cik": "2001794"
     },
     {
       "ticker": "YORW",

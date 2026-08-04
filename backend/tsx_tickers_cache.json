@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-08-03T16:23:29.260175Z",
-  "count": 2164,
-  "tsx_count": 753,
-  "tsxv_count": 1411,
+  "generated_at": "2026-08-04T16:10:50.524801Z",
+  "count": 2159,
+  "tsx_count": 750,
+  "tsxv_count": 1409,
   "tickers": [
     {
       "ticker": "AAA-P.V",
@@ -397,12 +397,6 @@
     {
       "ticker": "AIF.TO",
       "name": "Altus Group Limited",
-      "exchange": "TSX",
-      "sector": ""
-    },
-    {
-      "ticker": "AII.TO",
-      "name": "Almonty Industries Inc.",
       "exchange": "TSX",
       "sector": ""
     },
@@ -2372,12 +2366,6 @@
       "ticker": "CHER.V",
       "name": "Cheelcare Inc.",
       "exchange": "TSXV",
-      "sector": ""
-    },
-    {
-      "ticker": "CHEV.TO",
-      "name": "Chevron CDR (CAD Hedged)",
-      "exchange": "TSX",
       "sector": ""
     },
     {
@@ -7109,12 +7097,6 @@
       "sector": ""
     },
     {
-      "ticker": "MCDS.TO",
-      "name": "McDonald’s CDR (CAD Hedged)",
-      "exchange": "TSX",
-      "sector": ""
-    },
-    {
       "ticker": "MCF.V",
       "name": "MCF Energy Ltd.",
       "exchange": "TSXV",
@@ -8015,12 +7997,6 @@
       "sector": ""
     },
     {
-      "ticker": "NMI.V",
-      "name": "Namibia Critical Metals Inc.",
-      "exchange": "TSXV",
-      "sector": ""
-    },
-    {
       "ticker": "NNX.V",
       "name": "Nickel North Exploration Corp.",
       "exchange": "TSXV",
@@ -8323,12 +8299,6 @@
     {
       "ticker": "NXS.V",
       "name": "Nexus Gold Corp.",
-      "exchange": "TSXV",
-      "sector": ""
-    },
-    {
-      "ticker": "NZP.V",
-      "name": "Chatham Rock Phosphate Limited",
       "exchange": "TSXV",
       "sector": ""
     },
