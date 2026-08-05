@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-08-04T16:10:50.524801Z",
-  "count": 2159,
+  "generated_at": "2026-08-05T16:01:38.575033Z",
+  "count": 2160,
   "tsx_count": 750,
-  "tsxv_count": 1409,
+  "tsxv_count": 1410,
   "tickers": [
     {
       "ticker": "AAA-P.V",
@@ -3257,12 +3257,6 @@
       "sector": ""
     },
     {
-      "ticker": "DG.V",
-      "name": "Dixie Gold Inc.",
-      "exchange": "TSXV",
-      "sector": ""
-    },
-    {
       "ticker": "DGC.V",
       "name": "Daura Gold Corp.",
       "exchange": "TSXV",
@@ -3528,7 +3522,7 @@
     },
     {
       "ticker": "E.TO",
-      "name": "Enterprise Group, Inc.",
+      "name": "Evolution PowerX Corp.",
       "exchange": "TSX",
       "sector": ""
     },
@@ -3623,9 +3617,9 @@
       "sector": ""
     },
     {
-      "ticker": "EDCU.V",
+      "ticker": "EDCU.TO",
       "name": "Edge Copper Corporation",
-      "exchange": "TSXV",
+      "exchange": "TSX",
       "sector": ""
     },
     {
@@ -3962,6 +3956,12 @@
       "ticker": "ERD.TO",
       "name": "Erdene Resource Development Corporation",
       "exchange": "TSX",
+      "sector": ""
+    },
+    {
+      "ticker": "ERDA.V",
+      "name": "Erda Resource Opportunities Inc.",
+      "exchange": "TSXV",
       "sector": ""
     },
     {
@@ -4399,12 +4399,6 @@
     {
       "ticker": "FMS.V",
       "name": "Focus Graphite Inc.",
-      "exchange": "TSXV",
-      "sector": ""
-    },
-    {
-      "ticker": "FNC.V",
-      "name": "Fancamp Exploration Ltd.",
       "exchange": "TSXV",
       "sector": ""
     },
@@ -7997,6 +7991,12 @@
       "sector": ""
     },
     {
+      "ticker": "NMI.V",
+      "name": "Namibia Critical Metals Inc.",
+      "exchange": "TSXV",
+      "sector": ""
+    },
+    {
       "ticker": "NNX.V",
       "name": "Nickel North Exploration Corp.",
       "exchange": "TSXV",
@@ -8303,6 +8303,12 @@
       "sector": ""
     },
     {
+      "ticker": "NZ.V",
+      "name": "New Zealand Energy Corp.",
+      "exchange": "TSXV",
+      "sector": ""
+    },
+    {
       "ticker": "OAC-P.V",
       "name": "Oa Capital Corp.",
       "exchange": "TSXV",
@@ -8408,12 +8414,6 @@
       "ticker": "OGW.V",
       "name": "Ongwe Minerals Inc.",
       "exchange": "TSXV",
-      "sector": ""
-    },
-    {
-      "ticker": "OLA.TO",
-      "name": "Orla Mining Ltd",
-      "exchange": "TSX",
       "sector": ""
     },
     {
@@ -10681,6 +10681,12 @@
     {
       "ticker": "SPA.V",
       "name": "Spanish Mountain Gold Ltd.",
+      "exchange": "TSXV",
+      "sector": ""
+    },
+    {
+      "ticker": "SPAR.V",
+      "name": "Spartacus Metals Inc.",
       "exchange": "TSXV",
       "sector": ""
     },
