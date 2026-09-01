@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-08-06T01:21:29.669946Z",
-  "count": 2160,
-  "tsx_count": 750,
-  "tsxv_count": 1410,
+  "generated_at": "2026-09-01T12:55:26.097856Z",
+  "count": 2153,
+  "tsx_count": 748,
+  "tsxv_count": 1405,
   "tickers": [
     {
       "ticker": "AAA-P.V",
@@ -233,12 +233,6 @@
       "sector": ""
     },
     {
-      "ticker": "ADW-A.TO",
-      "name": "Andrew Peller Limited/Andrew Peller Limitee",
-      "exchange": "TSX",
-      "sector": ""
-    },
-    {
       "ticker": "ADY.V",
       "name": "Adyton Resources Corporation",
       "exchange": "TSXV",
@@ -283,12 +277,6 @@
     {
       "ticker": "AEMC.V",
       "name": "Alaska Energy Metals Corporation",
-      "exchange": "TSXV",
-      "sector": ""
-    },
-    {
-      "ticker": "AF-P.V",
-      "name": "AF2 Capital Corp.",
       "exchange": "TSXV",
       "sector": ""
     },
@@ -761,12 +749,6 @@
       "sector": ""
     },
     {
-      "ticker": "ARC.V",
-      "name": "ARCpoint Inc.",
-      "exchange": "TSXV",
-      "sector": ""
-    },
-    {
       "ticker": "ARCH.V",
       "name": "Arch Biopartners Inc.",
       "exchange": "TSXV",
@@ -812,6 +794,12 @@
       "ticker": "ARL.V",
       "name": "Aurum Lake Mining Corporation",
       "exchange": "TSXV",
+      "sector": ""
+    },
+    {
+      "ticker": "ARN.TO",
+      "name": "Asarian Energy Limited",
+      "exchange": "TSX",
       "sector": ""
     },
     {
@@ -1469,12 +1457,6 @@
       "sector": ""
     },
     {
-      "ticker": "BIGG.V",
-      "name": "BIGG Digital Assets Inc.",
-      "exchange": "TSXV",
-      "sector": ""
-    },
-    {
       "ticker": "BIGT.V",
       "name": "Big Tree Carbon Inc.",
       "exchange": "TSXV",
@@ -1484,6 +1466,12 @@
       "ticker": "BILD.V",
       "name": "BuildDirect.Com Technologies Inc.",
       "exchange": "TSXV",
+      "sector": ""
+    },
+    {
+      "ticker": "BILP-PR-A.TO",
+      "name": "Brookfield Infrastructure L.P.",
+      "exchange": "TSX",
       "sector": ""
     },
     {
@@ -1586,12 +1574,6 @@
       "ticker": "BLU.V",
       "name": "BluEnergies Ltd.",
       "exchange": "TSXV",
-      "sector": ""
-    },
-    {
-      "ticker": "BLX.TO",
-      "name": "Boralex Inc.",
-      "exchange": "TSX",
       "sector": ""
     },
     {
@@ -1730,6 +1712,12 @@
       "ticker": "BPO-PR-A.TO",
       "name": "Brookfield Office Properties Inc.",
       "exchange": "TSX",
+      "sector": ""
+    },
+    {
+      "ticker": "BPR.V",
+      "name": "Black Pine Resources Corp.",
+      "exchange": "TSXV",
       "sector": ""
     },
     {
@@ -2246,6 +2234,12 @@
       "ticker": "CEMX.TO",
       "name": "CEMATRIX Corporation",
       "exchange": "TSX",
+      "sector": ""
+    },
+    {
+      "ticker": "CENT.V",
+      "name": "Centauri Minerals Inc.",
+      "exchange": "TSXV",
       "sector": ""
     },
     {
@@ -3695,6 +3689,12 @@
       "sector": ""
     },
     {
+      "ticker": "EGLT.V",
+      "name": "EGL Technology Inc.",
+      "exchange": "TSXV",
+      "sector": ""
+    },
+    {
       "ticker": "EGLX.TO",
       "name": "Enthusiast Gaming Holdings Inc.",
       "exchange": "TSX",
@@ -3716,6 +3716,12 @@
       "ticker": "EIF.TO",
       "name": "Exchange Income Corporation",
       "exchange": "TSX",
+      "sector": ""
+    },
+    {
+      "ticker": "EK.V",
+      "name": "Everkind Wellness Inc.",
+      "exchange": "TSXV",
       "sector": ""
     },
     {
@@ -4415,15 +4421,15 @@
       "sector": ""
     },
     {
-      "ticker": "FONC-P.V",
-      "name": "Florence One Capital Inc.",
+      "ticker": "FOBI.V",
+      "name": "Fobi AI Inc.",
       "exchange": "TSXV",
       "sector": ""
     },
     {
-      "ticker": "FOOD.TO",
-      "name": "Goodfood Market Corp.",
-      "exchange": "TSX",
+      "ticker": "FONC-P.V",
+      "name": "Florence One Capital Inc.",
+      "exchange": "TSXV",
       "sector": ""
     },
     {
@@ -4537,12 +4543,6 @@
     {
       "ticker": "FSV.TO",
       "name": "FirstService Corporation",
-      "exchange": "TSX",
-      "sector": ""
-    },
-    {
-      "ticker": "FSY.TO",
-      "name": "Forsys Metals Corp.",
       "exchange": "TSX",
       "sector": ""
     },
@@ -4733,7 +4733,7 @@
       "sector": ""
     },
     {
-      "ticker": "GCV-P.V",
+      "ticker": "GCV.V",
       "name": "Golden Star Capital Ventures Inc.",
       "exchange": "TSXV",
       "sector": ""
@@ -4811,6 +4811,12 @@
       "sector": ""
     },
     {
+      "ticker": "GERA.V",
+      "name": "Goldera Exploration Ltd.",
+      "exchange": "TSXV",
+      "sector": ""
+    },
+    {
       "ticker": "GEV.TO",
       "name": "GE Vernova CDR (CAD Hedged)",
       "exchange": "TSX",
@@ -4844,6 +4850,12 @@
       "ticker": "GFR.TO",
       "name": "Greenfire Resources Ltd.",
       "exchange": "TSX",
+      "sector": ""
+    },
+    {
+      "ticker": "GFTA.V",
+      "name": "Grafta Nanotech Corp.",
+      "exchange": "TSXV",
       "sector": ""
     },
     {
@@ -5005,12 +5017,6 @@
     {
       "ticker": "GNG.V",
       "name": "Golden Goliath Resources Ltd.",
-      "exchange": "TSXV",
-      "sector": ""
-    },
-    {
-      "ticker": "GOFL.V",
-      "name": "Goldflare Exploration Inc.",
       "exchange": "TSXV",
       "sector": ""
     },
@@ -5707,12 +5713,6 @@
     {
       "ticker": "ICM.V",
       "name": "Iconic Minerals Ltd.",
-      "exchange": "TSXV",
-      "sector": ""
-    },
-    {
-      "ticker": "ICON.V",
-      "name": "International Iconic Gold Exploration Corp.",
       "exchange": "TSXV",
       "sector": ""
     },
@@ -6437,18 +6437,6 @@
       "sector": ""
     },
     {
-      "ticker": "KSI.TO",
-      "name": "kneat.com, inc.",
-      "exchange": "TSX",
-      "sector": ""
-    },
-    {
-      "ticker": "KSM.V",
-      "name": "Kirkstone Metals Corp.",
-      "exchange": "TSXV",
-      "sector": ""
-    },
-    {
       "ticker": "KTN.V",
       "name": "Kootenay Silver Inc.",
       "exchange": "TSXV",
@@ -6872,6 +6860,12 @@
       "ticker": "LUG.TO",
       "name": "Lundin Gold Inc.",
       "exchange": "TSX",
+      "sector": ""
+    },
+    {
+      "ticker": "LUKA-P.V",
+      "name": "Luka Capital Corp.",
+      "exchange": "TSXV",
       "sector": ""
     },
     {
@@ -7463,6 +7457,12 @@
       "sector": ""
     },
     {
+      "ticker": "MOGL.V",
+      "name": "Mogul Mountain Ventures Corporation",
+      "exchange": "TSXV",
+      "sector": ""
+    },
+    {
       "ticker": "MOLY.TO",
       "name": "Greenland Resources Inc.",
       "exchange": "TSX",
@@ -7865,9 +7865,9 @@
       "sector": ""
     },
     {
-      "ticker": "NFG.V",
+      "ticker": "NFGC.TO",
       "name": "New Found Gold Corp.",
-      "exchange": "TSXV",
+      "exchange": "TSX",
       "sector": ""
     },
     {
@@ -8633,12 +8633,6 @@
       "sector": ""
     },
     {
-      "ticker": "PANO-P.V",
-      "name": "Panorama Capital Corp.",
-      "exchange": "TSXV",
-      "sector": ""
-    },
-    {
       "ticker": "PAT.V",
       "name": "Patterson Metals Corp.",
       "exchange": "TSXV",
@@ -8744,12 +8738,6 @@
       "ticker": "PDV.TO",
       "name": "Prime Dividend Corp.",
       "exchange": "TSX",
-      "sector": ""
-    },
-    {
-      "ticker": "PDVN-P.V",
-      "name": "Pardus Ventures Inc.",
-      "exchange": "TSXV",
       "sector": ""
     },
     {
@@ -9011,12 +8999,6 @@
       "sector": ""
     },
     {
-      "ticker": "PNTI-P.V",
-      "name": "Pentagon I Capital Corp.",
-      "exchange": "TSXV",
-      "sector": ""
-    },
-    {
       "ticker": "PNTR.V",
       "name": "Pantera Silver Corp.",
       "exchange": "TSXV",
@@ -9134,6 +9116,12 @@
       "ticker": "PSK.TO",
       "name": "PrairieSky Royalty Ltd.",
       "exchange": "TSX",
+      "sector": ""
+    },
+    {
+      "ticker": "PSVA.V",
+      "name": "Prospectiva Resources Ltd.",
+      "exchange": "TSXV",
       "sector": ""
     },
     {
@@ -9415,12 +9403,6 @@
     {
       "ticker": "RAMP.V",
       "name": "Ramp Metals Inc.",
-      "exchange": "TSXV",
-      "sector": ""
-    },
-    {
-      "ticker": "RARE.V",
-      "name": "Tactical Resources Corp.",
       "exchange": "TSXV",
       "sector": ""
     },
@@ -9983,12 +9965,6 @@
       "sector": ""
     },
     {
-      "ticker": "SABA.V",
-      "name": "Saba Energy Ltd.",
-      "exchange": "TSXV",
-      "sector": ""
-    },
-    {
       "ticker": "SAC-P.V",
       "name": "Savanna Capital Corp.",
       "exchange": "TSXV",
@@ -10193,12 +10169,6 @@
       "sector": ""
     },
     {
-      "ticker": "SECU.V",
-      "name": "SSC Security Services Corp.",
-      "exchange": "TSXV",
-      "sector": ""
-    },
-    {
       "ticker": "SEGN.V",
       "name": "Seegnal Inc.",
       "exchange": "TSXV",
@@ -10289,14 +10259,14 @@
       "sector": ""
     },
     {
-      "ticker": "SGML.V",
-      "name": "Sigma Lithium Corporation",
+      "ticker": "SGLD.V",
+      "name": "Scorpio Gold Corporation",
       "exchange": "TSXV",
       "sector": ""
     },
     {
-      "ticker": "SGN.V",
-      "name": "Scorpio Gold Corporation",
+      "ticker": "SGML.V",
+      "name": "Sigma Lithium Corporation",
       "exchange": "TSXV",
       "sector": ""
     },
@@ -10793,6 +10763,12 @@
       "sector": ""
     },
     {
+      "ticker": "SRGE.V",
+      "name": "Surge Digital Inc.",
+      "exchange": "TSXV",
+      "sector": ""
+    },
+    {
       "ticker": "SRI.V",
       "name": "Sparton Resources Inc.",
       "exchange": "TSXV",
@@ -11099,9 +11075,9 @@
       "sector": ""
     },
     {
-      "ticker": "TALA.V",
+      "ticker": "TALA.TO",
       "name": "Talamore Mining Corp.",
-      "exchange": "TSXV",
+      "exchange": "TSX",
       "sector": ""
     },
     {
@@ -12131,12 +12107,6 @@
       "sector": ""
     },
     {
-      "ticker": "VMAR.V",
-      "name": "Vision Marine Technologies Inc",
-      "exchange": "TSXV",
-      "sector": ""
-    },
-    {
       "ticker": "VMET.TO",
       "name": "Versamet Royalties Corporation",
       "exchange": "TSX",
@@ -12497,12 +12467,6 @@
       "sector": ""
     },
     {
-      "ticker": "WITT-P.V",
-      "name": "Wittering Capital Corp.",
-      "exchange": "TSXV",
-      "sector": ""
-    },
-    {
       "ticker": "WJX.TO",
       "name": "Wajax Corporation",
       "exchange": "TSX",
@@ -12608,12 +12572,6 @@
       "ticker": "WRR.V",
       "name": "Walker River Resources Corp.",
       "exchange": "TSXV",
-      "sector": ""
-    },
-    {
-      "ticker": "WRX.TO",
-      "name": "Western Resources Corp.",
-      "exchange": "TSX",
       "sector": ""
     },
     {

@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-08-06T01:22:30.107077+00:00",
-  "count": 3132,
+  "generated_at": "2026-09-01T12:56:26.498270+00:00",
+  "count": 3120,
   "exchange": "NYSE/NYSE-MKT/NYSE-ARCA",
   "source": "nasdaq-trader-otherlisted + sec-edgar-fallback",
   "tickers": [
@@ -19,7 +19,21 @@
       "cik": "1675149"
     },
     {
+      "ticker": "AAC",
+      "name": "Ares Acquisition Corp III",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "2128115"
+    },
+    {
       "ticker": "AAC-UN",
+      "name": "Ares Acquisition Corp III",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "2128115"
+    },
+    {
+      "ticker": "AAC-WT",
       "name": "Ares Acquisition Corp III",
       "exchange": "NYSE",
       "sector": "",
@@ -306,6 +320,13 @@
       "cik": "1771910"
     },
     {
+      "ticker": "ADIG",
+      "name": "ADI GLOBAL DISTRIBUTION INC.",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "2105139"
+    },
+    {
       "ticker": "ADM",
       "name": "Archer-Daniels-Midland Co",
       "exchange": "NYSE",
@@ -367,6 +388,13 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "2809"
+    },
+    {
+      "ticker": "AEMC",
+      "name": "C2 Blockchain, Inc.",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "1882781"
     },
     {
       "ticker": "AEO",
@@ -1307,13 +1335,6 @@
       "cik": "1858681"
     },
     {
-      "ticker": "APO-PA",
-      "name": "Apollo Global Management, Inc.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1858681"
-    },
-    {
       "ticker": "APOS",
       "name": "Apollo Global Management, Inc.",
       "exchange": "NYSE",
@@ -1755,13 +1776,6 @@
       "cik": "1504764"
     },
     {
-      "ticker": "AVB",
-      "name": "AVALONBAY COMMUNITIES INC",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "915912"
-    },
-    {
       "ticker": "AVBC",
       "name": "Avidia Bancorp, Inc.",
       "exchange": "NYSE",
@@ -1788,13 +1802,6 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1219120"
-    },
-    {
-      "ticker": "AVNS",
-      "name": "AVANOS MEDICAL, INC.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1606498"
     },
     {
       "ticker": "AVNT",
@@ -1865,13 +1872,6 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1299709"
-    },
-    {
-      "ticker": "AXIA",
-      "name": "AXIA Energia S.A.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1439124"
     },
     {
       "ticker": "AXIL",
@@ -2166,13 +2166,6 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "913059"
-    },
-    {
-      "ticker": "BBBY",
-      "name": "BED BATH & BEYOND, INC.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1130713"
     },
     {
       "ticker": "BBD",
@@ -3400,6 +3393,13 @@
       "cik": "885725"
     },
     {
+      "ticker": "BTA",
+      "name": "BlackRock Long-Term Municipal Advantage Trust",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "1343793"
+    },
+    {
       "ticker": "BTC",
       "name": "Grayscale Bitcoin Mini Trust ETF",
       "exchange": "NYSE",
@@ -3587,13 +3587,6 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1788257"
-    },
-    {
-      "ticker": "BWNB",
-      "name": "Babcock & Wilcox Enterprises, Inc.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1630805"
     },
     {
       "ticker": "BWOW",
@@ -4639,13 +4632,6 @@
       "cik": "1385280"
     },
     {
-      "ticker": "CNL",
-      "name": "Collective Mining Ltd.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1953575"
-    },
-    {
       "ticker": "CNM",
       "name": "Core & Main, Inc.",
       "exchange": "NYSE",
@@ -5668,13 +5654,6 @@
       "cik": "910521"
     },
     {
-      "ticker": "DEFI",
-      "name": "Hashdex Commodities Trust",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1985840"
-    },
-    {
       "ticker": "DEI",
       "name": "Douglas Emmett Inc",
       "exchange": "NYSE",
@@ -6019,7 +5998,7 @@
     },
     {
       "ticker": "DPC",
-      "name": "DPC Holdings Ltd",
+      "name": "DPC Holdings PLC",
       "exchange": "NYSE",
       "sector": "",
       "cik": "2107018"
@@ -6173,6 +6152,13 @@
     },
     {
       "ticker": "DUKB",
+      "name": "Duke Energy CORP",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "1326160"
+    },
+    {
+      "ticker": "DUKU",
       "name": "Duke Energy CORP",
       "exchange": "NYSE",
       "sector": "",
@@ -6436,6 +6422,13 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1372920"
+    },
+    {
+      "ticker": "EDVA",
+      "name": "Endovia Health Sciences, Inc.",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "1553788"
     },
     {
       "ticker": "EE",
@@ -6977,13 +6970,6 @@
       "cik": "1140625"
     },
     {
-      "ticker": "EQR",
-      "name": "EQUITY RESIDENTIAL",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "906107"
-    },
-    {
       "ticker": "EQS",
       "name": "EQUUS TOTAL RETURN, INC.",
       "exchange": "NYSE",
@@ -7509,13 +7495,6 @@
       "cik": "2074697"
     },
     {
-      "ticker": "FCT",
-      "name": "FIRST TRUST SENIOR FLOATING RATE INCOME FUND II",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1282850"
-    },
-    {
       "ticker": "FCX",
       "name": "FREEPORT-MCMORAN INC",
       "exchange": "NYSE",
@@ -7941,6 +7920,13 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1375340"
+    },
+    {
+      "ticker": "FOIL",
+      "name": "Londian Wason New Energy Tech Inc.",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "2006960"
     },
     {
       "ticker": "FOR",
@@ -8552,6 +8538,13 @@
       "cik": "1966287"
     },
     {
+      "ticker": "GFR-RI",
+      "name": "Greenfire Resources Ltd.",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "1966287"
+    },
+    {
       "ticker": "GGB",
       "name": "GERDAU S.A.",
       "exchange": "NYSE",
@@ -8798,13 +8791,6 @@
     },
     {
       "ticker": "GLP",
-      "name": "GLOBAL PARTNERS LP",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1323468"
-    },
-    {
-      "ticker": "GLP-PB",
       "name": "GLOBAL PARTNERS LP",
       "exchange": "NYSE",
       "sector": "",
@@ -9096,13 +9082,6 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "896493"
-    },
-    {
-      "ticker": "GRAF",
-      "name": "Graf Global Corp.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1897463"
     },
     {
       "ticker": "GRBK",
@@ -10617,27 +10596,6 @@
       "cik": "914208"
     },
     {
-      "ticker": "IWDL",
-      "name": "UBS AG",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1114446"
-    },
-    {
-      "ticker": "IWFL",
-      "name": "UBS AG",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1114446"
-    },
-    {
-      "ticker": "IWML",
-      "name": "UBS AG",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1114446"
-    },
-    {
       "ticker": "IX",
       "name": "ORIX CORP",
       "exchange": "NYSE",
@@ -12003,6 +11961,13 @@
       "cik": "1160106"
     },
     {
+      "ticker": "LYNX",
+      "name": "Lyntris Inc.",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "2132582"
+    },
+    {
       "ticker": "LYV",
       "name": "Live Nation Entertainment, Inc.",
       "exchange": "NYSE",
@@ -12260,20 +12225,6 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "67716"
-    },
-    {
-      "ticker": "MDV",
-      "name": "MODIV INDUSTRIAL, INC.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1645873"
-    },
-    {
-      "ticker": "MDV-PA",
-      "name": "MODIV INDUSTRIAL, INC.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1645873"
     },
     {
       "ticker": "MDY",
@@ -13186,13 +13137,6 @@
       "cik": "1104657"
     },
     {
-      "ticker": "MTUL",
-      "name": "UBS AG",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1114446"
-    },
-    {
       "ticker": "MTUS",
       "name": "Metallus Inc.",
       "exchange": "NYSE",
@@ -13222,13 +13166,6 @@
     },
     {
       "ticker": "MUA",
-      "name": "BLACKROCK MUNIASSETS FUND, INC.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "901243"
-    },
-    {
-      "ticker": "MUA-RW",
       "name": "BLACKROCK MUNIASSETS FUND, INC.",
       "exchange": "NYSE",
       "sector": "",
@@ -13275,13 +13212,6 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "314203"
-    },
-    {
-      "ticker": "MVO",
-      "name": "MV Oil Trust",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1371782"
     },
     {
       "ticker": "MVRL",
@@ -13485,13 +13415,6 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1737924"
-    },
-    {
-      "ticker": "NCL",
-      "name": "Northann Corp.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1923780"
     },
     {
       "ticker": "NCLH",
@@ -13824,7 +13747,7 @@
     },
     {
       "ticker": "NL",
-      "name": "NL INDUSTRIES INC",
+      "name": "NLI HOLDINGS, INC.",
       "exchange": "NYSE",
       "sector": "",
       "cik": "72162"
@@ -14090,7 +14013,7 @@
     },
     {
       "ticker": "NPWR",
-      "name": "NET Power Inc.",
+      "name": "Net Power Inc.",
       "exchange": "NYSE",
       "sector": "",
       "cik": "1845437"
@@ -14712,13 +14635,6 @@
       "cik": "1327688"
     },
     {
-      "ticker": "OPAD",
-      "name": "Offerpad Solutions Inc.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1825024"
-    },
-    {
       "ticker": "OPFI",
       "name": "OppFi Inc.",
       "exchange": "NYSE",
@@ -14822,13 +14738,6 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "74260"
-    },
-    {
-      "ticker": "ORLA",
-      "name": "Orla Mining Ltd.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1680056"
     },
     {
       "ticker": "ORN",
@@ -15581,7 +15490,7 @@
     },
     {
       "ticker": "PIM",
-      "name": "PUTNAM MASTER INTERMEDIATE INCOME TRUST",
+      "name": "FRANKLIN MASTER INTERMEDIATE INCOME TRUST",
       "exchange": "NYSE",
       "sector": "",
       "cik": "830622"
@@ -15735,7 +15644,7 @@
     },
     {
       "ticker": "PMM",
-      "name": "PUTNAM MANAGED MUNICIPAL INCOME TRUST",
+      "name": "FRANKLIN MANAGED MUNICIPAL INCOME TRUST",
       "exchange": "NYSE",
       "sector": "",
       "cik": "844790"
@@ -16343,13 +16252,6 @@
       "cik": "1481792"
     },
     {
-      "ticker": "QULL",
-      "name": "UBS AG",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1114446"
-    },
-    {
       "ticker": "QXO",
       "name": "QXO, Inc.",
       "exchange": "NYSE",
@@ -16763,6 +16665,13 @@
       "cik": "1501072"
     },
     {
+      "ticker": "RIV-RW",
+      "name": "RIVERNORTH OPPORTUNITIES FUND, INC.",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "1501072"
+    },
+    {
       "ticker": "RJF",
       "name": "RAYMOND JAMES FINANCIAL INC",
       "exchange": "NYSE",
@@ -17057,6 +16966,13 @@
       "cik": "2085091"
     },
     {
+      "ticker": "RVII",
+      "name": "Robinhood Ventures Fund II",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "2131040"
+    },
+    {
       "ticker": "RVLV",
       "name": "Revolve Group, Inc.",
       "exchange": "NYSE",
@@ -17274,6 +17190,13 @@
       "cik": "949870"
     },
     {
+      "ticker": "SAMO",
+      "name": "Samos Energy Acquisition Corp",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "2125567"
+    },
+    {
       "ticker": "SAN",
       "name": "Banco Santander, S.A.",
       "exchange": "NYSE",
@@ -17316,6 +17239,13 @@
       "cik": "1377936"
     },
     {
+      "ticker": "SAX",
+      "name": "SARATOGA INVESTMENT CORP.",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "1377936"
+    },
+    {
       "ticker": "SAY",
       "name": "SARATOGA INVESTMENT CORP.",
       "exchange": "NYSE",
@@ -17352,7 +17282,7 @@
     },
     {
       "ticker": "SBEV",
-      "name": "SPLASH BEVERAGE GROUP, INC.",
+      "name": "Endovia Health Sciences, Inc.",
       "exchange": "NYSE",
       "sector": "",
       "cik": "1553788"
@@ -17461,13 +17391,6 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1270131"
-    },
-    {
-      "ticker": "SCDL",
-      "name": "UBS AG",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1114446"
     },
     {
       "ticker": "SCE-PG",
@@ -17618,13 +17541,6 @@
     },
     {
       "ticker": "SES",
-      "name": "SES AI Corp",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1819142"
-    },
-    {
-      "ticker": "SES-WT",
       "name": "SES AI Corp",
       "exchange": "NYSE",
       "sector": "",
@@ -18112,6 +18028,13 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1640147"
+    },
+    {
+      "ticker": "SNSC",
+      "name": "SunScout Holding Ltd",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "2101240"
     },
     {
       "ticker": "SNX",
@@ -19346,13 +19269,6 @@
       "cik": "1744676"
     },
     {
-      "ticker": "TMHC",
-      "name": "Taylor Morrison Home Corp",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1562476"
-    },
-    {
       "ticker": "TMO",
       "name": "THERMO FISHER SCIENTIFIC INC.",
       "exchange": "NYSE",
@@ -19449,6 +19365,13 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "894158"
+    },
+    {
+      "ticker": "TP",
+      "name": "Ticketplus Ltd.",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "2104296"
     },
     {
       "ticker": "TPB",
@@ -20215,49 +20138,49 @@
     },
     {
       "ticker": "USB",
-      "name": "US BANCORP DE",
+      "name": "US BANCORP \\DE\\",
       "exchange": "NYSE",
       "sector": "",
       "cik": "36104"
     },
     {
       "ticker": "USB-PA",
-      "name": "US BANCORP DE",
+      "name": "US BANCORP \\DE\\",
       "exchange": "NYSE",
       "sector": "",
       "cik": "36104"
     },
     {
       "ticker": "USB-PH",
-      "name": "US BANCORP DE",
+      "name": "US BANCORP \\DE\\",
       "exchange": "NYSE",
       "sector": "",
       "cik": "36104"
     },
     {
       "ticker": "USB-PP",
-      "name": "US BANCORP DE",
+      "name": "US BANCORP \\DE\\",
       "exchange": "NYSE",
       "sector": "",
       "cik": "36104"
     },
     {
       "ticker": "USB-PQ",
-      "name": "US BANCORP DE",
+      "name": "US BANCORP \\DE\\",
       "exchange": "NYSE",
       "sector": "",
       "cik": "36104"
     },
     {
       "ticker": "USB-PR",
-      "name": "US BANCORP DE",
+      "name": "US BANCORP \\DE\\",
       "exchange": "NYSE",
       "sector": "",
       "cik": "36104"
     },
     {
       "ticker": "USB-PS",
-      "name": "US BANCORP DE",
+      "name": "US BANCORP \\DE\\",
       "exchange": "NYSE",
       "sector": "",
       "cik": "36104"
@@ -20289,13 +20212,6 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1405528"
-    },
-    {
-      "ticker": "USML",
-      "name": "UBS AG",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1114446"
     },
     {
       "ticker": "USNA",
@@ -20352,6 +20268,13 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1739566"
+    },
+    {
+      "ticker": "UUP",
+      "name": "Invesco DB US Dollar Index Bullish Fund",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "1383151"
     },
     {
       "ticker": "UUU",
@@ -20711,6 +20634,13 @@
       "cik": "884152"
     },
     {
+      "ticker": "VMRK",
+      "name": "VIVMARK RESIDENTIAL",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "906107"
+    },
+    {
       "ticker": "VNO",
       "name": "VORNADO REALTY TRUST",
       "exchange": "NYSE",
@@ -20982,27 +20912,6 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "2064947"
-    },
-    {
-      "ticker": "WBS",
-      "name": "WEBSTER FINANCIAL CORP",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "801337"
-    },
-    {
-      "ticker": "WBS-PF",
-      "name": "WEBSTER FINANCIAL CORP",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "801337"
-    },
-    {
-      "ticker": "WBS-PG",
-      "name": "WEBSTER FINANCIAL CORP",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "801337"
     },
     {
       "ticker": "WBX",
@@ -21822,6 +21731,13 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1136869"
+    },
+    {
+      "ticker": "ZCSH",
+      "name": "Zcash ETF",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "1720265"
     },
     {
       "ticker": "ZDGE",
