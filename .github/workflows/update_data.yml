@@ -26,10 +26,10 @@ jobs:
           pip install -r requirements.txt
 
       - name: Refresh TSX Ticker Cache
-        run: python backend/refresh_tsx_tickers.py
+        run: python backend/fetch_tsx_tickers.py
 
       - name: Refresh NYSE Ticker Cache
-        run: python backend/refresh_nyse_tickers.py
+        run: python backend/fetch_nyse_tickers.py
 
       - name: Upload CAD Checkpoint
         uses: actions/upload-artifact@v4
