@@ -107,15 +107,21 @@ def analyze_stocks(region, checkpoint_path=None):
         ticker_cache = "backend/tsx_tickers_cache.json"
         results_file = "backend/results_cad.json"
     else:
-        ticker_cache = "backend/nyse_tickers_cache.json"
+        ticker_cache = "backend/nasdaq_tickers_cache.json"
         results_file = "backend/results_usd.json"
     
     # Load tickers
     try:
         if os.path.exists(ticker_cache):
             with open(ticker_cache, "r") as f:
-                tickers = json.load(f)
-            logger.info(f"Loaded {len(tickers)} tickers from {ticker_cache}")
+                cache_data = json.load(f)
+            # Extract tickers array from cache structure
+            if isinstance(cache_data, dict) and "tickers" in cache_data:
+                tickers_list = cache_data["tickers"]
+            else:
+                tickers_list = cache_data if isinstance(cache_data, list) else []
+            
+            logger.info(f"Loaded {len(tickers_list)} tickers from {ticker_cache}")
         else:
             logger.error(f"Ticker cache not found: {ticker_cache}")
             # Create empty results file to prevent workflow failure
@@ -130,9 +136,18 @@ def analyze_stocks(region, checkpoint_path=None):
     results = []
     errors = []
     
-    for i, ticker in enumerate(tickers):
+    for i, ticker_entry in enumerate(tickers_list):
         try:
-            logger.info(f"Analyzing {ticker} ({i+1}/{len(tickers)})")
+            # Handle both string tickers and dict entries {ticker, name, exchange, sector}
+            if isinstance(ticker_entry, dict):
+                ticker = ticker_entry.get("ticker", "")
+            else:
+                ticker = ticker_entry
+            
+            if not ticker:
+                continue
+            
+            logger.info(f"Analyzing {ticker} ({i+1}/{len(tickers_list)})")
             
             # Check if we have recent data in checkpoint
             if ticker in checkpoint_data:
@@ -167,7 +182,7 @@ def analyze_stocks(region, checkpoint_path=None):
         "results": results,
         "errors": errors,
         "summary": {
-            "total": len(tickers),
+            "total": len(tickers_list),
             "analyzed": len(results),
             "failed": len(errors)
         }
