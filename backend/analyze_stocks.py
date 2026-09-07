@@ -13,6 +13,7 @@ import time
 import logging
 from datetime import datetime, timezone
 from pathlib import Path
+import pandas as pd
 
 # Configure logging
 logging.basicConfig(
@@ -45,10 +46,22 @@ def save_checkpoint(checkpoint_path, data):
     try:
         os.makedirs(os.path.dirname(checkpoint_path) or ".", exist_ok=True)
         with open(checkpoint_path, "w") as f:
-            json.dump(data, f, indent=2)
+            json.dump(data, f, indent=2, default=str)
         logger.info(f"Saved checkpoint to {checkpoint_path}")
     except IOError as e:
         logger.error(f"Failed to save checkpoint {checkpoint_path}: {e}")
+
+def convert_pandas_types(obj):
+    """Recursively convert pandas/numpy types to JSON-serializable types."""
+    if isinstance(obj, dict):
+        return {str(k): convert_pandas_types(v) for k, v in obj.items()}
+    elif isinstance(obj, (list, tuple)):
+        return [convert_pandas_types(item) for item in obj]
+    elif isinstance(obj, (pd.Timestamp, pd.Timedelta)):
+        return str(obj)
+    elif hasattr(obj, 'item'):  # numpy types
+        return obj.item()
+    return obj
 
 def fetch_ticker_data(ticker, max_retries=3, retry_delay=5):
     """Fetch ticker data with retry logic for rate limits."""
@@ -74,7 +87,7 @@ def fetch_ticker_data(ticker, max_retries=3, retry_delay=5):
             
             return {
                 "ticker": ticker,
-                "data": hist.to_dict(),
+                "data": convert_pandas_types(hist.to_dict()),
                 "timestamp": datetime.now(timezone.utc).isoformat()
             }
             
@@ -199,7 +212,7 @@ def save_results(results_path, data):
     try:
         os.makedirs(os.path.dirname(results_path) or ".", exist_ok=True)
         with open(results_path, "w") as f:
-            json.dump(data, f, indent=2, default=str)
+            json.dump(convert_pandas_types(data), f, indent=2, default=str)
         logger.info(f"Results saved to {results_path}")
     except Exception as e:
         logger.error(f"Failed to save results: {e}")
