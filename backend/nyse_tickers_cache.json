@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-09-01T12:56:26.498270+00:00",
-  "count": 3120,
+  "generated_at": "2026-10-01T14:59:10.325778+00:00",
+  "count": 3117,
   "exchange": "NYSE/NYSE-MKT/NYSE-ARCA",
   "source": "nasdaq-trader-otherlisted + sec-edgar-fallback",
   "tickers": [
@@ -388,13 +388,6 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "2809"
-    },
-    {
-      "ticker": "AEMC",
-      "name": "C2 Blockchain, Inc.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1882781"
     },
     {
       "ticker": "AEO",
@@ -1412,13 +1405,6 @@
       "cik": "1035443"
     },
     {
-      "ticker": "AREN",
-      "name": "Arena Group Holdings, Inc.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "894871"
-    },
-    {
       "ticker": "ARES",
       "name": "Ares Management Corp",
       "exchange": "NYSE",
@@ -1760,6 +1746,13 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1817740"
+    },
+    {
+      "ticker": "AUXX",
+      "name": "Gold X2 Mining Inc.",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "1961592"
     },
     {
       "ticker": "AVA",
@@ -2414,7 +2407,7 @@
     },
     {
       "ticker": "BEN",
-      "name": "FRANKLIN RESOURCES INC",
+      "name": "FRANKLIN TEMPLETON INC",
       "exchange": "NYSE",
       "sector": "",
       "cik": "38777"
@@ -2572,13 +2565,6 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1521404"
-    },
-    {
-      "ticker": "BGI",
-      "name": "BIRKS GROUP INC.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1179821"
     },
     {
       "ticker": "BGR",
@@ -3517,6 +3503,13 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1579298"
+    },
+    {
+      "ticker": "BURU",
+      "name": "Nuburu, Inc.",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "1814215"
     },
     {
       "ticker": "BV",
@@ -5767,7 +5760,7 @@
     },
     {
       "ticker": "DHY",
-      "name": "CREDIT SUISSE HIGH YIELD CREDIT FUND",
+      "name": "UBS ASSET MANAGEMENT HIGH YIELD CREDIT FUND",
       "exchange": "NYSE",
       "sector": "",
       "cik": "1061353"
@@ -6558,14 +6551,14 @@
     },
     {
       "ticker": "EIC",
-      "name": "Eagle Point Income Co Inc.",
+      "name": "Eagle Point Income Co",
       "exchange": "NYSE",
       "sector": "",
       "cik": "1754836"
     },
     {
       "ticker": "EICA",
-      "name": "Eagle Point Income Co Inc.",
+      "name": "Eagle Point Income Co",
       "exchange": "NYSE",
       "sector": "",
       "cik": "1754836"
@@ -8314,13 +8307,6 @@
       "cik": "1588489"
     },
     {
-      "ticker": "GBTG",
-      "name": "Global Business Travel Group, Inc.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1820872"
-    },
-    {
       "ticker": "GBX",
       "name": "GREENBRIER COMPANIES INC",
       "exchange": "NYSE",
@@ -8532,13 +8518,6 @@
     },
     {
       "ticker": "GFR",
-      "name": "Greenfire Resources Ltd.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1966287"
-    },
-    {
-      "ticker": "GFR-RI",
       "name": "Greenfire Resources Ltd.",
       "exchange": "NYSE",
       "sector": "",
@@ -9427,13 +9406,6 @@
       "cik": "1400810"
     },
     {
-      "ticker": "HCWC",
-      "name": "HEALTHY CHOICE WELLNESS CORP.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1948864"
-    },
-    {
       "ticker": "HCXY",
       "name": "Hercules Capital, Inc.",
       "exchange": "NYSE",
@@ -9651,18 +9623,18 @@
       "cik": "1900304"
     },
     {
+      "ticker": "HLSQ",
+      "name": "Tessera Defense & Homeland Security Inc.",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "1739174"
+    },
+    {
       "ticker": "HLT",
       "name": "Hilton Worldwide Holdings Inc.",
       "exchange": "NYSE",
       "sector": "",
       "cik": "1585689"
-    },
-    {
-      "ticker": "HLX",
-      "name": "HELIX ENERGY SOLUTIONS GROUP INC",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "866829"
     },
     {
       "ticker": "HMC",
@@ -9712,6 +9684,20 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1331520"
+    },
+    {
+      "ticker": "HOS",
+      "name": "HORNBECK OFFSHORE SERVICES, INC.",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "866829"
+    },
+    {
+      "ticker": "HOST",
+      "name": "Host Digital Inc.",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "1948864"
     },
     {
       "ticker": "HOV",
@@ -10568,6 +10554,13 @@
       "cik": "49826"
     },
     {
+      "ticker": "IVAI",
+      "name": "Ives Ultra AI Opportunities Inc.",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "2077345"
+    },
+    {
       "ticker": "IVR",
       "name": "Invesco Mortgage Capital Inc.",
       "exchange": "NYSE",
@@ -11086,6 +11079,13 @@
       "cik": "1767042"
     },
     {
+      "ticker": "KHC",
+      "name": "Kraft Heinz Co",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "1637459"
+    },
+    {
       "ticker": "KIM",
       "name": "KIMCO REALTY CORP",
       "exchange": "NYSE",
@@ -11553,13 +11553,6 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "842162"
-    },
-    {
-      "ticker": "LEG",
-      "name": "LEGGETT & PLATT INC",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "58492"
     },
     {
       "ticker": "LEGO",
@@ -12673,6 +12666,13 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "886043"
+    },
+    {
+      "ticker": "MNGU",
+      "name": "BANK OF MONTREAL /CAN/",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "927971"
     },
     {
       "ticker": "MNR",
@@ -14082,6 +14082,13 @@
       "cik": "1171486"
     },
     {
+      "ticker": "NRR",
+      "name": "Bitwise NEAR ETF",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "2067111"
+    },
+    {
       "ticker": "NRT",
       "name": "NORTH EUROPEAN OIL ROYALTY TRUST",
       "exchange": "NYSE",
@@ -14150,13 +14157,6 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1798100"
-    },
-    {
-      "ticker": "NTZ",
-      "name": "NATUZZI S P A",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "900391"
     },
     {
       "ticker": "NU",
@@ -14866,6 +14866,13 @@
       "cik": "1474432"
     },
     {
+      "ticker": "PAAI",
+      "name": "Paradium.AI, Inc.",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "894871"
+    },
+    {
       "ticker": "PAAS",
       "name": "PAN AMERICAN SILVER CORP",
       "exchange": "NYSE",
@@ -15426,13 +15433,6 @@
       "cik": "313216"
     },
     {
-      "ticker": "PHGE",
-      "name": "BiomX Inc.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1739174"
-    },
-    {
       "ticker": "PHI",
       "name": "PLDT Inc.",
       "exchange": "NYSE",
@@ -15704,6 +15704,13 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1464423"
+    },
+    {
+      "ticker": "PNAQ",
+      "name": "Pinnacle Acquisition Corp",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "2123955"
     },
     {
       "ticker": "PNC",
@@ -16665,13 +16672,6 @@
       "cik": "1501072"
     },
     {
-      "ticker": "RIV-RW",
-      "name": "RIVERNORTH OPPORTUNITIES FUND, INC.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1501072"
-    },
-    {
       "ticker": "RJF",
       "name": "RAYMOND JAMES FINANCIAL INC",
       "exchange": "NYSE",
@@ -16740,13 +16740,6 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1519401"
-    },
-    {
-      "ticker": "RMAX",
-      "name": "RE/MAX Holdings, Inc.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1581091"
     },
     {
       "ticker": "RMD",
@@ -17225,13 +17218,6 @@
       "cik": "2025410"
     },
     {
-      "ticker": "SAT",
-      "name": "SARATOGA INVESTMENT CORP.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1377936"
-    },
-    {
       "ticker": "SAV",
       "name": "SARATOGA INVESTMENT CORP.",
       "exchange": "NYSE",
@@ -17279,13 +17265,6 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "1434754"
-    },
-    {
-      "ticker": "SBEV",
-      "name": "Endovia Health Sciences, Inc.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1553788"
     },
     {
       "ticker": "SBH",
@@ -18301,6 +18280,13 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "884394"
+    },
+    {
+      "ticker": "SPYU",
+      "name": "BANK OF MONTREAL /CAN/",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "927971"
     },
     {
       "ticker": "SQM",
@@ -19521,13 +19507,6 @@
       "cik": "1232384"
     },
     {
-      "ticker": "TRT",
-      "name": "TRIO-TECH INTERNATIONAL",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "732026"
-    },
-    {
       "ticker": "TRTX",
       "name": "TPG RE Finance Trust, Inc.",
       "exchange": "NYSE",
@@ -19687,13 +19666,6 @@
       "exchange": "NYSE",
       "sector": "",
       "cik": "804123"
-    },
-    {
-      "ticker": "TWO",
-      "name": "TWO HARBORS INVESTMENT CORP.",
-      "exchange": "NYSE",
-      "sector": "",
-      "cik": "1465740"
     },
     {
       "ticker": "TWO-PA",
@@ -20138,49 +20110,49 @@
     },
     {
       "ticker": "USB",
-      "name": "US BANCORP \\DE\\",
+      "name": "US BANCORP DE",
       "exchange": "NYSE",
       "sector": "",
       "cik": "36104"
     },
     {
       "ticker": "USB-PA",
-      "name": "US BANCORP \\DE\\",
+      "name": "US BANCORP DE",
       "exchange": "NYSE",
       "sector": "",
       "cik": "36104"
     },
     {
       "ticker": "USB-PH",
-      "name": "US BANCORP \\DE\\",
+      "name": "US BANCORP DE",
       "exchange": "NYSE",
       "sector": "",
       "cik": "36104"
     },
     {
       "ticker": "USB-PP",
-      "name": "US BANCORP \\DE\\",
+      "name": "US BANCORP DE",
       "exchange": "NYSE",
       "sector": "",
       "cik": "36104"
     },
     {
       "ticker": "USB-PQ",
-      "name": "US BANCORP \\DE\\",
+      "name": "US BANCORP DE",
       "exchange": "NYSE",
       "sector": "",
       "cik": "36104"
     },
     {
       "ticker": "USB-PR",
-      "name": "US BANCORP \\DE\\",
+      "name": "US BANCORP DE",
       "exchange": "NYSE",
       "sector": "",
       "cik": "36104"
     },
     {
       "ticker": "USB-PS",
-      "name": "US BANCORP \\DE\\",
+      "name": "US BANCORP DE",
       "exchange": "NYSE",
       "sector": "",
       "cik": "36104"
@@ -21558,6 +21530,13 @@
       "cik": "2059438"
     },
     {
+      "ticker": "XTND",
+      "name": "Xtend AI Robotics, Inc.",
+      "exchange": "NYSE",
+      "sector": "",
+      "cik": "2111860"
+    },
+    {
       "ticker": "XTNT",
       "name": "Xtant Medical Holdings, Inc.",
       "exchange": "NYSE",
@@ -21797,7 +21776,7 @@
     },
     {
       "ticker": "ZONE",
-      "name": "CleanCore Solutions, Inc.",
+      "name": "Zone Frontier Inc.",
       "exchange": "NYSE",
       "sector": "",
       "cik": "1956741"

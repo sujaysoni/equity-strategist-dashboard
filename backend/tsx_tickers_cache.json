@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-09-01T12:55:26.097856Z",
-  "count": 2153,
-  "tsx_count": 748,
-  "tsxv_count": 1405,
+  "generated_at": "2026-10-01T14:58:09.869907Z",
+  "count": 2148,
+  "tsx_count": 746,
+  "tsxv_count": 1402,
   "tickers": [
     {
       "ticker": "AAA-P.V",
@@ -206,18 +206,6 @@
       "ticker": "ADEN.TO",
       "name": "ADENTRA Inc.",
       "exchange": "TSX",
-      "sector": ""
-    },
-    {
-      "ticker": "ADG.V",
-      "name": "Arcus Development Group Inc.",
-      "exchange": "TSXV",
-      "sector": ""
-    },
-    {
-      "ticker": "ADJ-P.V",
-      "name": "AD4 Capital Corp.",
-      "exchange": "TSXV",
       "sector": ""
     },
     {
@@ -545,6 +533,12 @@
       "sector": ""
     },
     {
+      "ticker": "ALX.V",
+      "name": "Alex Metals Corp.",
+      "exchange": "TSXV",
+      "sector": ""
+    },
+    {
       "ticker": "ALYA.TO",
       "name": "Alithya Group inc.",
       "exchange": "TSX",
@@ -803,6 +797,12 @@
       "sector": ""
     },
     {
+      "ticker": "ARO.V",
+      "name": "Arc Mineral Royalties Ltd.",
+      "exchange": "TSXV",
+      "sector": ""
+    },
+    {
       "ticker": "AROC-P.V",
       "name": "Argo Opportunity Corp.",
       "exchange": "TSXV",
@@ -824,12 +824,6 @@
       "ticker": "ARU.V",
       "name": "Aurania Resources Ltd.",
       "exchange": "TSXV",
-      "sector": ""
-    },
-    {
-      "ticker": "ARX.TO",
-      "name": "ARC Resources Ltd.",
-      "exchange": "TSX",
       "sector": ""
     },
     {
@@ -1093,6 +1087,12 @@
     {
       "ticker": "AVR.V",
       "name": "Avaron Mining Corp.",
+      "exchange": "TSXV",
+      "sector": ""
+    },
+    {
+      "ticker": "AVTS.V",
+      "name": "Aventus Capital Inc.",
       "exchange": "TSXV",
       "sector": ""
     },
@@ -2051,6 +2051,12 @@
       "sector": ""
     },
     {
+      "ticker": "CATX.V",
+      "name": "Catalyst One Exploration Corp.",
+      "exchange": "TSXV",
+      "sector": ""
+    },
+    {
       "ticker": "CBA.V",
       "name": "Champion Bear Resources Ltd.",
       "exchange": "TSXV",
@@ -2795,9 +2801,9 @@
       "sector": ""
     },
     {
-      "ticker": "CRWN.TO",
+      "ticker": "CRWN.V",
       "name": "Crown Capital Partners Inc.",
-      "exchange": "TSX",
+      "exchange": "TSXV",
       "sector": ""
     },
     {
@@ -3038,12 +3044,6 @@
       "ticker": "CWL.TO",
       "name": "Caldwell Partners International Inc. (The)",
       "exchange": "TSX",
-      "sector": ""
-    },
-    {
-      "ticker": "CWV.V",
-      "name": "Crown Point Energy Inc.",
-      "exchange": "TSXV",
       "sector": ""
     },
     {
@@ -3319,12 +3319,6 @@
     {
       "ticker": "DLTA.V",
       "name": "Delta Resources Limited",
-      "exchange": "TSXV",
-      "sector": ""
-    },
-    {
-      "ticker": "DM.V",
-      "name": "Datametrex AI Limited",
       "exchange": "TSXV",
       "sector": ""
     },
@@ -4175,8 +4169,8 @@
       "sector": ""
     },
     {
-      "ticker": "FCLI.V",
-      "name": "Full Circle Lithium Corp.",
+      "ticker": "FCLX.V",
+      "name": "FCL-X Fire & Safety Inc.",
       "exchange": "TSXV",
       "sector": ""
     },
@@ -4730,6 +4724,12 @@
       "ticker": "GCU.TO",
       "name": "Gunnison Copper Corp",
       "exchange": "TSX",
+      "sector": ""
+    },
+    {
+      "ticker": "GCUC.V",
+      "name": "Green Canada Uranium Corp.",
+      "exchange": "TSXV",
       "sector": ""
     },
     {
@@ -7332,7 +7332,7 @@
     },
     {
       "ticker": "MKA.V",
-      "name": "Mkango Resources Ltd.",
+      "name": "Mkango Magnetic Materials Limited",
       "exchange": "TSXV",
       "sector": ""
     },
@@ -7711,6 +7711,12 @@
     {
       "ticker": "MYID.V",
       "name": "Reklaim Ltd.",
+      "exchange": "TSXV",
+      "sector": ""
+    },
+    {
+      "ticker": "NAIA.V",
+      "name": "NAIA Relief Inc.",
       "exchange": "TSXV",
       "sector": ""
     },
@@ -8718,7 +8724,7 @@
     },
     {
       "ticker": "PDI.TO",
-      "name": "Predictive Discovery Limited",
+      "name": "PDI Gold Limited",
       "exchange": "TSX",
       "sector": ""
     },
@@ -9281,12 +9287,6 @@
       "sector": ""
     },
     {
-      "ticker": "QCX.V",
-      "name": "QCX Gold Corp.",
-      "exchange": "TSXV",
-      "sector": ""
-    },
-    {
       "ticker": "QEC.TO",
       "name": "Questerre Energy Corporation",
       "exchange": "TSX",
@@ -9307,6 +9307,12 @@
     {
       "ticker": "QNC.V",
       "name": "Quantum Emotion Corp.",
+      "exchange": "TSXV",
+      "sector": ""
+    },
+    {
+      "ticker": "QNTA.V",
+      "name": "Quanta AI Inc.",
       "exchange": "TSXV",
       "sector": ""
     },
@@ -9517,6 +9523,12 @@
     {
       "ticker": "REG.V",
       "name": "Regulus Resources Inc.",
+      "exchange": "TSXV",
+      "sector": ""
+    },
+    {
+      "ticker": "REH.V",
+      "name": "Responsible Energy Corporation",
       "exchange": "TSXV",
       "sector": ""
     },
@@ -10133,9 +10145,9 @@
       "sector": ""
     },
     {
-      "ticker": "SCZ.V",
+      "ticker": "SCZ.TO",
       "name": "Santacruz Silver Mining Ltd.",
-      "exchange": "TSXV",
+      "exchange": "TSX",
       "sector": ""
     },
     {
@@ -10190,12 +10202,6 @@
       "ticker": "SERV.V",
       "name": "Elevate Service Group Inc.",
       "exchange": "TSXV",
-      "sector": ""
-    },
-    {
-      "ticker": "SES.TO",
-      "name": "Secure Waste Infrastructure Corp.",
-      "exchange": "TSX",
       "sector": ""
     },
     {
@@ -10553,18 +10559,6 @@
       "sector": ""
     },
     {
-      "ticker": "SMRV.V",
-      "name": "Smooth Rock Ventures Corp.",
-      "exchange": "TSXV",
-      "sector": ""
-    },
-    {
-      "ticker": "SMWE.V",
-      "name": "Smartwell Technology Corp.",
-      "exchange": "TSXV",
-      "sector": ""
-    },
-    {
       "ticker": "SMY.V",
       "name": "Search Minerals Inc.",
       "exchange": "TSXV",
@@ -10585,12 +10579,6 @@
     {
       "ticker": "SNG.V",
       "name": "Silver Range Resources Ltd.",
-      "exchange": "TSXV",
-      "sector": ""
-    },
-    {
-      "ticker": "SNI-PR-A.V",
-      "name": "Sonor Investments Limited",
       "exchange": "TSXV",
       "sector": ""
     },
@@ -10733,12 +10721,6 @@
       "sector": ""
     },
     {
-      "ticker": "SPZ.V",
-      "name": "SuperBuzz Inc.",
-      "exchange": "TSXV",
-      "sector": ""
-    },
-    {
       "ticker": "SQG.V",
       "name": "Spackman Equities Group Inc.",
       "exchange": "TSXV",
@@ -10747,12 +10729,6 @@
     {
       "ticker": "SR.V",
       "name": "Strategic Resources Inc.",
-      "exchange": "TSXV",
-      "sector": ""
-    },
-    {
-      "ticker": "SRA.V",
-      "name": "Stria Lithium Inc.",
       "exchange": "TSXV",
       "sector": ""
     },
@@ -11442,7 +11418,7 @@
     },
     {
       "ticker": "TOM.V",
-      "name": "Trinity One Metals Ltd.",
+      "name": "Trinity Silver Corp.",
       "exchange": "TSXV",
       "sector": ""
     },
@@ -12173,12 +12149,6 @@
       "sector": ""
     },
     {
-      "ticker": "VROY.V",
-      "name": "Vizsla Royalties Corp.",
-      "exchange": "TSXV",
-      "sector": ""
-    },
-    {
       "ticker": "VRR.V",
       "name": "VR Resources Ltd.",
       "exchange": "TSXV",
@@ -12349,12 +12319,6 @@
     {
       "ticker": "WEC.V",
       "name": "Winchester Equity Corporation",
-      "exchange": "TSXV",
-      "sector": ""
-    },
-    {
-      "ticker": "WED.V",
-      "name": "The Westaim Corporation",
       "exchange": "TSXV",
       "sector": ""
     },
@@ -12683,12 +12647,6 @@
       "sector": ""
     },
     {
-      "ticker": "XRTX.V",
-      "name": "XORTX Therapeutics Inc.",
-      "exchange": "TSXV",
-      "sector": ""
-    },
-    {
       "ticker": "XTAO-U.V",
       "name": "XTAO Inc.",
       "exchange": "TSXV",
@@ -12875,6 +12833,12 @@
       "sector": ""
     },
     {
+      "ticker": "ZIGY.V",
+      "name": "Stardust Metal Corp.",
+      "exchange": "TSXV",
+      "sector": ""
+    },
+    {
       "ticker": "ZLTO.V",
       "name": "BULGOLD Inc.",
       "exchange": "TSXV",
@@ -12920,6 +12884,12 @@
       "ticker": "ZYNS.TO",
       "name": "Philip Morris CDR (CAD Hedged)",
       "exchange": "TSX",
+      "sector": ""
+    },
+    {
+      "ticker": "ZYUS.V",
+      "name": "ZYUS Life Sciences Corporation",
+      "exchange": "TSXV",
       "sector": ""
     }
   ]
